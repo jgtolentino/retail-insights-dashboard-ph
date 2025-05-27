@@ -63,11 +63,11 @@ export function GenderDistribution({ startDate, endDate, filters }: GenderDistri
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+        <PieChart margin={{ top: 20, right: 0, bottom: 0, left: 0 }}>
           <Pie
             data={pieData}
             cx="50%"
-            cy="50%"
+            cy="55%"
             innerRadius={40}
             outerRadius={80}
             paddingAngle={2}
