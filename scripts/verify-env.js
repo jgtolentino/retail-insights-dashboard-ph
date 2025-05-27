@@ -30,9 +30,15 @@ console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
 console.log(`   VERCEL: ${process.env.VERCEL || 'not set'}`);
 console.log(`   VERCEL_ENV: ${process.env.VERCEL_ENV || 'not set'}`);
 
-if (hasErrors) {
+// Skip validation in CI environments (like GitHub Actions)
+const isCI = process.env.CI === 'true';
+
+if (hasErrors && !isCI) {
   console.error('\n❌ Environment validation failed! Some required variables are missing.');
   process.exit(1);
+} else if (hasErrors && isCI) {
+  console.warn('\n⚠️  Running in CI without env vars - skipping validation');
+  console.log('ℹ️  Environment variables should be set in Vercel, not in GitHub Actions');
 } else {
   console.log('\n✅ All environment variables are properly set!');
 }
