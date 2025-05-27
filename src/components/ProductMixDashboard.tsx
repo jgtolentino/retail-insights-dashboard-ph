@@ -140,7 +140,7 @@ export function ProductMixDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -154,7 +154,7 @@ export function ProductMixDashboard() {
               </Select>
 
               <Select value={selectedBrand} onValueChange={setSelectedBrand}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select brand" />
                 </SelectTrigger>
                 <SelectContent>
@@ -168,8 +168,8 @@ export function ProductMixDashboard() {
               </Select>
 
               <Select value={paretoGroupBy} onValueChange={(v) => setParetoGroupBy(v as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pareto grouping" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Group by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="product">By Product</SelectItem>

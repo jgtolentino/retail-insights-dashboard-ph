@@ -32,7 +32,7 @@ export const productMixService = {
     try {
       // For now, we'll simulate substitution data
       // In a real implementation, this would track when customers buy Product B instead of Product A
-      const { data: transactions, error } = await supabase
+      let query = supabase
         .from('transaction_items')
         .select(`
           product_id,
@@ -42,6 +42,8 @@ export const productMixService = {
             name,
             brand_id,
             brands!inner(
+              id,
+              name,
               category
             )
           ),
@@ -52,6 +54,18 @@ export const productMixService = {
         `)
         .gte('transactions.created_at', filters.startDate.toISOString())
         .lte('transactions.created_at', filters.endDate.toISOString());
+
+      // Apply category filter
+      if (filters.category) {
+        query = query.eq('products.brands.category', filters.category);
+      }
+
+      // Apply brand filter
+      if (filters.brandId) {
+        query = query.eq('products.brand_id', filters.brandId);
+      }
+
+      const { data: transactions, error } = await query;
 
       if (error) throw error;
 
@@ -117,13 +131,14 @@ export const productMixService = {
     logger.info('Fetching Pareto analysis', { filters, groupBy });
     
     try {
-      const { data: items, error } = await supabase
+      let query = supabase
         .from('transaction_items')
         .select(`
           quantity,
           price,
           products!inner(
             name,
+            brand_id,
             brands!inner(
               id,
               name,
@@ -137,6 +152,18 @@ export const productMixService = {
         `)
         .gte('transactions.created_at', filters.startDate.toISOString())
         .lte('transactions.created_at', filters.endDate.toISOString());
+
+      // Apply category filter
+      if (filters.category) {
+        query = query.eq('products.brands.category', filters.category);
+      }
+
+      // Apply brand filter
+      if (filters.brandId) {
+        query = query.eq('products.brand_id', filters.brandId);
+      }
+
+      const { data: items, error } = await query;
 
       if (error) throw error;
 
@@ -194,13 +221,15 @@ export const productMixService = {
     logger.info('Fetching category breakdown', filters);
     
     try {
-      const { data: items, error } = await supabase
+      let query = supabase
         .from('transaction_items')
         .select(`
           quantity,
           price,
           products!inner(
+            brand_id,
             brands!inner(
+              id,
               category
             )
           ),
@@ -211,6 +240,18 @@ export const productMixService = {
         `)
         .gte('transactions.created_at', filters.startDate.toISOString())
         .lte('transactions.created_at', filters.endDate.toISOString());
+
+      // Apply category filter
+      if (filters.category) {
+        query = query.eq('products.brands.category', filters.category);
+      }
+
+      // Apply brand filter
+      if (filters.brandId) {
+        query = query.eq('products.brand_id', filters.brandId);
+      }
+
+      const { data: items, error } = await query;
 
       if (error) throw error;
 
