@@ -71,7 +71,7 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Bar Chart with Real Data */}
+        {/* Horizontal Bar Chart with Real Data */}
         <Card className="border-0 shadow-md">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -80,28 +80,28 @@ const Index = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart 
+                data={topBrands} 
+                layout="horizontal"
+                margin={{ top: 20, right: 30, left: 80, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end" 
-                  height={80}
-                  tick={{ fontSize: 12 }}
-                  stroke="#666"
-                />
-                <YAxis 
+                  type="number"
                   tickFormatter={(value) => `₱${(value/1000).toFixed(0)}k`}
                   tick={{ fontSize: 12 }}
                   stroke="#666"
                 />
+                <YAxis 
+                  type="category"
+                  dataKey="name" 
+                  tick={{ fontSize: 12 }}
+                  stroke="#666"
+                  width={70}
+                />
                 <Tooltip 
-                  formatter={(value: number, name: string, props: any) => [
-                    formatPeso(value), 
-                    'Revenue',
-                    props.payload.is_tbwa_client ? '(TBWA Client)' : '(Competitor)'
-                  ]}
+                  formatter={(value: number) => [formatPeso(value), 'Revenue']}
                   labelStyle={{ color: '#333' }}
                   contentStyle={{ 
                     backgroundColor: '#fff', 
@@ -111,21 +111,11 @@ const Index = () => {
                 />
                 <Bar 
                   dataKey="sales" 
-                  fill={(entry: any) => entry.is_tbwa_client ? '#3b82f6' : '#94a3b8'}
-                  radius={[4, 4, 0, 0]}
+                  fill="#3b82f6"
+                  radius={[0, 4, 4, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
-            <div className="mt-4 flex gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span>TBWA Clients</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-slate-400 rounded"></div>
-                <span>Competitors</span>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
