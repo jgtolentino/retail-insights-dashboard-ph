@@ -1,68 +1,32 @@
 
-import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, RefreshCw } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { dashboardService, type DashboardData } from '@/services/dashboard'
-import { Button } from '@/components/ui/button'
+import { TrendingUp, Database } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useRetailAnalytics } from '@/hooks/useRetailAnalytics'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
 
 const Index = () => {
-  const [data, setData] = useState<DashboardData>({
-    totalRevenue: 0,
-    totalTransactions: 0,
-    avgTransaction: 0,
-    topBrands: []
-  })
-  const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState(7) // days
+  const { topBrands, totalStats, isLoading } = useRetailAnalytics();
 
-  useEffect(() => {
-    fetchData()
-  }, [timeRange])
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      const dashboardData = await dashboardService.getDashboardData(timeRange)
-      setData(dashboardData)
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
-    } finally {
-      setLoading(false)
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <Database className="h-12 w-12 animate-pulse mx-auto mb-4 text-blue-600" />
+          <p className="text-lg text-gray-600">Loading retail analytics data...</p>
+        </div>
+      </div>
+    );
   }
   
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Retail Analytics Dashboard</h1>
-          <div className="flex gap-2">
-            <Button
-              variant={timeRange === 7 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(7)}
-            >
-              7 Days
-            </Button>
-            <Button
-              variant={timeRange === 30 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(30)}
-            >
-              30 Days
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={fetchData}
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
+        <div className="flex items-center gap-2 mb-6">
+          <Database className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-900">Retail Analytics POC</h1>
+          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Live Data</span>
         </div>
         
         {/* KPI Cards with Real Data */}
@@ -73,11 +37,11 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {loading ? '...' : formatPeso(data.totalRevenue)}
+                {formatPeso(totalStats.totalRevenue)}
               </div>
               <p className="text-sm text-green-600 flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 mr-1" />
-                {loading ? '...' : 'Live data'}
+                From Supabase Database
               </p>
             </CardContent>
           </Card>
@@ -88,9 +52,9 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {loading ? '...' : data.totalTransactions.toLocaleString()}
+                {totalStats.totalTransactions.toLocaleString()}
               </div>
-              <p className="text-sm text-gray-500 mt-2">Last {timeRange} days</p>
+              <p className="text-sm text-gray-500 mt-2">Real transaction data</p>
             </CardContent>
           </Card>
           
@@ -100,9 +64,9 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900">
-                {loading ? '...' : formatPeso(data.avgTransaction)}
+                {formatPeso(totalStats.avgTransaction)}
               </div>
-              <p className="text-sm text-gray-500 mt-2">Per transaction</p>
+              <p className="text-sm text-gray-500 mt-2">Per customer</p>
             </CardContent>
           </Card>
         </div>
@@ -110,59 +74,58 @@ const Index = () => {
         {/* Bar Chart with Real Data */}
         <Card className="border-0 shadow-md">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-xl font-semibold text-gray-900">Top Brands by Revenue</CardTitle>
-              <div className="flex gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                  <span>TBWA Clients</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                  <span>Competitors</span>
-                </div>
-              </div>
-            </div>
+            <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              Top Brands by Revenue
+              <span className="text-sm font-normal text-gray-500">(Live Database)</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="h-[350px] flex items-center justify-center text-gray-500">
-                Loading chart data...
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={80}
+                  tick={{ fontSize: 12 }}
+                  stroke="#666"
+                />
+                <YAxis 
+                  tickFormatter={(value) => `₱${(value/1000).toFixed(0)}k`}
+                  tick={{ fontSize: 12 }}
+                  stroke="#666"
+                />
+                <Tooltip 
+                  formatter={(value: number, name: string, props: any) => [
+                    formatPeso(value), 
+                    'Revenue',
+                    props.payload.is_tbwa_client ? '(TBWA Client)' : '(Competitor)'
+                  ]}
+                  labelStyle={{ color: '#333' }}
+                  contentStyle={{ 
+                    backgroundColor: '#fff', 
+                    border: '1px solid #ccc',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar 
+                  dataKey="sales" 
+                  fill={(entry: any) => entry.is_tbwa_client ? '#3b82f6' : '#94a3b8'}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="mt-4 flex gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <span>TBWA Clients</span>
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data.topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    height={80}
-                    tick={{ fontSize: 12 }}
-                    stroke="#666"
-                  />
-                  <YAxis 
-                    tickFormatter={(value) => `₱${(value/1000).toFixed(0)}k`}
-                    tick={{ fontSize: 12 }}
-                    stroke="#666"
-                  />
-                  <Tooltip 
-                    formatter={(value: number) => [formatPeso(value), 'Revenue']}
-                    labelStyle={{ color: '#333' }}
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #ccc',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
-                    {data.topBrands.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.is_tbwa ? '#3b82f6' : '#f59e0b'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-slate-400 rounded"></div>
+                <span>Competitors</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
