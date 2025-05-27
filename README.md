@@ -2,6 +2,10 @@
 
 Real-time retail analytics dashboard for sari-sari stores in the Philippines.
 
+## 🚀 Preview Deployments
+
+This project uses Vercel for automatic preview deployments. Every pull request gets its own preview URL!
+
 ## 🚀 Quick Start
 
 ### Prerequisites
