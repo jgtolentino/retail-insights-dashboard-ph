@@ -6,7 +6,6 @@ import { Calendar, Users, TrendingUp, Heart, Filter } from 'lucide-react';
 import { AgeDistribution } from '@/components/charts/AgeDistribution';
 import { GenderDistribution } from '@/components/charts/GenderDistribution';
 import { PurchasePatterns } from '@/components/charts/PurchasePatterns';
-import { DataTestComponent } from '@/components/charts/DataTestComponent';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { FilterSummary } from '@/components/FilterSummary';
@@ -263,9 +262,6 @@ export default function ConsumerInsights() {
 
           {/* Demographics Tab */}
           <TabsContent value="demographics" className="space-y-4">
-            {/* Temporary Data Test Component */}
-            <DataTestComponent />
-            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Age Distribution */}
               <Card>

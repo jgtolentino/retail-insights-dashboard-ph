@@ -96,6 +96,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
             dataKey="customer_count" 
             fill="#3b82f6" 
             radius={[2, 2, 0, 0]}
+            name="Customers"
           />
         </BarChart>
       </ResponsiveContainer>
