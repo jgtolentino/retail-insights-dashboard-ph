@@ -16,7 +16,7 @@ export class AzurePostgresClient {
     }
   }
 
-  async query(text: string, params?: any[]) {
+  async query(text: string, params?: unknown[]) {
     if (!this.pool) {
       throw new Error('Azure PostgreSQL not configured')
     }
@@ -79,7 +79,7 @@ export class HybridDatabaseClient {
   private azureClient = new AzurePostgresClient()
 
   // Use Supabase for real-time features
-  subscribeToTransactions(callback: (payload: any) => void) {
+  subscribeToTransactions(callback: (payload: unknown) => void) {
     return this.supabase
       .channel('transactions')
       .on('postgres_changes', 

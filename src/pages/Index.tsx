@@ -30,7 +30,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchData()
-  }, [timeRange])
+  }, [timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     setLoading(true)
@@ -223,7 +223,7 @@ const Index = () => {
                     dataKey="sales" 
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
-                    onClick={(data: any) => {
+                    onClick={(data: { name: string }) => {
                       setSelectedBrand(data.name)
                       // TODO: Implement drill-down functionality
                       console.log('Clicked brand:', data.name)
