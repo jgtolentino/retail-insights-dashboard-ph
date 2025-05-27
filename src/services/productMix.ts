@@ -43,8 +43,10 @@ export const productMixService = {
           products!inner(
             id,
             name,
-            category,
-            brand_id
+            brand_id,
+            brands!inner(
+              category
+            )
           ),
           transactions!inner(
             created_at,
@@ -61,7 +63,7 @@ export const productMixService = {
       const productDetails = new Map<string, { name: string; category: string }>();
 
       transactions?.forEach(item => {
-        const category = item.products.category || 'Other';
+        const category = item.products.brands?.category || 'Other';
         const productName = item.products.name;
         
         if (!productsByCategory.has(category)) {
@@ -127,10 +129,10 @@ export const productMixService = {
           price,
           products!inner(
             name,
-            category,
             brands!inner(
               id,
-              name
+              name,
+              category
             )
           ),
           transactions!inner(
@@ -151,7 +153,7 @@ export const productMixService = {
         
         switch (groupBy) {
           case 'category':
-            key = item.products.category || 'Other';
+            key = item.products.brands?.category || 'Other';
             break;
           case 'brand':
             key = item.products.brands.name;
@@ -203,7 +205,9 @@ export const productMixService = {
           quantity,
           price,
           products!inner(
-            category
+            brands!inner(
+              category
+            )
           ),
           transactions!inner(
             created_at,
@@ -219,7 +223,7 @@ export const productMixService = {
       const categoryMap = new Map<string, { units: number; revenue: number }>();
       
       items?.forEach(item => {
-        const category = item.products.category || 'Other';
+        const category = item.products.brands?.category || 'Other';
         const existing = categoryMap.get(category) || { units: 0, revenue: 0 };
         
         existing.units += item.quantity || 0;

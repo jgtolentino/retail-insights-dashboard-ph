@@ -30,11 +30,11 @@ export function ProductMixDashboard() {
     queryKey: ['categories'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('products')
+        .from('brands')
         .select('category')
         .not('category', 'is', null);
       
-      const uniqueCategories = [...new Set(data?.map(p => p.category) || [])];
+      const uniqueCategories = [...new Set(data?.map(b => b.category) || [])];
       return uniqueCategories.sort();
     }
   });
