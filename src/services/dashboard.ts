@@ -8,37 +8,51 @@ export interface TimeSeriesData {
   revenue: number
 }
 
+export interface DailyTrendsData {
+  day: string
+  tx_count: number
+  daily_revenue: number
+  avg_tx: number
+}
+
 export const dashboardService = {
   async getDashboardData(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange })
     
     try {
-      // Calculate date filter based on timeRange
-      const now = new Date()
-      let startDate = new Date()
+      // Use fixed end date that matches your data (May 30, 2025)
+      const endDate = new Date('2025-05-30T23:59:59Z')
+      let startDate = new Date(endDate)
       
       switch (timeRange) {
         case '1d':
-          startDate.setDate(now.getDate() - 1)
+          startDate.setDate(endDate.getDate() - 1)
           break
         case '7d':
-          startDate.setDate(now.getDate() - 7)
+          startDate.setDate(endDate.getDate() - 7)
           break
         case '30d':
-          startDate.setDate(now.getDate() - 30)
+          startDate.setDate(endDate.getDate() - 30)
           break
         case '90d':
-          startDate.setDate(now.getDate() - 90)
+          startDate.setDate(endDate.getDate() - 90)
           break
         default:
-          startDate.setDate(now.getDate() - 30)
+          startDate.setDate(endDate.getDate() - 30)
       }
+
+      console.log('📅 Using date range:', {
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        timeRange
+      })
 
       // Get total revenue and transaction count from transactions table
       const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
         .select('total_amount, created_at')
         .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
       
       if (transactionError) {
         logger.error('Error fetching transactions:', transactionError)
@@ -60,6 +74,7 @@ export const dashboardService = {
           transactions!inner(created_at)
         `)
         .gte('transactions.created_at', startDate.toISOString())
+        .lte('transactions.created_at', endDate.toISOString())
       
       if (itemsError) {
         logger.error('Error fetching transaction items:', itemsError)
@@ -160,30 +175,30 @@ export const dashboardService = {
     logger.info('Fetching time series data', { timeRange })
     
     try {
-      // Calculate date filter based on timeRange
-      const now = new Date()
-      let startDate = new Date()
+      // Use fixed end date that matches your data (May 30, 2025)
+      const endDate = new Date('2025-05-30T23:59:59Z')
+      let startDate = new Date(endDate)
       let groupBy = 'day' // Default grouping
       
       switch (timeRange) {
         case '1d':
-          startDate.setDate(now.getDate() - 1)
+          startDate.setDate(endDate.getDate() - 1)
           groupBy = 'hour'
           break
         case '7d':
-          startDate.setDate(now.getDate() - 7)
+          startDate.setDate(endDate.getDate() - 7)
           groupBy = 'day'
           break
         case '30d':
-          startDate.setDate(now.getDate() - 30)
+          startDate.setDate(endDate.getDate() - 30)
           groupBy = 'day'
           break
         case '90d':
-          startDate.setDate(now.getDate() - 90)
+          startDate.setDate(endDate.getDate() - 90)
           groupBy = 'week'
           break
         default:
-          startDate.setDate(now.getDate() - 30)
+          startDate.setDate(endDate.getDate() - 30)
       }
 
       // Get transaction items with transaction dates via join
@@ -195,6 +210,7 @@ export const dashboardService = {
           transactions!inner(created_at)
         `)
         .gte('transactions.created_at', startDate.toISOString())
+        .lte('transactions.created_at', endDate.toISOString())
         .order('transactions.created_at', { ascending: true })
       
       if (error) {
@@ -256,6 +272,74 @@ export const dashboardService = {
       logger.error('Failed to fetch time series data', error)
       console.error('Time series service error:', error)
       return []
+    }
+  },
+
+  // New method for date-parametric queries using the RPC function
+  async getTimeSeriesDataByDateRange(startDate: string, endDate: string): Promise<TimeSeriesData[]> {
+    logger.info('Fetching time series data by date range', { startDate, endDate })
+    
+    try {
+      // Call the new RPC function
+      const { data: dailyTrends, error } = await supabase
+        .rpc('get_daily_trends', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z'
+        })
+      
+      if (error) {
+        logger.error('Error fetching daily trends:', error)
+        throw error
+      }
+
+      // Transform the data to match TimeSeriesData interface
+      const timeSeriesData: TimeSeriesData[] = (dailyTrends || []).map((item: DailyTrendsData) => ({
+        date: item.day,
+        transactions: Number(item.tx_count),
+        revenue: Math.round(Number(item.daily_revenue))
+      }))
+      
+      logger.info('Successfully fetched time series data by date range', { 
+        dataPoints: timeSeriesData.length,
+        startDate,
+        endDate
+      })
+      
+      return timeSeriesData
+    } catch (error) {
+      logger.error('Failed to fetch time series data by date range', error)
+      console.error('Time series by date range service error:', error)
+      return []
+    }
+  },
+
+  // Helper method to convert preset time ranges to actual dates
+  convertTimeRangeTodates(timeRange: string): { startDate: string, endDate: string } {
+    // Use fixed end date that matches your data (May 30, 2025)
+    const endDate = '2025-05-30'
+    const endDateObj = new Date('2025-05-30T23:59:59Z')
+    let startDate = new Date(endDateObj)
+    
+    switch (timeRange) {
+      case '1d':
+        startDate.setDate(endDateObj.getDate() - 1)
+        break
+      case '7d':
+        startDate.setDate(endDateObj.getDate() - 7)
+        break
+      case '30d':
+        startDate.setDate(endDateObj.getDate() - 30)
+        break
+      case '90d':
+        startDate.setDate(endDateObj.getDate() - 90)
+        break
+      default:
+        startDate.setDate(endDateObj.getDate() - 30)
+    }
+    
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate
     }
   }
 }
