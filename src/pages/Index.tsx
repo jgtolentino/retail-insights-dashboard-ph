@@ -1,12 +1,21 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, RefreshCw } from 'lucide-react'
+import { TrendingUp, RefreshCw, BarChart3 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { dashboardService, type DashboardData } from '@/services/dashboard'
 import { Button } from '@/components/ui/button'
+import { normalizeBrandName, getBrandOwnerType } from '@/utils/brandNormalization'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
+
+// Accessibility-friendly color palette
+const COLORS = {
+  tbwa: '#2563eb', // Blue with good contrast
+  competitor: '#ea580c', // Orange with good contrast
+  tbwaPattern: 'url(#tbwaPattern)', // For additional clarity
+  competitorPattern: 'url(#competitorPattern)'
+}
 
 const Index = () => {
   const [data, setData] = useState<DashboardData>({
@@ -17,6 +26,7 @@ const Index = () => {
   })
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState(7) // days
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -33,6 +43,26 @@ const Index = () => {
       setLoading(false)
     }
   }
+
+  // Calculate TBWA vs Competitor metrics
+  const calculateMetrics = () => {
+    if (!data.topBrands.length) return { tbwaRevenue: 0, competitorRevenue: 0, tbwaPercentage: 0 }
+    
+    const tbwaRevenue = data.topBrands
+      .filter(brand => brand.is_tbwa)
+      .reduce((sum, brand) => sum + brand.sales, 0)
+    
+    const competitorRevenue = data.topBrands
+      .filter(brand => !brand.is_tbwa)
+      .reduce((sum, brand) => sum + brand.sales, 0)
+    
+    const totalRevenue = tbwaRevenue + competitorRevenue
+    const tbwaPercentage = totalRevenue > 0 ? (tbwaRevenue / totalRevenue * 100).toFixed(1) : 0
+    
+    return { tbwaRevenue, competitorRevenue, tbwaPercentage }
+  }
+
+  const { tbwaRevenue, competitorRevenue, tbwaPercentage } = calculateMetrics()
   
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -109,20 +139,36 @@ const Index = () => {
 
         {/* Bar Chart with Real Data */}
         <Card className="border-0 shadow-md">
-          <CardHeader>
+          <CardHeader className="space-y-4">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-xl font-semibold text-gray-900">Top Brands by Revenue</CardTitle>
-              <div className="flex gap-4 text-sm">
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top Brands by Revenue
+              </CardTitle>
+            </div>
+            
+            {/* Legend moved above chart */}
+            <div className="flex items-center justify-between">
+              <div className="flex gap-6">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                  <span>TBWA Clients</span>
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS.tbwa }}></div>
+                  <span className="text-sm font-medium">TBWA Clients</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                  <span>Competitors</span>
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS.competitor }}></div>
+                  <span className="text-sm font-medium">Competitors</span>
                 </div>
               </div>
             </div>
+            
+            {/* Contextual summary */}
+            {!loading && data.topBrands.length > 0 && (
+              <p className="text-sm text-gray-600">
+                TBWA clients capture <span className="font-semibold">{tbwaPercentage}%</span> of category revenue
+                ({formatPeso(tbwaRevenue)} vs {formatPeso(competitorRevenue)}). 
+                Click any bar to drill down by region or store.
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -147,17 +193,47 @@ const Index = () => {
                     stroke="#666"
                   />
                   <Tooltip 
-                    formatter={(value: number) => [formatPeso(value), 'Revenue']}
-                    labelStyle={{ color: '#333' }}
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #ccc',
-                      borderRadius: '8px'
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload
+                        const ownerType = getBrandOwnerType(data.name)
+                        return (
+                          <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                            <p className="font-semibold text-gray-900">{label}</p>
+                            <p className="text-sm text-gray-600">{ownerType}</p>
+                            <div className="mt-2 space-y-1">
+                              <p className="text-sm">
+                                <span className="text-gray-600">Revenue:</span>
+                                <span className="font-medium ml-2">{formatPeso(data.sales)}</span>
+                              </p>
+                              {data.transaction_count && (
+                                <p className="text-sm">
+                                  <span className="text-gray-600">Transactions:</span>
+                                  <span className="font-medium ml-2">{data.transaction_count.toLocaleString()}</span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
                     }}
                   />
-                  <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
+                  <Bar 
+                    dataKey="sales" 
+                    radius={[4, 4, 0, 0]}
+                    cursor="pointer"
+                    onClick={(data: any) => {
+                      setSelectedBrand(data.name)
+                      // TODO: Implement drill-down functionality
+                      console.log('Clicked brand:', data.name)
+                    }}
+                  >
                     {data.topBrands.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.is_tbwa ? '#3b82f6' : '#f59e0b'} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.is_tbwa ? COLORS.tbwa : COLORS.competitor}
+                      />
                     ))}
                   </Bar>
                 </BarChart>

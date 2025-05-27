@@ -8,6 +8,7 @@ export interface DashboardData {
     name: string
     sales: number
     is_tbwa: boolean
+    transaction_count?: number
   }>
 }
 
