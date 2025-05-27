@@ -53,14 +53,25 @@ export async function runPreSprintChecks(sprintNumber: number): Promise<Validati
         // Check product relationships
         const { data: productData, error: productError } = await supabase
           .from('products')
-          .select('id, name, category, brand_id')
+          .select('id, name, brand_id')
           .limit(1);
         
         if (productError || !productData) {
           result.errors.push('Cannot access products table');
           result.passed = false;
-        } else if (!productData[0]?.category) {
-          result.warnings.push('Missing category field in products');
+        }
+        
+        // Check brands table for category
+        const { data: brandData, error: brandError } = await supabase
+          .from('brands')
+          .select('id, name, category')
+          .limit(1);
+        
+        if (brandError || !brandData) {
+          result.errors.push('Cannot access brands table');
+          result.passed = false;
+        } else if (!brandData[0]?.category) {
+          result.warnings.push('Missing category field in brands');
         }
         
         // Check transaction items
@@ -153,8 +164,9 @@ export async function validateSprintRequirements(sprint: number): Promise<Valida
     2: {
       tables: ['products', 'brands', 'transaction_items'],
       fields: {
-        products: ['category', 'brand_id'],
-        transaction_items: ['product_id', 'quantity']
+        products: ['id', 'name', 'brand_id'],
+        brands: ['id', 'name', 'category'],
+        transaction_items: ['product_id', 'quantity', 'price']
       }
     },
     3: {
