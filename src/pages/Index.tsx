@@ -354,7 +354,7 @@ export default function Index() {
 
         {/* Footer */}
         <div className="text-center py-6 text-gray-500 text-sm">
-          <p>Retail Insights Dashboard PH - Powered by Supabase & React</p>
+          <p>Retail Insights Dashboard PH - Powered by Dlab</p>
           <p className="mt-1">Last updated: {new Date().toLocaleDateString()}</p>
         </div>
       </div>
