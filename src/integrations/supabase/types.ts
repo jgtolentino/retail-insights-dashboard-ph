@@ -9,7 +9,169 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      brands: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_tbwa_client: boolean | null
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_tbwa_client?: boolean | null
+          name: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_tbwa_client?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          brand_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          price: number | null
+          sku: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          price?: number | null
+          sku?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          price?: number | null
+          sku?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          created_at: string | null
+          id: string
+          location: string | null
+          name: string
+          region: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          region?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          region?: string | null
+        }
+        Relationships: []
+      }
+      transaction_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          price: number
+          product_id: string | null
+          quantity: number
+          subtotal: number | null
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          price: number
+          product_id?: string | null
+          quantity?: number
+          subtotal?: number | null
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          price?: number
+          product_id?: string | null
+          quantity?: number
+          subtotal?: number | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          items_count: number | null
+          store_id: string | null
+          total_amount: number | null
+          transaction_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          items_count?: number | null
+          store_id?: string | null
+          total_amount?: number | null
+          transaction_date: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          items_count?: number | null
+          store_id?: string | null
+          total_amount?: number | null
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

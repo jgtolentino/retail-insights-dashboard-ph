@@ -1,41 +1,47 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, Database } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-
-// Simple mock data focusing on key brands only
-const mockData = {
-  topBrands: [
-    { name: 'Alaska Evap Milk', sales: 285000 },
-    { name: 'Oishi Prawn Crackers', sales: 342000 },
-    { name: 'Champion Detergent', sales: 425000 },
-    { name: 'Del Monte Ketchup', sales: 387000 },
-    { name: 'Winston', sales: 567000 },
-    { name: 'Bear Brand (Competitor)', sales: 198000 },
-  ]
-}
+import { useRetailAnalytics } from '@/hooks/useRetailAnalytics'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
 
 const Index = () => {
-  const totalRevenue = mockData.topBrands.reduce((sum, brand) => sum + brand.sales, 0)
+  const { topBrands, totalStats, isLoading } = useRetailAnalytics();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <Database className="h-12 w-12 animate-pulse mx-auto mb-4 text-blue-600" />
+          <p className="text-lg text-gray-600">Loading retail analytics data...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Retail Analytics POC</h1>
+        <div className="flex items-center gap-2 mb-6">
+          <Database className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-900">Retail Analytics POC</h1>
+          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Live Data</span>
+        </div>
         
-        {/* Simple KPI Cards */}
+        {/* KPI Cards with Real Data */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{formatPeso(totalRevenue)}</div>
+              <div className="text-3xl font-bold text-gray-900">
+                {formatPeso(totalStats.totalRevenue)}
+              </div>
               <p className="text-sm text-green-600 flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 mr-1" />
-                12.5% vs last week
+                From Supabase Database
               </p>
             </CardContent>
           </Card>
@@ -45,8 +51,10 @@ const Index = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Total Transactions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">3,421</div>
-              <p className="text-sm text-gray-500 mt-2">This week</p>
+              <div className="text-3xl font-bold text-gray-900">
+                {totalStats.totalTransactions.toLocaleString()}
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Real transaction data</p>
             </CardContent>
           </Card>
           
@@ -55,20 +63,25 @@ const Index = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Avg Transaction</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">₱635</div>
+              <div className="text-3xl font-bold text-gray-900">
+                {formatPeso(totalStats.avgTransaction)}
+              </div>
               <p className="text-sm text-gray-500 mt-2">Per customer</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Simple Bar Chart */}
+        {/* Bar Chart with Real Data */}
         <Card className="border-0 shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-900">Top Products by Revenue</CardTitle>
+            <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              Top Brands by Revenue
+              <span className="text-sm font-normal text-gray-500">(Live Database)</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={mockData.topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              <BarChart data={topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis 
                   dataKey="name" 
@@ -84,7 +97,11 @@ const Index = () => {
                   stroke="#666"
                 />
                 <Tooltip 
-                  formatter={(value: number) => [formatPeso(value), 'Revenue']}
+                  formatter={(value: number, name: string, props: any) => [
+                    formatPeso(value), 
+                    'Revenue',
+                    props.payload.is_tbwa_client ? '(TBWA Client)' : '(Competitor)'
+                  ]}
                   labelStyle={{ color: '#333' }}
                   contentStyle={{ 
                     backgroundColor: '#fff', 
@@ -94,11 +111,21 @@ const Index = () => {
                 />
                 <Bar 
                   dataKey="sales" 
-                  fill="#3b82f6" 
+                  fill={(entry: any) => entry.is_tbwa_client ? '#3b82f6' : '#94a3b8'}
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
+            <div className="mt-4 flex gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <span>TBWA Clients</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-slate-400 rounded"></div>
+                <span>Competitors</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
