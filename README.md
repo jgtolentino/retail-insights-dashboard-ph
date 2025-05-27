@@ -1,73 +1,124 @@
-# Welcome to your Lovable project
+# Retail Insights Dashboard PH
 
-## Project info
+Real-time retail analytics dashboard for sari-sari stores in the Philippines.
 
-**URL**: https://lovable.dev/projects/1d517f38-8a42-4920-b574-0a192238853b
+## 🚀 Quick Start
 
-## How can I edit this code?
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
 
-There are several ways of editing your application.
+### Setup
 
-**Use Lovable**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/jgtolentino/retail-insights-dashboard-ph.git
+   cd retail-insights-dashboard-ph
+   ```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1d517f38-8a42-4920-b574-0a192238853b) and start prompting.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Changes made via Lovable will be committed automatically to this repo.
+3. **Set up environment variables**
+   ```bash
+   # Copy the example env file
+   cp .env.example .env.local
+   
+   # Edit .env.local with your Supabase credentials
+   VITE_SUPABASE_URL=your-supabase-url
+   VITE_SUPABASE_ANON_KEY=your-anon-key
+   ```
 
-**Use your preferred IDE**
+4. **Run development server**
+   ```bash
+   npm run dev
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+5. **Build for production**
+   ```bash
+   npm run build
+   npm run preview  # Test the production build locally
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📊 Database Schema
 
-Follow these steps:
+The dashboard expects the following Supabase tables:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### brands
+- `id` (int8, primary key)
+- `name` (text)
+- `is_tbwa` (boolean)
+- `category` (text)
+- `created_at` (timestamp)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### products
+- `id` (int8, primary key)
+- `name` (text)
+- `brand_id` (int8, foreign key → brands.id)
+- `price` (numeric)
+- `created_at` (timestamp)
 
-# Step 3: Install the necessary dependencies.
-npm i
+### transaction_items
+- `id` (int8, primary key)
+- `product_id` (int8, foreign key → products.id)
+- `quantity` (int4)
+- `price` (numeric)
+- `transaction_date` (timestamp)
+- `created_at` (timestamp)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🛠️ Tech Stack
 
-**Edit a file directly in GitHub**
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel
+- **Build Tool**: Vite
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📝 Common Issues & Solutions
 
-**Use GitHub Codespaces**
+### Blank Dashboard
+- **Check Supabase connection**: Ensure your environment variables are set correctly
+- **Verify data exists**: The dashboard needs data in the tables to display
+- **Check browser console**: Look for any connection errors
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Build Errors
+- **Clear node_modules**: `rm -rf node_modules && npm install`
+- **Check TypeScript errors**: `npm run type-check`
+- **Verify all imports**: Make sure you're using the correct import paths
 
-## What technologies are used for this project?
+### Deployment Issues
+- **Environment variables**: Ensure they're set in your deployment platform
+- **Build command**: Use `npm run build`
+- **Output directory**: Set to `dist`
 
-This project is built with:
+## 🧪 Testing Checklist
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Before deploying:
+- [ ] Run locally with `npm run dev`
+- [ ] Check browser console for errors
+- [ ] Test with empty database
+- [ ] Test with sample data
+- [ ] Build locally with `npm run build`
+- [ ] Test the build with `npm run preview`
+- [ ] Verify all environment variables
+- [ ] Check Supabase connection
 
-## How can I deploy this project?
+## 🤝 Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/1d517f38-8a42-4920-b574-0a192238853b) and click on Share -> Publish.
+1. Create a feature branch: `git checkout -b feature/your-feature`
+2. Make your changes
+3. Test thoroughly
+4. Commit: `git commit -m "feat: add new feature"`
+5. Push: `git push origin feature/your-feature`
+6. Create a Pull Request
 
-## Can I connect a custom domain to my Lovable project?
+## 📄 License
 
-Yes, you can!
+MIT
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*Originally created with [Lovable](https://lovable.dev/projects/1d517f38-8a42-4920-b574-0a192238853b)*

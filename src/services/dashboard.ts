@@ -1,19 +1,10 @@
 import { supabase } from '@/integrations/supabase/client'
-
-interface DashboardData {
-  totalRevenue: number
-  totalTransactions: number
-  avgTransaction: number
-  topBrands: Array<{
-    name: string
-    sales: number
-    is_tbwa: boolean
-  }>
-}
+import { logger } from '@/utils/logger'
+import type { DashboardData } from '@/types/database.types'
 
 export const dashboardService = {
   async getDashboardData(timeRange: string): Promise<DashboardData> {
-    console.log('Fetching data from Supabase...')
+    logger.info('Fetching dashboard data', { timeRange })
     
     try {
       // Get aggregated brand data
@@ -58,7 +49,11 @@ export const dashboardService = {
       
       const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0
       
-      console.log('Supabase data:', { totalRevenue, totalTransactions, topBrands })
+      logger.info('Successfully fetched dashboard data', { 
+        totalRevenue, 
+        totalTransactions, 
+        brandsCount: topBrands.length 
+      })
       
       return {
         totalRevenue,
@@ -67,7 +62,7 @@ export const dashboardService = {
         topBrands
       }
     } catch (error) {
-      console.error('Error fetching from Supabase:', error)
+      logger.error('Failed to fetch dashboard data', error)
       
       // Return mock data as fallback
       return {
