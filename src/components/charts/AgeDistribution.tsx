@@ -28,9 +28,18 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
 
   useEffect(() => {
     setLoading(true);
+    console.log('🔍 AgeDistribution: Fetching data...', { startDate, endDate, bucketSize, filters });
+    
     dashboardService
       .getAgeDistribution(startDate, endDate, bucketSize, filters)
-      .then(setData)
+      .then((result) => {
+        console.log('📊 AgeDistribution: Data received:', result);
+        setData(result);
+      })
+      .catch((error) => {
+        console.error('❌ AgeDistribution: Error fetching data:', error);
+        setData([]);
+      })
       .finally(() => setLoading(false));
   }, [startDate, endDate, bucketSize, filters]);
 
@@ -44,8 +53,13 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
-        No age distribution data available for the selected period
+      <div className="h-64 w-full flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="text-muted-foreground">No age distribution data available</div>
+          <div className="text-xs text-muted-foreground">
+            Try adjusting the date range or check if customer_age data exists
+          </div>
+        </div>
       </div>
     );
   }
