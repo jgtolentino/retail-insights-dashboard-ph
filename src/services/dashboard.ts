@@ -201,17 +201,13 @@ export const dashboardService = {
           startDate.setDate(endDate.getDate() - 30)
       }
 
-      // Get transaction items with transaction dates via join
-      const { data: transactionItems, error } = await supabase
-        .from('transaction_items')
-        .select(`
-          quantity, 
-          price,
-          transactions!inner(created_at)
-        `)
-        .gte('transactions.created_at', startDate.toISOString())
-        .lte('transactions.created_at', endDate.toISOString())
-        .order('transactions.created_at', { ascending: true })
+      // Get transactions directly for time series
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('id, created_at, total_amount')
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
+        .order('created_at', { ascending: true })
       
       if (error) {
         logger.error('Error fetching time series data:', error)
@@ -221,9 +217,8 @@ export const dashboardService = {
       // Group data by time period
       const timeSeriesMap = new Map<string, { transactions: number, revenue: number }>()
       
-      transactionItems?.forEach(item => {
-        // Access the joined transaction data
-        const transactionDate = item.transactions?.created_at
+      transactions?.forEach(transaction => {
+        const transactionDate = transaction.created_at
         if (!transactionDate) return
         
         const date = new Date(transactionDate)
@@ -239,7 +234,7 @@ export const dashboardService = {
           key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`
         }
         
-        const revenue = (Number(item.quantity) || 0) * (Number(item.price) || 0)
+        const revenue = Number(transaction.total_amount) || 0
         const existing = timeSeriesMap.get(key)
         
         if (existing) {
@@ -271,6 +266,7 @@ export const dashboardService = {
     } catch (error) {
       logger.error('Failed to fetch time series data', error)
       console.error('Time series service error:', error)
+      // Return empty array to prevent dashboard crash
       return []
     }
   },
