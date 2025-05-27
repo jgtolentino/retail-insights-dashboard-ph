@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
+import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
+import { Link } from 'react-router-dom'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -219,9 +220,19 @@ export default function Index() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Retail Insights Dashboard PH</h1>
-          <p className="text-gray-600 mt-2">Real-time retail analytics for sari-sari stores</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Retail Insights Dashboard PH</h1>
+            <p className="text-gray-600 mt-2">Real-time retail analytics for sari-sari stores</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/product-mix" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Product Mix Analysis
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Controls */}
