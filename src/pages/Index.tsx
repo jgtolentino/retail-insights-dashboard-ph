@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, Database } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useRetailAnalytics } from '@/hooks/useRetailAnalytics'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
@@ -109,11 +109,11 @@ const Index = () => {
                     borderRadius: '8px'
                   }}
                 />
-                <Bar 
-                  dataKey="sales" 
-                  fill={(entry: any) => entry.is_tbwa_client ? '#3b82f6' : '#94a3b8'}
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
+                  {topBrands.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.is_tbwa_client ? '#3b82f6' : '#94a3b8'} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-4 flex gap-4 text-sm">
