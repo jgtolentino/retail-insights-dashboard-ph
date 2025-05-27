@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, TrendingUp, Heart, Filter } from 'lucide-react';
 import { AgeDistribution } from '@/components/charts/AgeDistribution';
 import { GenderDistribution } from '@/components/charts/GenderDistribution';
-import { SprintDashboard } from '@/components/SprintDashboard';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { FilterSummary } from '@/components/FilterSummary';
@@ -94,8 +93,8 @@ export default function ConsumerInsights() {
   };
 
   return (
-    <SprintDashboard sprint={3}>
-      <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -383,6 +382,6 @@ export default function ConsumerInsights() {
           </TabsContent>
         </Tabs>
       </div>
-    </SprintDashboard>
+    </div>
   );
 }
