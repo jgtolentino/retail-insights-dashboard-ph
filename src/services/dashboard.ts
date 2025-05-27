@@ -358,7 +358,17 @@ export const dashboardService = {
   },
 
   // Consumer Insights Methods for Sprint 3
-  async getAgeDistribution(startDate: string, endDate: string, bucketSize: number = 10): Promise<AgeDistributionData[]> {
+  async getAgeDistribution(
+    startDate: string, 
+    endDate: string, 
+    bucketSize: number = 10,
+    filters?: {
+      categories?: string[];
+      brands?: string[];
+      genders?: string[];
+      ageGroups?: string[];
+    }
+  ): Promise<AgeDistributionData[]> {
     logger.info('Fetching age distribution data', { startDate, endDate, bucketSize })
     
     try {
@@ -381,7 +391,15 @@ export const dashboardService = {
     }
   },
 
-  async getGenderDistribution(startDate: string, endDate: string): Promise<GenderDistributionData[]> {
+  async getGenderDistribution(
+    startDate: string, 
+    endDate: string,
+    filters?: {
+      categories?: string[];
+      brands?: string[];
+      ageGroups?: string[];
+    }
+  ): Promise<GenderDistributionData[]> {
     logger.info('Fetching gender distribution data', { startDate, endDate })
     
     try {

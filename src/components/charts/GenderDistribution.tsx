@@ -13,6 +13,11 @@ import { formatCurrency } from '@/lib/utils';
 interface GenderDistributionProps {
   startDate: string;
   endDate: string;
+  filters?: {
+    categories?: string[];
+    brands?: string[];
+    ageGroups?: string[];
+  };
 }
 
 const GENDER_COLORS = {
@@ -21,17 +26,17 @@ const GENDER_COLORS = {
   'Unknown': '#6b7280'
 };
 
-export function GenderDistribution({ startDate, endDate }: GenderDistributionProps) {
+export function GenderDistribution({ startDate, endDate, filters }: GenderDistributionProps) {
   const [data, setData] = useState<GenderDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     dashboardService
-      .getGenderDistribution(startDate, endDate)
+      .getGenderDistribution(startDate, endDate, filters)
       .then(setData)
       .finally(() => setLoading(false));
-  }, [startDate, endDate]);
+  }, [startDate, endDate, filters]);
 
   if (loading) {
     return (

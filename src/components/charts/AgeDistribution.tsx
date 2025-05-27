@@ -14,19 +14,25 @@ interface AgeDistributionProps {
   startDate: string;
   endDate: string;
   bucketSize?: number;
+  filters?: {
+    categories?: string[];
+    brands?: string[];
+    genders?: string[];
+    ageGroups?: string[];
+  };
 }
 
-export function AgeDistribution({ startDate, endDate, bucketSize = 10 }: AgeDistributionProps) {
+export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }: AgeDistributionProps) {
   const [data, setData] = useState<AgeDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     dashboardService
-      .getAgeDistribution(startDate, endDate, bucketSize)
+      .getAgeDistribution(startDate, endDate, bucketSize, filters)
       .then(setData)
       .finally(() => setLoading(false));
-  }, [startDate, endDate, bucketSize]);
+  }, [startDate, endDate, bucketSize, filters]);
 
   if (loading) {
     return (
