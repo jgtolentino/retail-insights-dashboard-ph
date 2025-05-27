@@ -56,13 +56,18 @@ export const productMixService = {
         .lte('transactions.created_at', filters.endDate.toISOString());
 
       // Apply category filter
-      if (filters.category) {
+      if (filters.category && filters.category !== 'all') {
         query = query.eq('products.brands.category', filters.category);
       }
 
       // Apply brand filter
-      if (filters.brandId) {
-        query = query.eq('products.brand_id', filters.brandId);
+      if (filters.brand && filters.brand !== 'all') {
+        query = query.eq('products.brand_id', filters.brand);
+      }
+
+      // Apply product filter
+      if (filters.product && filters.product !== 'all') {
+        query = query.eq('products.name', filters.product);
       }
 
       const { data: transactions, error } = await query;
@@ -154,13 +159,18 @@ export const productMixService = {
         .lte('transactions.created_at', filters.endDate.toISOString());
 
       // Apply category filter
-      if (filters.category) {
+      if (filters.category && filters.category !== 'all') {
         query = query.eq('products.brands.category', filters.category);
       }
 
       // Apply brand filter
-      if (filters.brandId) {
-        query = query.eq('products.brand_id', filters.brandId);
+      if (filters.brand && filters.brand !== 'all') {
+        query = query.eq('products.brand_id', filters.brand);
+      }
+
+      // Apply product filter
+      if (filters.product && filters.product !== 'all') {
+        query = query.eq('products.name', filters.product);
       }
 
       const { data: items, error } = await query;
@@ -242,13 +252,18 @@ export const productMixService = {
         .lte('transactions.created_at', filters.endDate.toISOString());
 
       // Apply category filter
-      if (filters.category) {
+      if (filters.category && filters.category !== 'all') {
         query = query.eq('products.brands.category', filters.category);
       }
 
       // Apply brand filter
-      if (filters.brandId) {
-        query = query.eq('products.brand_id', filters.brandId);
+      if (filters.brand && filters.brand !== 'all') {
+        query = query.eq('products.brand_id', filters.brand);
+      }
+
+      // Apply product filter
+      if (filters.product && filters.product !== 'all') {
+        query = query.eq('products.name', filters.product);
       }
 
       const { data: items, error } = await query;

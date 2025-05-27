@@ -56,7 +56,7 @@ export function ProductMixDashboard() {
     setFilters(prev => ({
       ...prev,
       category: selectedCategory === 'all' ? undefined : selectedCategory,
-      brandId: selectedBrand === 'all' ? undefined : selectedBrand
+      brand: selectedBrand === 'all' ? undefined : selectedBrand
     }));
   }, [selectedCategory, selectedBrand]);
 
