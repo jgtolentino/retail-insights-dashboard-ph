@@ -13,7 +13,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1', '#14b8a6', '#f97316'];
+// Professional color palette - using a monochromatic scheme with semantic colors
+const COLORS = [
+  '#1e40af', // Deep blue - primary category
+  '#3730a3', // Indigo
+  '#6366f1', // Medium indigo
+  '#8b5cf6', // Purple
+  '#64748b', // Slate gray
+  '#94a3b8', // Light slate
+  '#475569', // Dark slate
+  '#cbd5e1', // Very light slate
+];
 
 export function ProductMixDashboard() {
   const [filters, setFilters] = useState<ProductMixFilters>({
@@ -262,9 +272,11 @@ export function ProductMixDashboard() {
                           cy="50%"
                           innerRadius={60}
                           outerRadius={120}
-                          paddingAngle={4}
+                          paddingAngle={2}
                           labelLine={false}
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => 
+                            percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+                          }
                           fill="#8884d8"
                           dataKey="value"
                         >
@@ -272,8 +284,23 @@ export function ProductMixDashboard() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        <Legend verticalAlign="bottom" height={36} />
+                        <Tooltip 
+                          formatter={(value: number) => formatCurrency(value)}
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          wrapperStyle={{
+                            paddingTop: '20px'
+                          }}
+                          iconType="rect"
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
