@@ -50,7 +50,7 @@ export function DataTestComponent() {
       console.log('🧪 Testing raw transactions...');
       const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
-        .select('customer_age, customer_gender, amount, created_at')
+        .select('customer_age, customer_gender, total_amount, created_at')
         .not('customer_age', 'is', null)
         .limit(5);
       

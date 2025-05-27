@@ -13,50 +13,44 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string | null
-          id: string
-          is_tbwa_client: boolean | null
+          id: number
+          is_tbwa: boolean | null
           name: string
         }
         Insert: {
           category?: string | null
           created_at?: string | null
-          id?: string
-          is_tbwa_client?: boolean | null
+          id?: number
+          is_tbwa?: boolean | null
           name: string
         }
         Update: {
           category?: string | null
           created_at?: string | null
-          id?: string
-          is_tbwa_client?: boolean | null
+          id?: number
+          is_tbwa?: boolean | null
           name?: string
         }
         Relationships: []
       }
       products: {
         Row: {
-          brand_id: string | null
+          brand_id: number | null
           created_at: string | null
-          id: string
+          id: number
           name: string
-          price: number | null
-          sku: string | null
         }
         Insert: {
-          brand_id?: string | null
+          brand_id?: number | null
           created_at?: string | null
-          id?: string
+          id?: number
           name: string
-          price?: number | null
-          sku?: string | null
         }
         Update: {
-          brand_id?: string | null
+          brand_id?: number | null
           created_at?: string | null
-          id?: string
+          id?: number
           name?: string
-          price?: number | null
-          sku?: string | null
         }
         Relationships: [
           {
@@ -70,55 +64,116 @@ export type Database = {
       }
       stores: {
         Row: {
+          barangay: string | null
+          city: string | null
           created_at: string | null
-          id: string
+          id: number
+          latitude: number | null
           location: string | null
+          longitude: number | null
           name: string
           region: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          barangay?: string | null
+          city?: string | null
+          created_at?: string | null
+          id?: number
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          name: string
+          region?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          barangay?: string | null
+          city?: string | null
+          created_at?: string | null
+          id?: number
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          name?: string
+          region?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      substitutions: {
+        Row: {
+          created_at: string | null
+          id: number
+          original_product_id: number | null
+          reason: string | null
+          substitute_product_id: number | null
+          transaction_id: number | null
         }
         Insert: {
           created_at?: string | null
-          id?: string
-          location?: string | null
-          name: string
-          region?: string | null
+          id?: number
+          original_product_id?: number | null
+          reason?: string | null
+          substitute_product_id?: number | null
+          transaction_id?: number | null
         }
         Update: {
           created_at?: string | null
-          id?: string
-          location?: string | null
-          name?: string
-          region?: string | null
+          id?: number
+          original_product_id?: number | null
+          reason?: string | null
+          substitute_product_id?: number | null
+          transaction_id?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "substitutions_original_product_id_fkey"
+            columns: ["original_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitutions_substitute_product_id_fkey"
+            columns: ["substitute_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitutions_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transaction_items: {
         Row: {
           created_at: string | null
-          id: string
+          id: number
           price: number
-          product_id: string | null
+          product_id: number | null
           quantity: number
-          subtotal: number | null
-          transaction_id: string | null
+          transaction_id: number | null
         }
         Insert: {
           created_at?: string | null
-          id?: string
+          id?: number
           price: number
-          product_id?: string | null
-          quantity?: number
-          subtotal?: number | null
-          transaction_id?: string | null
+          product_id?: number | null
+          quantity: number
+          transaction_id?: number | null
         }
         Update: {
           created_at?: string | null
-          id?: string
+          id?: number
           price?: number
-          product_id?: string | null
+          product_id?: number | null
           quantity?: number
-          subtotal?: number | null
-          transaction_id?: string | null
+          transaction_id?: number | null
         }
         Relationships: [
           {
@@ -140,44 +195,114 @@ export type Database = {
       transactions: {
         Row: {
           created_at: string | null
-          id: string
-          items_count: number | null
-          store_id: string | null
+          customer_age: number | null
+          customer_gender: string | null
+          id: number
+          store_location: string | null
           total_amount: number | null
-          transaction_date: string
         }
         Insert: {
           created_at?: string | null
-          id?: string
-          items_count?: number | null
-          store_id?: string | null
+          customer_age?: number | null
+          customer_gender?: string | null
+          id?: number
+          store_location?: string | null
           total_amount?: number | null
-          transaction_date: string
         }
         Update: {
           created_at?: string | null
-          id?: string
-          items_count?: number | null
-          store_id?: string | null
+          customer_age?: number | null
+          customer_gender?: string | null
+          id?: number
+          store_location?: string | null
           total_amount?: number | null
-          transaction_date?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_age_distribution: {
+        Args:
+          | { start_date: string; end_date: string }
+          | { start_date: string; end_date: string; bucket_size?: number }
+          | { start_date?: string; end_date?: string; bucket_size?: number }
+        Returns: {
+          age_bucket: string
+          customer_count: number
+        }[]
+      }
+      get_daily_trends: {
+        Args: { start_date: string; end_date: string }
+        Returns: {
+          day: string
+          tx_count: number
+          daily_revenue: number
+          avg_tx: number
+        }[]
+      }
+      get_frequently_bought_together: {
+        Args: { start_date?: string; end_date?: string; min_frequency?: number }
+        Returns: {
+          product_1: string
+          product_2: string
+          frequency: number
+          insight: string
+        }[]
+      }
+      get_gender_distribution: {
+        Args:
+          | { start_date: string; end_date: string }
+          | { start_date?: string; end_date?: string }
+        Returns: {
+          gender: string
+          customer_count: number
+          total_revenue: number
+          percentage: number
+        }[]
+      }
+      get_location_distribution: {
+        Args:
+          | { start_date: string; end_date: string }
+          | { start_date?: string; end_date?: string }
+        Returns: {
+          location: string
+          customer_count: number
+          transaction_count: number
+          total_revenue: number
+          avg_transaction_value: number
+          percentage: number
+        }[]
+      }
+      get_product_substitutions: {
+        Args: { start_date?: string; end_date?: string }
+        Returns: {
+          original_product: string
+          substitute_product: string
+          count: number
+          reasons: string
+        }[]
+      }
+      get_purchase_behavior_by_age: {
+        Args: { start_date: string; end_date: string }
+        Returns: {
+          age_group: string
+          avg_transaction_value: number
+          purchase_frequency: number
+          preferred_categories: string[]
+        }[]
+      }
+      get_purchase_patterns_by_time: {
+        Args: { start_date: string; end_date: string }
+        Returns: {
+          hour_of_day: number
+          transaction_count: number
+          total_revenue: number
+          avg_transaction_value: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

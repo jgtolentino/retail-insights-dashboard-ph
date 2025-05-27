@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/utils/logger'
 import type { DashboardData } from '@/types/database.types'
+import type { ConsumerFilters } from '@/types/filters'
 
 export interface TimeSeriesData {
   date: string
@@ -143,7 +144,7 @@ export const dashboardService = {
             } else {
               brandSalesMap.set(brand.name, {
                 sales: sales,
-                is_tbwa: brand.is_tbwa_client || false
+                is_tbwa: brand.is_tbwa || false
               })
             }
           }
@@ -362,21 +363,20 @@ export const dashboardService = {
     startDate: string, 
     endDate: string, 
     bucketSize: number = 10,
-    filters?: {
-      categories?: string[];
-      brands?: string[];
-      genders?: string[];
-      ageGroups?: string[];
-    }
+    filters?: ConsumerFilters
   ): Promise<AgeDistributionData[]> {
-    logger.info('Fetching age distribution data', { startDate, endDate, bucketSize })
+    logger.info('Fetching age distribution data', { startDate, endDate, bucketSize, filters })
     
     try {
       const { data, error } = await supabase
         .rpc('get_age_distribution', {
           start_date: startDate + 'T00:00:00Z',
           end_date: endDate + 'T23:59:59Z',
-          bucket_size: bucketSize
+          bucket_size: bucketSize,
+          category_filter: filters?.category !== 'All' ? filters.category : null,
+          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
+          location_filter: filters?.location !== 'All' ? filters.location : null,
+          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
         })
       
       if (error) {
@@ -394,19 +394,19 @@ export const dashboardService = {
   async getGenderDistribution(
     startDate: string, 
     endDate: string,
-    filters?: {
-      categories?: string[];
-      brands?: string[];
-      ageGroups?: string[];
-    }
+    filters?: ConsumerFilters
   ): Promise<GenderDistributionData[]> {
-    logger.info('Fetching gender distribution data', { startDate, endDate })
+    logger.info('Fetching gender distribution data', { startDate, endDate, filters })
     
     try {
       const { data, error } = await supabase
         .rpc('get_gender_distribution', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z'
+          end_date: endDate + 'T23:59:59Z',
+          category_filter: filters?.category !== 'All' ? filters.category : null,
+          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
+          location_filter: filters?.location !== 'All' ? filters.location : null,
+          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
         })
       
       if (error) {
@@ -421,14 +421,18 @@ export const dashboardService = {
     }
   },
 
-  async getPurchaseBehaviorByAge(startDate: string, endDate: string): Promise<PurchaseBehaviorData[]> {
-    logger.info('Fetching purchase behavior by age data', { startDate, endDate })
+  async getPurchaseBehaviorByAge(startDate: string, endDate: string, filters?: ConsumerFilters): Promise<PurchaseBehaviorData[]> {
+    logger.info('Fetching purchase behavior by age data', { startDate, endDate, filters })
     
     try {
       const { data, error } = await supabase
         .rpc('get_purchase_behavior_by_age', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z'
+          end_date: endDate + 'T23:59:59Z',
+          category_filter: filters?.category !== 'All' ? filters.category : null,
+          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
+          location_filter: filters?.location !== 'All' ? filters.location : null,
+          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
         })
       
       if (error) {
@@ -439,6 +443,65 @@ export const dashboardService = {
       return data || []
     } catch (error) {
       logger.error('Failed to fetch purchase behavior by age data', error)
+      return []
+    }
+  },
+
+  async getLocationDistribution(
+    startDate: string,
+    endDate: string,
+    filters?: ConsumerFilters
+  ): Promise<any[]> {
+    logger.info('Fetching location distribution data', { startDate, endDate, filters })
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_location_distribution', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z',
+          category_filter: filters?.category !== 'All' ? filters.category : null,
+          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
+          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+        })
+      
+      if (error) {
+        logger.error('Error fetching location distribution:', error)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      logger.error('Failed to fetch location distribution data', error)
+      return []
+    }
+  },
+
+  async getPurchasePatternsByTime(
+    startDate: string,
+    endDate: string,
+    filters?: ConsumerFilters
+  ): Promise<any[]> {
+    logger.info('Fetching purchase patterns by time', { startDate, endDate, filters })
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_purchase_patterns_by_time', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z',
+          category_filter: filters?.category !== 'All' ? filters.category : null,
+          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
+          location_filter: filters?.location !== 'All' ? filters.location : null,
+          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+        })
+      
+      if (error) {
+        logger.error('Error fetching purchase patterns:', error)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      logger.error('Failed to fetch purchase patterns data', error)
       return []
     }
   }

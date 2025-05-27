@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { FilterProvider } from "@/contexts/FilterContext";
+import { EnhancedFilterProvider as FilterProvider } from "@/contexts/EnhancedFilterContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProductMix from "./pages/ProductMix";

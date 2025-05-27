@@ -1,128 +1,108 @@
-// Filter types for multi-select functionality across dashboards
-
-export interface BaseFilters {
-  startDate: Date;
-  endDate: Date;
+export interface ConsumerFilters {
+  category: string;
+  brand: string;
+  location: string;
+  weekdayWeekend: 'all' | 'weekday' | 'weekend';
 }
 
-export interface ProductMixFilters extends BaseFilters {
-  categories: string[];
-  brands: string[];
-  products: string[];
+export interface DateRange {
+  start: string;
+  end: string;
 }
 
-export interface ConsumerFilters extends BaseFilters {
-  categories: string[];
-  brands: string[];
-  products: string[];
-  ageGroups: string[];
-  genders: string[];
-  locations: string[];
-  incomeRanges: string[];
+export interface GlobalFilters extends ConsumerFilters {
+  dateRange: DateRange;
 }
 
-// Age group options for consistent use across components
-export const AGE_GROUP_OPTIONS = [
-  { label: "18-24", value: "18-24" },
-  { label: "25-34", value: "25-34" },
-  { label: "35-44", value: "35-44" },
-  { label: "45-54", value: "45-54" },
-  { label: "55-64", value: "55-64" },
-  { label: "65+", value: "65+" },
-];
-
-// Gender options
-export const GENDER_OPTIONS = [
-  { label: "Male", value: "Male" },
-  { label: "Female", value: "Female" },
-  { label: "Other", value: "Other" },
-  { label: "Prefer not to say", value: "Unknown" },
-];
-
-// Income range options (in PHP)
-export const INCOME_RANGE_OPTIONS = [
-  { label: "Under ₱15,000", value: "0-15000" },
-  { label: "₱15,000 - ₱30,000", value: "15000-30000" },
-  { label: "₱30,000 - ₱50,000", value: "30000-50000" },
-  { label: "₱50,000 - ₱75,000", value: "50000-75000" },
-  { label: "₱75,000 - ₱100,000", value: "75000-100000" },
-  { label: "Over ₱100,000", value: "100000+" },
-];
-
-// Location options (major Philippine cities)
-export const LOCATION_OPTIONS = [
-  { label: "Metro Manila", value: "metro-manila" },
-  { label: "Cebu City", value: "cebu" },
-  { label: "Davao City", value: "davao" },
-  { label: "Iloilo City", value: "iloilo" },
-  { label: "Bacolod City", value: "bacolod" },
-  { label: "Cagayan de Oro", value: "cagayan-de-oro" },
-  { label: "Zamboanga City", value: "zamboanga" },
-  { label: "Other", value: "other" },
-];
-
-// Default filter values
-export const DEFAULT_PRODUCT_MIX_FILTERS: ProductMixFilters = {
-  startDate: new Date('2025-04-30'),
-  endDate: new Date('2025-05-30'),
-  categories: [],
-  brands: [],
-  products: [],
+export const defaultConsumerFilters: ConsumerFilters = {
+  category: 'All',
+  brand: 'All',
+  location: 'All',
+  weekdayWeekend: 'all'
 };
 
-export const DEFAULT_CONSUMER_FILTERS: ConsumerFilters = {
-  startDate: new Date('2025-04-30'),
-  endDate: new Date('2025-05-30'),
-  categories: [],
-  brands: [],
-  products: [],
-  ageGroups: [],
-  genders: [],
-  locations: [],
-  incomeRanges: [],
+export const defaultGlobalFilters: GlobalFilters = {
+  ...defaultConsumerFilters,
+  dateRange: {
+    start: '2025-04-30',
+    end: '2025-05-30'
+  }
 };
 
-// Utility functions
-export function formatDateForQuery(date: Date): string {
-  return date.toISOString().split('T')[0];
-}
+// Helper to check if any filters are active
+export const hasActiveFilters = (filters: ConsumerFilters | GlobalFilters): boolean => {
+  return filters.category !== 'All' || 
+         filters.brand !== 'All' || 
+         filters.location !== 'All' || 
+         filters.weekdayWeekend !== 'all';
+};
 
-export function getActiveFiltersCount(filters: ConsumerFilters | ProductMixFilters): number {
+// Helper to count active filters
+export const countActiveFilters = (filters: ConsumerFilters | GlobalFilters): number => {
   let count = 0;
-  if ('categories' in filters && filters.categories.length > 0) count++;
-  if ('brands' in filters && filters.brands.length > 0) count++;
-  if ('products' in filters && filters.products.length > 0) count++;
-  if ('ageGroups' in filters && filters.ageGroups.length > 0) count++;
-  if ('genders' in filters && filters.genders.length > 0) count++;
-  if ('locations' in filters && filters.locations.length > 0) count++;
-  if ('incomeRanges' in filters && filters.incomeRanges.length > 0) count++;
+  if (filters.category !== 'All') count++;
+  if (filters.brand !== 'All') count++;
+  if (filters.location !== 'All') count++;
+  if (filters.weekdayWeekend !== 'all') count++;
   return count;
+};
+
+// Alias for backward compatibility
+export const getActiveFiltersCount = countActiveFilters;
+
+// Helper to get filter summary
+export const getFilterSummary = (filters: ConsumerFilters | GlobalFilters): string[] => {
+  const summary: string[] = [];
+  if (filters.category !== 'All') summary.push(`Category: ${filters.category}`);
+  if (filters.brand !== 'All') summary.push(`Brand: ${filters.brand}`);
+  if (filters.location !== 'All') summary.push(`Location: ${filters.location}`);
+  if (filters.weekdayWeekend !== 'all') summary.push(`Days: ${filters.weekdayWeekend}`);
+  return summary;
+};
+
+// Product Mix specific filters
+export interface ProductMixFilters extends ConsumerFilters {
+  // Add any product mix specific filters here
 }
 
-export function getFilterSummary(filters: ConsumerFilters | ProductMixFilters): string[] {
-  const summary: string[] = [];
-  
-  if ('categories' in filters && filters.categories.length > 0) {
-    summary.push(`${filters.categories.length} categories`);
-  }
-  if ('brands' in filters && filters.brands.length > 0) {
-    summary.push(`${filters.brands.length} brands`);
-  }
-  if ('products' in filters && filters.products.length > 0) {
-    summary.push(`${filters.products.length} products`);
-  }
-  if ('ageGroups' in filters && filters.ageGroups.length > 0) {
-    summary.push(`${filters.ageGroups.length} age groups`);
-  }
-  if ('genders' in filters && filters.genders.length > 0) {
-    summary.push(`${filters.genders.length} genders`);
-  }
-  if ('locations' in filters && filters.locations.length > 0) {
-    summary.push(`${filters.locations.length} locations`);
-  }
-  if ('incomeRanges' in filters && filters.incomeRanges.length > 0) {
-    summary.push(`${filters.incomeRanges.length} income ranges`);
-  }
-  
-  return summary;
-}
+// Default filter constants
+export const DEFAULT_CONSUMER_FILTERS = defaultConsumerFilters;
+
+// Filter options
+export const AGE_GROUP_OPTIONS = [
+  { value: 'All', label: 'All Ages' },
+  { value: '18-24', label: '18-24' },
+  { value: '25-34', label: '25-34' },
+  { value: '35-44', label: '35-44' },
+  { value: '45-54', label: '45-54' },
+  { value: '55+', label: '55+' }
+];
+
+export const GENDER_OPTIONS = [
+  { value: 'All', label: 'All Genders' },
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' }
+];
+
+export const LOCATION_OPTIONS = [
+  { value: 'All', label: 'All Locations' },
+  { value: 'Manila', label: 'Manila' },
+  { value: 'Cebu', label: 'Cebu' },
+  { value: 'Davao', label: 'Davao' },
+  { value: 'Makati', label: 'Makati' },
+  { value: 'Quezon City', label: 'Quezon City' }
+];
+
+export const INCOME_RANGE_OPTIONS = [
+  { value: 'All', label: 'All Income Levels' },
+  { value: '0-20k', label: '₱0 - ₱20k' },
+  { value: '20k-50k', label: '₱20k - ₱50k' },
+  { value: '50k-100k', label: '₱50k - ₱100k' },
+  { value: '100k+', label: '₱100k+' }
+];
+
+// Helper to format date for queries
+export const formatDateForQuery = (date: string | Date): string => {
+  if (typeof date === 'string') return date;
+  return date.toISOString().split('T')[0];
+};
