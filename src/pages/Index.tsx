@@ -7,6 +7,7 @@ import { dashboardService, type DashboardData } from '@/services/dashboard'
 import { FilterProvider, useFilters } from '@/contexts/FilterContext'
 import { FilterBar } from '@/components/FilterBar'
 import { TransactionTrends } from '@/components/TransactionTrends'
+import { getBrandOwnerType } from '@/utils/brandNormalization'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
 

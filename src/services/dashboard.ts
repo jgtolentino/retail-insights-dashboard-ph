@@ -87,14 +87,18 @@ export const dashboardService = {
         totalTransactions: 3421,
         avgTransaction: 635,
         topBrands: [
-          { brandName: 'Philip Morris', revenue: 567000, tbwaClient: true },
-          { brandName: 'JTI', revenue: 425000, tbwaClient: false },
-          { brandName: 'Del Monte', revenue: 387000, tbwaClient: true },
-          { brandName: 'Oishi', revenue: 342000, tbwaClient: false },
-          { brandName: 'Alaska Milk', revenue: 285000, tbwaClient: true },
-          { brandName: 'Bear Brand', revenue: 198000, tbwaClient: false },
-          { brandName: 'Nestle', revenue: 156000, tbwaClient: true },
-          { brandName: 'Unilever', revenue: 142000, tbwaClient: false },
+          { brandName: 'Winston', revenue: 567000, tbwaClient: true },     // JTI (TBWA)
+          { brandName: 'Marlboro', revenue: 485000, tbwaClient: false },   // Philip Morris (Competitor)
+          { brandName: 'Del Monte Ketchup', revenue: 387000, tbwaClient: true },  // Del Monte (TBWA)
+          { brandName: 'Oishi Prawn Crackers', revenue: 342000, tbwaClient: true }, // Oishi (TBWA)
+          { brandName: 'Alaska Evaporated Milk', revenue: 315000, tbwaClient: true }, // Alaska (TBWA)
+          { brandName: 'Champion Detergent', revenue: 298000, tbwaClient: true }, // Peerless (TBWA)
+          { brandName: 'Bear Brand', revenue: 245000, tbwaClient: false }, // Nestle (Competitor)
+          { brandName: 'Camel', revenue: 189000, tbwaClient: true },       // JTI (TBWA)
+          { brandName: 'Ariel', revenue: 156000, tbwaClient: false },      // P&G (Competitor)
+          { brandName: 'Smart C+', revenue: 142000, tbwaClient: true },    // Oishi (TBWA)
+          { brandName: 'Jack n Jill', revenue: 128000, tbwaClient: false }, // URC (Competitor)
+          { brandName: 'Fit n Right', revenue: 115000, tbwaClient: true },  // Del Monte (TBWA)
         ]
       }
     }
