@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { RefreshCw, TrendingUp, Calendar, BarChart3 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 
-type DateRange = '1d' | '7d' | '30d' | '90d'
+type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
 
 export default function Index() {
@@ -19,18 +21,41 @@ export default function Index() {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
+  
+  // Custom date range state
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
 
   useEffect(() => {
     fetchData()
-  }, [dateRange])
+  }, [dateRange, customStartDate, customEndDate])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [dashboardData, timeSeriesResult] = await Promise.all([
-        dashboardService.getDashboardData(dateRange),
-        dashboardService.getTimeSeriesData(dateRange)
-      ])
+      let dashboardData, timeSeriesResult
+      
+      if (dateRange === 'custom' && customStartDate && customEndDate) {
+        // Use the new date-parametric method for custom ranges
+        const [dashboardDataResult, timeSeriesDataResult] = await Promise.all([
+          dashboardService.getDashboardData('30d'), // Fallback for dashboard data
+          dashboardService.getTimeSeriesDataByDateRange(customStartDate, customEndDate)
+        ])
+        dashboardData = dashboardDataResult
+        timeSeriesResult = timeSeriesDataResult
+      } else if (dateRange !== 'custom') {
+        // Use existing preset methods
+        const [dashboardDataResult, timeSeriesDataResult] = await Promise.all([
+          dashboardService.getDashboardData(dateRange),
+          dashboardService.getTimeSeriesData(dateRange)
+        ])
+        dashboardData = dashboardDataResult
+        timeSeriesResult = timeSeriesDataResult
+      } else {
+        // Custom range selected but dates not set yet
+        return
+      }
       
       console.log('📊 Dashboard data received:', dashboardData)
       console.log('📈 Time series data received:', timeSeriesResult)
@@ -48,11 +73,34 @@ export default function Index() {
     fetchData()
   }
 
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setDateRange(newRange)
+    if (newRange === 'custom') {
+      setShowCustomDatePicker(true)
+      // Set default custom dates to last 30 days
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setDate(endDate.getDate() - 30)
+      
+      setCustomEndDate(endDate.toISOString().split('T')[0])
+      setCustomStartDate(startDate.toISOString().split('T')[0])
+    } else {
+      setShowCustomDatePicker(false)
+    }
+  }
+
+  const handleCustomDateApply = () => {
+    if (customStartDate && customEndDate) {
+      fetchData()
+    }
+  }
+
   const dateRangeOptions = [
     { value: '1d' as DateRange, label: 'Today' },
     { value: '7d' as DateRange, label: '7 Days' },
     { value: '30d' as DateRange, label: '30 Days' },
-    { value: '90d' as DateRange, label: '90 Days' }
+    { value: '90d' as DateRange, label: '90 Days' },
+    { value: 'custom' as DateRange, label: 'Custom Range' }
   ]
 
   const chartMetricOptions = [
@@ -75,6 +123,13 @@ export default function Index() {
     }
   }
 
+  const getDateRangeLabel = () => {
+    if (dateRange === 'custom' && customStartDate && customEndDate) {
+      return `${customStartDate} to ${customEndDate}`
+    }
+    return dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown'
+  }
+
   const renderChart = () => {
     if (timeSeriesData.length === 0) {
       return (
@@ -90,7 +145,7 @@ export default function Index() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh Data
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setDateRange('30d')}>
+            <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('30d')}>
               Reset to 30 Days
             </Button>
           </div>
@@ -170,31 +225,75 @@ export default function Index() {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
-            {dateRangeOptions.map((option) => (
-              <Button
-                key={option.value}
-                variant={dateRange === option.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDateRange(option.value)}
-                disabled={loading}
-              >
-                {option.label}
-              </Button>
-            ))}
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              {dateRangeOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={dateRange === option.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleDateRangeChange(option.value)}
+                  disabled={loading}
+                  className="flex items-center gap-1"
+                >
+                  {option.value === 'custom' && <CalendarDays className="h-3 w-3" />}
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+
+          {/* Custom Date Picker */}
+          {showCustomDatePicker && (
+            <Card className="p-4">
+              <div className="flex flex-wrap items-end gap-4">
+                <div className="flex-1 min-w-[200px]">
+                  <Label htmlFor="start-date" className="text-sm font-medium">
+                    Start Date
+                  </Label>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <Label htmlFor="end-date" className="text-sm font-medium">
+                    End Date
+                  </Label>
+                  <Input
+                    id="end-date"
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <Button
+                  onClick={handleCustomDateApply}
+                  disabled={!customStartDate || !customEndDate || loading}
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Apply Range
+                </Button>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* KPI Cards */}
@@ -211,6 +310,7 @@ export default function Index() {
                   `₱${data.totalRevenue.toLocaleString()}`
                 )}
               </div>
+              <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
             </CardContent>
           </Card>
 
@@ -226,6 +326,7 @@ export default function Index() {
                   data.totalTransactions
                 )}
               </div>
+              <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
             </CardContent>
           </Card>
 
@@ -241,6 +342,7 @@ export default function Index() {
                   `₱${Math.round(data.avgTransaction)}`
                 )}
               </div>
+              <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
             </CardContent>
           </Card>
         </div>
@@ -249,7 +351,15 @@ export default function Index() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Transaction Trends</CardTitle>
+              <div>
+                <CardTitle>Transaction Trends</CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  {dateRange === 'custom' ? 
+                    `Custom range: ${getDateRangeLabel()}` : 
+                    `Showing data for: ${getDateRangeLabel()}`
+                  }
+                </p>
+              </div>
               <div className="flex gap-1">
                 {chartMetricOptions.map((option) => {
                   const Icon = option.icon
@@ -285,6 +395,9 @@ export default function Index() {
         <Card>
           <CardHeader>
             <CardTitle>Top Brands by Revenue</CardTitle>
+            <p className="text-sm text-gray-500">
+              Based on {getDateRangeLabel()}
+            </p>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -310,7 +423,7 @@ export default function Index() {
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh Data
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setDateRange('30d')}>
+                  <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('30d')}>
                     Reset to 30 Days
                   </Button>
                 </div>
@@ -318,7 +431,7 @@ export default function Index() {
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-500">
-                  Showing top {data.topBrands.length} brands ({dateRangeOptions.find(opt => opt.value === dateRange)?.label})
+                  Showing top {data.topBrands.length} brands
                 </div>
                 
                 {/* CSS-based horizontal bar chart */}

@@ -8,7 +8,12 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:check": "./scripts/deployment-check.sh",
+    "predeploy": "npm run deploy:check",
+    "deploy": "vercel --prod",
+    "test:console": "echo 'Playwright tests to be implemented'",
+    "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

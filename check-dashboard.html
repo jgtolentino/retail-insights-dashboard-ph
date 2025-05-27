@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Check</title>
+</head>
+<body>
+    <h1>Dashboard Status Check</h1>
+    <div id="status"></div>
+    
+    <script type="module">
+        // Check if dashboard is accessible
+        fetch('http://localhost:8080/')
+            .then(response => {
+                document.getElementById('status').innerHTML = `
+                    <p>Dashboard Response: ${response.status} ${response.statusText}</p>
+                    <p>Check your browser at: <a href="http://localhost:8080/">http://localhost:8080/</a></p>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = `
+                    <p style="color: red;">Error: ${error.message}</p>
+                `;
+            });
+    </script>
+</body>
+</html>
