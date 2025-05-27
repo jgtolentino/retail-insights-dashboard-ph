@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package } from "lucide-react"
+import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, Users } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { Link } from 'react-router-dom'
@@ -230,6 +230,12 @@ export default function Index() {
               <Link to="/product-mix" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Product Mix Analysis
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/consumer-insights" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Consumer Insights
               </Link>
             </Button>
           </div>

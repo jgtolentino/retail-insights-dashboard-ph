@@ -15,6 +15,24 @@ export interface DailyTrendsData {
   avg_tx: number
 }
 
+export interface AgeDistributionData {
+  age_bucket: string
+  customer_count: number
+}
+
+export interface GenderDistributionData {
+  gender: string
+  customer_count: number
+  total_revenue: number
+}
+
+export interface PurchaseBehaviorData {
+  age_group: string
+  avg_transaction_value: number
+  purchase_frequency: number
+  preferred_categories: string[]
+}
+
 export const dashboardService = {
   async getDashboardData(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange })
@@ -336,6 +354,74 @@ export const dashboardService = {
     return {
       startDate: startDate.toISOString().split('T')[0],
       endDate
+    }
+  },
+
+  // Consumer Insights Methods for Sprint 3
+  async getAgeDistribution(startDate: string, endDate: string, bucketSize: number = 10): Promise<AgeDistributionData[]> {
+    logger.info('Fetching age distribution data', { startDate, endDate, bucketSize })
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_age_distribution', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z',
+          bucket_size: bucketSize
+        })
+      
+      if (error) {
+        logger.error('Error fetching age distribution:', error)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      logger.error('Failed to fetch age distribution data', error)
+      return []
+    }
+  },
+
+  async getGenderDistribution(startDate: string, endDate: string): Promise<GenderDistributionData[]> {
+    logger.info('Fetching gender distribution data', { startDate, endDate })
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_gender_distribution', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z'
+        })
+      
+      if (error) {
+        logger.error('Error fetching gender distribution:', error)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      logger.error('Failed to fetch gender distribution data', error)
+      return []
+    }
+  },
+
+  async getPurchaseBehaviorByAge(startDate: string, endDate: string): Promise<PurchaseBehaviorData[]> {
+    logger.info('Fetching purchase behavior by age data', { startDate, endDate })
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_purchase_behavior_by_age', {
+          start_date: startDate + 'T00:00:00Z',
+          end_date: endDate + 'T23:59:59Z'
+        })
+      
+      if (error) {
+        logger.error('Error fetching purchase behavior by age:', error)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      logger.error('Failed to fetch purchase behavior by age data', error)
+      return []
     }
   }
 }
