@@ -1,0 +1,14 @@
+{
+  "name": "retail-insights-scripts",
+  "version": "1.0.0",
+  "description": "Data generation and import scripts for retail insights dashboard",
+  "scripts": {
+    "generate": "python generate_complete_data.py",
+    "import": "node import_to_supabase.js",
+    "seed": "npm run generate && npm run import"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.7",
+    "csv-parse": "^5.5.3"
+  }
+}
