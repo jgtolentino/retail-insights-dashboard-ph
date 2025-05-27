@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService } from '@/services/dashboard'
 
 export default function Index() {
@@ -73,7 +74,7 @@ export default function Index() {
           </Card>
         </div>
 
-        {/* Simple Table */}
+        {/* Horizontal Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Top Brands by Revenue</CardTitle>
@@ -81,25 +82,36 @@ export default function Index() {
           <CardContent>
             {loading ? (
               <div className="text-center py-8 text-gray-500">Loading...</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2">Brand</th>
-                      <th className="text-right p-2">Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.topBrands.map((brand, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="p-2">{brand.name}</td>
-                        <td className="text-right p-2">₱{brand.sales.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            ) : data.topBrands.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No data available. Please add data to your Supabase database.
               </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart 
+                  data={data.topBrands} 
+                  layout="horizontal"
+                  margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    type="number"
+                    tickFormatter={(value) => `₱${(value/1000).toFixed(0)}k`}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="name" 
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
+                  />
+                  <Bar 
+                    dataKey="sales" 
+                    fill="#3b82f6"
+                    radius={[0, 4, 4, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>

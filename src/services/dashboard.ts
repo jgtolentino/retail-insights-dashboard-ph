@@ -12,7 +12,7 @@ export const dashboardService = {
         .from('brands')
         .select(`
           name,
-          is_tbwa,
+          is_tbwa_client,
           products (
             transaction_items (
               quantity,
@@ -35,7 +35,7 @@ export const dashboardService = {
         return {
           name: brand.name,
           sales: sales,
-          is_tbwa: brand.is_tbwa || false
+          is_tbwa: brand.is_tbwa_client || false
         }
       }).sort((a, b) => b.sales - a.sales) || []
       
