@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, TrendingUp, Heart, Filter } from 'lucide-react';
 import { AgeDistribution } from '@/components/charts/AgeDistribution';
 import { GenderDistribution } from '@/components/charts/GenderDistribution';
+import { PurchasePatterns } from '@/components/charts/PurchasePatterns';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { FilterSummary } from '@/components/FilterSummary';
@@ -210,7 +211,8 @@ export default function ConsumerInsights() {
               <Users className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Customers</p>
-                <p className="text-2xl font-bold">2,847</p>
+                <p className="text-2xl font-bold">224</p>
+                <p className="text-xs text-muted-foreground mt-1">Current period</p>
               </div>
             </CardContent>
           </Card>
@@ -220,7 +222,8 @@ export default function ConsumerInsights() {
               <TrendingUp className="h-8 w-8 text-green-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Avg Age</p>
-                <p className="text-2xl font-bold">34.2</p>
+                <p className="text-2xl font-bold">40.2</p>
+                <p className="text-xs text-muted-foreground mt-1">Years</p>
               </div>
             </CardContent>
           </Card>
@@ -229,8 +232,9 @@ export default function ConsumerInsights() {
             <CardContent className="flex items-center p-6">
               <Heart className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Repeat Rate</p>
-                <p className="text-2xl font-bold">68%</p>
+                <p className="text-sm font-medium text-muted-foreground">Peak Hour</p>
+                <p className="text-2xl font-bold">1-2 AM</p>
+                <p className="text-xs text-muted-foreground mt-1">15 transactions</p>
               </div>
             </CardContent>
           </Card>
@@ -239,8 +243,9 @@ export default function ConsumerInsights() {
             <CardContent className="flex items-center p-6">
               <Users className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">High Value</p>
-                <p className="text-2xl font-bold">387</p>
+                <p className="text-sm font-medium text-muted-foreground">Locations</p>
+                <p className="text-2xl font-bold">50</p>
+                <p className="text-xs text-muted-foreground mt-1">Barangays</p>
               </div>
             </CardContent>
           </Card>
@@ -335,18 +340,61 @@ export default function ConsumerInsights() {
 
           {/* Purchase Behavior Tab */}
           <TabsContent value="behavior" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Purchase Behavior Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  Purchase behavior analytics coming soon...
-                  <br />
-                  Will include frequency analysis, basket size by demographics, and time patterns.
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 gap-6">
+              {/* Purchase Patterns Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Purchase Behavior Patterns
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PurchasePatterns 
+                    startDate={startDate} 
+                    endDate={endDate}
+                    filters={{
+                      categories: filters.categories,
+                      brands: filters.brands,
+                      ageGroups: filters.ageGroups,
+                      genders: filters.genders
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Purchase Behavior Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Behavior Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">1-2 AM</div>
+                      <div className="text-sm text-muted-foreground">Peak Hours</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Late night activity common in sari-sari stores
+                      </div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">₱285</div>
+                      <div className="text-sm text-muted-foreground">Avg Transaction</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Consistent across all hours
+                      </div>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">24/7</div>
+                      <div className="text-sm text-muted-foreground">Operating Hours</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Continuous customer activity
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Customer Segmentation Tab */}
