@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { dashboardService } from '@/services/dashboard'
+import { Button } from "@/components/ui/button"
+import { RefreshCw, TrendingUp, Calendar, BarChart3 } from "lucide-react"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
+
+type DateRange = '1d' | '7d' | '30d' | '90d'
+type ChartMetric = 'transactions' | 'revenue' | 'both'
 
 export default function Index() {
   const [data, setData] = useState({
@@ -9,24 +15,149 @@ export default function Index() {
     avgTransaction: 0,
     topBrands: []
   })
+  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([])
   const [loading, setLoading] = useState(true)
+  const [dateRange, setDateRange] = useState<DateRange>('30d')
+  const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [dateRange])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const dashboardData = await dashboardService.getDashboardData('30d')
+      const [dashboardData, timeSeriesResult] = await Promise.all([
+        dashboardService.getDashboardData(dateRange),
+        dashboardService.getTimeSeriesData(dateRange)
+      ])
+      
       console.log('📊 Dashboard data received:', dashboardData)
-      console.log('📊 Top brands data:', dashboardData.topBrands)
+      console.log('📈 Time series data received:', timeSeriesResult)
+      
       setData(dashboardData)
+      setTimeSeriesData(timeSeriesResult)
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleRefresh = () => {
+    fetchData()
+  }
+
+  const dateRangeOptions = [
+    { value: '1d' as DateRange, label: 'Today' },
+    { value: '7d' as DateRange, label: '7 Days' },
+    { value: '30d' as DateRange, label: '30 Days' },
+    { value: '90d' as DateRange, label: '90 Days' }
+  ]
+
+  const chartMetricOptions = [
+    { value: 'transactions' as ChartMetric, label: 'Transactions', icon: BarChart3 },
+    { value: 'revenue' as ChartMetric, label: 'Revenue', icon: TrendingUp },
+    { value: 'both' as ChartMetric, label: 'Both', icon: Calendar }
+  ]
+
+  const formatXAxisLabel = (tickItem: string) => {
+    if (dateRange === '1d') {
+      // For hourly data, show just the hour
+      return tickItem.split(' ')[1] || tickItem
+    } else if (dateRange === '90d') {
+      // For weekly data, show week of
+      return `Week of ${tickItem.split('-')[2]}/${tickItem.split('-')[1]}`
+    } else {
+      // For daily data, show day/month
+      const parts = tickItem.split('-')
+      return `${parts[2]}/${parts[1]}`
+    }
+  }
+
+  const renderChart = () => {
+    if (timeSeriesData.length === 0) {
+      return (
+        <div className="h-80 flex flex-col items-center justify-center text-gray-500 space-y-4">
+          <div className="text-center">
+            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Available</h3>
+            <p className="text-sm">No transaction data found for the selected time period.</p>
+            <p className="text-sm mt-1">Try selecting a different date range or check your database connection.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setDateRange('30d')}>
+              Reset to 30 Days
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div style={{ width: '100%', height: 320 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={timeSeriesData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="date" 
+              tickFormatter={formatXAxisLabel}
+              tick={{ fontSize: 12 }}
+            />
+            {(chartMetric === 'transactions' || chartMetric === 'both') && (
+              <YAxis 
+                yAxisId="transactions"
+                orientation="left"
+                tick={{ fontSize: 12 }}
+              />
+            )}
+            {(chartMetric === 'revenue' || chartMetric === 'both') && (
+              <YAxis 
+                yAxisId="revenue"
+                orientation={chartMetric === 'both' ? 'right' : 'left'}
+                tickFormatter={(value) => `₱${value.toLocaleString()}`}
+                tick={{ fontSize: 12 }}
+              />
+            )}
+            <Tooltip 
+              formatter={(value, name) => {
+                if (name === 'revenue') {
+                  return [`₱${Number(value).toLocaleString()}`, 'Revenue']
+                }
+                return [value, 'Transactions']
+              }}
+              labelFormatter={(label) => `Date: ${label}`}
+            />
+            {(chartMetric === 'transactions' || chartMetric === 'both') && (
+              <Line 
+                yAxisId="transactions"
+                type="monotone" 
+                dataKey="transactions" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                name="transactions"
+              />
+            )}
+            {(chartMetric === 'revenue' || chartMetric === 'both') && (
+              <Line 
+                yAxisId="revenue"
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="#10b981" 
+                strokeWidth={2}
+                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                name="revenue"
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    )
   }
 
   return (
@@ -38,6 +169,34 @@ export default function Index() {
           <p className="text-gray-600 mt-2">Real-time retail analytics for sari-sari stores</p>
         </div>
 
+        {/* Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            {dateRangeOptions.map((option) => (
+              <Button
+                key={option.value}
+                variant={dateRange === option.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setDateRange(option.value)}
+                disabled={loading}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
@@ -46,7 +205,11 @@ export default function Index() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : `₱${data.totalRevenue.toLocaleString()}`}
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
+                ) : (
+                  `₱${data.totalRevenue.toLocaleString()}`
+                )}
               </div>
             </CardContent>
           </Card>
@@ -57,7 +220,11 @@ export default function Index() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : data.totalTransactions}
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+                ) : (
+                  data.totalTransactions
+                )}
               </div>
             </CardContent>
           </Card>
@@ -68,11 +235,51 @@ export default function Index() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loading ? '...' : `₱${Math.round(data.avgTransaction)}`}
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                ) : (
+                  `₱${Math.round(data.avgTransaction)}`
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Time Series Chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Transaction Trends</CardTitle>
+              <div className="flex gap-1">
+                {chartMetricOptions.map((option) => {
+                  const Icon = option.icon
+                  return (
+                    <Button
+                      key={option.value}
+                      variant={chartMetric === option.value ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setChartMetric(option.value)}
+                      disabled={loading}
+                      className="flex items-center gap-1"
+                    >
+                      <Icon className="h-3 w-3" />
+                      {option.label}
+                    </Button>
+                  )
+                })}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="h-80 flex items-center justify-center">
+                <div className="animate-pulse bg-gray-200 h-64 w-full rounded"></div>
+              </div>
+            ) : (
+              renderChart()
+            )}
+          </CardContent>
+        </Card>
 
         {/* Bar Chart */}
         <Card>
@@ -81,15 +288,37 @@ export default function Index() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
+              <div className="space-y-3">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="animate-pulse bg-gray-200 h-4 w-32 rounded"></div>
+                    <div className="flex-1 animate-pulse bg-gray-200 h-6 rounded-full"></div>
+                    <div className="animate-pulse bg-gray-200 h-4 w-12 rounded"></div>
+                  </div>
+                ))}
+              </div>
             ) : data.topBrands.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No data available. Please add data to your Supabase database.
+              <div className="text-center py-8 text-gray-500 space-y-4">
+                <div>
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Brand Data</h3>
+                  <p className="text-sm">No brand sales data found for the selected time period.</p>
+                  <p className="text-sm mt-1">Try a different date range or verify your database has transaction data.</p>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="outline" size="sm" onClick={handleRefresh}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Data
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setDateRange('30d')}>
+                    Reset to 30 Days
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-sm text-gray-500">
-                  Showing top {data.topBrands.length} brands
+                  Showing top {data.topBrands.length} brands ({dateRangeOptions.find(opt => opt.value === dateRange)?.label})
                 </div>
                 
                 {/* CSS-based horizontal bar chart */}
@@ -103,7 +332,7 @@ export default function Index() {
                         <div className="w-32 text-sm font-medium text-right">{brand.name}</div>
                         <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                           <div 
-                            className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
+                            className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-300"
                             style={{ width: `${percentage}%` }}
                           >
                             <span className="text-xs text-white font-medium">
@@ -122,6 +351,12 @@ export default function Index() {
             )}
           </CardContent>
         </Card>
+
+        {/* Footer */}
+        <div className="text-center py-6 text-gray-500 text-sm">
+          <p>Retail Insights Dashboard PH - Powered by Supabase & React</p>
+          <p className="mt-1">Last updated: {new Date().toLocaleDateString()}</p>
+        </div>
       </div>
     </div>
   )
