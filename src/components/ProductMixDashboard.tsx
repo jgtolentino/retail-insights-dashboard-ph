@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Filter } from 'lucide-react';
-import { SankeyDiagram } from './charts/SankeyDiagram';
+import { ProductSubstitutionsChart } from './charts/ProductSubstitutionsChart';
 import { ParetoChart } from './charts/ParetoChart';
 import { productMixService, ProductMixFilters } from '@/services/productMix';
 import { SprintDashboard } from './SprintDashboard';
@@ -89,7 +89,7 @@ export function ProductMixDashboard() {
     switch (type) {
       case 'substitutions':
         data = substitutionData;
-        filename = 'product-substitutions.json';
+        filename = 'product-substitutions.csv';
         break;
       case 'pareto':
         data = paretoData;
@@ -103,30 +103,19 @@ export function ProductMixDashboard() {
 
     if (!data) return;
 
-    // Convert to CSV for non-substitution data
-    if (type !== 'substitutions') {
-      const csv = [
-        Object.keys(data[0]).join(','),
-        ...data.map((row: any) => Object.values(row).join(','))
-      ].join('\n');
-      
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      // Export JSON for substitution data
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    // Convert to CSV
+    const csv = [
+      Object.keys(data[0]).join(','),
+      ...data.map((row: any) => Object.values(row).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const pieData = categoryBreakdown?.map(item => ({
@@ -212,12 +201,11 @@ export function ProductMixDashboard() {
                 Export Data
               </Button>
             </div>
-            <SankeyDiagram
-              nodes={substitutionData?.nodes || []}
-              links={substitutionData?.links || []}
+            <ProductSubstitutionsChart
+              data={substitutionData || []}
               loading={substitutionLoading}
-              title="Product Substitution Patterns"
-              height={600}
+              title="Top Product Substitutions"
+              height={400}
             />
           </TabsContent>
 
@@ -272,9 +260,11 @@ export function ProductMixDashboard() {
                           data={pieData}
                           cx="50%"
                           cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={4}
                           labelLine={false}
                           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
                         >
@@ -283,7 +273,7 @@ export function ProductMixDashboard() {
                           ))}
                         </Pie>
                         <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        <Legend />
+                        <Legend verticalAlign="bottom" height={36} />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
