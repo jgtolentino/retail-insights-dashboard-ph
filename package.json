@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/verify-env.js && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -13,7 +13,8 @@
     "predeploy": "npm run deploy:check",
     "deploy": "vercel --prod",
     "test:console": "echo 'Playwright tests to be implemented'",
-    "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\""
+    "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\"",
+    "verify:env": "node scripts/verify-env.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
