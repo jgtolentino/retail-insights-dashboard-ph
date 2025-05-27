@@ -1,14 +1,23 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, RefreshCw } from 'lucide-react'
+import { TrendingUp, BarChart3 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { dashboardService, type DashboardData } from '@/services/dashboard'
-import { Button } from '@/components/ui/button'
+import { FilterProvider, useFilters } from '@/contexts/FilterContext'
+import { FilterBar } from '@/components/FilterBar'
+import { TransactionTrends } from '@/components/TransactionTrends'
 
 const formatPeso = (value: number) => `₱${value.toLocaleString('en-PH')}`
 
-const Index = () => {
+// Accessibility-friendly color palette
+const COLORS = {
+  tbwa: '#2563eb', // Blue with good contrast
+  competitor: '#ea580c', // Orange with good contrast
+}
+
+const DashboardContent = () => {
+  const { filters } = useFilters()
   const [data, setData] = useState<DashboardData>({
     totalRevenue: 0,
     totalTransactions: 0,
@@ -16,16 +25,15 @@ const Index = () => {
     topBrands: []
   })
   const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState(7) // days
 
   useEffect(() => {
     fetchData()
-  }, [timeRange])
+  }, [filters.timeRange, filters.region, filters.refreshTrigger])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const dashboardData = await dashboardService.getDashboardData(timeRange)
+      const dashboardData = await dashboardService.getDashboardData(filters.timeRange)
       setData(dashboardData)
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
@@ -33,40 +41,28 @@ const Index = () => {
       setLoading(false)
     }
   }
+
+  // Calculate TBWA client metrics (for context only)
+  const tbwaClientCount = data.topBrands.filter(brand => brand.tbwaClient).length
+  const totalBrands = data.topBrands.length
   
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Retail Analytics Dashboard</h1>
-          <div className="flex gap-2">
-            <Button
-              variant={timeRange === 7 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(7)}
-            >
-              7 Days
-            </Button>
-            <Button
-              variant={timeRange === 30 ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(30)}
-            >
-              30 Days
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={fetchData}
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <FilterBar />
         
         {/* KPI Cards with Real Data */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{/* Filter indicator */}
+        {filters.region !== 'All Regions' && (
+          <div className="col-span-full mb-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-700">
+                📍 Filtered by: <span className="font-semibold">{filters.region}</span> • 
+                Last {filters.timeRange} days
+              </p>
+            </div>
+          </div>
+        )}
           <Card className="border-0 shadow-md">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
@@ -107,22 +103,26 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Bar Chart with Real Data */}
+        {/* Transaction Trends Section */}
+        <TransactionTrends />
+
+        {/* Single-Series Brand Revenue Chart */}
         <Card className="border-0 shadow-md">
-          <CardHeader>
+          <CardHeader className="space-y-3">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-xl font-semibold text-gray-900">Top Brands by Revenue</CardTitle>
-              <div className="flex gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                  <span>TBWA Clients</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                  <span>Competitors</span>
-                </div>
-              </div>
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top Brands by Revenue
+              </CardTitle>
             </div>
+            
+            {/* Simple contextual info */}
+            {!loading && data.topBrands.length > 0 && (
+              <p className="text-sm text-gray-600">
+                Showing top {totalBrands} brands • {tbwaClientCount} TBWA clients marked with ★ • 
+                Click any bar to drill down by region or store.
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -131,10 +131,10 @@ const Index = () => {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={data.topBrands} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <BarChart data={data.topBrands} margin={{ top: 30, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
-                    dataKey="name" 
+                    dataKey="brandName" 
                     angle={-45} 
                     textAnchor="end" 
                     height={80}
@@ -147,19 +147,52 @@ const Index = () => {
                     stroke="#666"
                   />
                   <Tooltip 
-                    formatter={(value: number) => [formatPeso(value), 'Revenue']}
-                    labelStyle={{ color: '#333' }}
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #ccc',
-                      borderRadius: '8px'
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload
+                        return (
+                          <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                            <p className="font-semibold text-gray-900 flex items-center gap-2">
+                              {label}
+                              {data.tbwaClient && <span className="text-blue-600">★</span>}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {data.tbwaClient ? 'TBWA Client' : 'Competitor'}
+                            </p>
+                            <div className="mt-2">
+                              <p className="text-sm">
+                                <span className="text-gray-600">Revenue:</span>
+                                <span className="font-medium ml-2">{formatPeso(data.revenue)}</span>
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
                     }}
                   />
-                  <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
-                    {data.topBrands.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.is_tbwa ? '#3b82f6' : '#f59e0b'} />
-                    ))}
-                  </Bar>
+                  <Bar 
+                    dataKey="revenue" 
+                    radius={[4, 4, 0, 0]}
+                    cursor="pointer"
+                    fill="#2563eb"
+                  />
+                  {/* TBWA Client indicators */}
+                  {data.topBrands.map((brand, index) => (
+                    brand.tbwaClient && (
+                      <text
+                        key={`star-${index}`}
+                        x={`${(index + 0.5) * (100 / data.topBrands.length)}%`}
+                        y="15"
+                        textAnchor="middle"
+                        fill="#2563eb"
+                        fontSize="16"
+                        fontWeight="bold"
+                      >
+                        ★
+                      </text>
+                    )
+                  ))}
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -167,6 +200,14 @@ const Index = () => {
         </Card>
       </div>
     </div>
+  )
+}
+
+const Index = () => {
+  return (
+    <FilterProvider>
+      <DashboardContent />
+    </FilterProvider>
   )
 }
 

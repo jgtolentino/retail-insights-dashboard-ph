@@ -5,9 +5,10 @@ export interface DashboardData {
   totalTransactions: number
   avgTransaction: number
   topBrands: Array<{
-    name: string
-    sales: number
-    is_tbwa: boolean
+    brandName: string
+    revenue: number
+    tbwaClient: boolean
+    transactionCount?: number
   }>
 }
 
@@ -62,14 +63,14 @@ export const dashboardService = {
         }
       })
 
-      // Convert to array and sort by sales
+      // Convert to array and sort by revenue
       const topBrands = Object.entries(brandRevenue)
-        .map(([name, data]) => ({
-          name,
-          sales: data.sales,
-          is_tbwa: data.is_tbwa
+        .map(([brandName, data]) => ({
+          brandName,
+          revenue: data.sales,
+          tbwaClient: data.is_tbwa
         }))
-        .sort((a, b) => b.sales - a.sales)
+        .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10)
 
       return {
@@ -86,12 +87,14 @@ export const dashboardService = {
         totalTransactions: 3421,
         avgTransaction: 635,
         topBrands: [
-          { name: 'Alaska Evap Milk', sales: 285000, is_tbwa: true },
-          { name: 'Oishi Prawn Crackers', sales: 342000, is_tbwa: true },
-          { name: 'Champion Detergent', sales: 425000, is_tbwa: true },
-          { name: 'Del Monte Ketchup', sales: 387000, is_tbwa: true },
-          { name: 'Winston', sales: 567000, is_tbwa: true },
-          { name: 'Bear Brand', sales: 198000, is_tbwa: false },
+          { brandName: 'Philip Morris', revenue: 567000, tbwaClient: true },
+          { brandName: 'JTI', revenue: 425000, tbwaClient: false },
+          { brandName: 'Del Monte', revenue: 387000, tbwaClient: true },
+          { brandName: 'Oishi', revenue: 342000, tbwaClient: false },
+          { brandName: 'Alaska Milk', revenue: 285000, tbwaClient: true },
+          { brandName: 'Bear Brand', revenue: 198000, tbwaClient: false },
+          { brandName: 'Nestle', revenue: 156000, tbwaClient: true },
+          { brandName: 'Unilever', revenue: 142000, tbwaClient: false },
         ]
       }
     }
