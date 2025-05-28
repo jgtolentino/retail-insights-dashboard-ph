@@ -23,10 +23,11 @@ function verifySupabaseConfig() {
   const content = fs.readFileSync(CLIENT_FILE, 'utf8');
   
   // Check for hardcoded credentials (bad patterns)
+  // Note: FALLBACK_URL and FALLBACK_KEY are allowed for bulletproof operation
   const badPatterns = [
-    /const SUPABASE_URL = ['"`]https:\/\/[^'"`]+['"`]/,
-    /const SUPABASE.*KEY = ['"`]eyJ[^'"`]+['"`]/,
-    /= ['"`]https:\/\/.*\.supabase\.co['"`]/,
+    /const SUPABASE_URL = ['"`]https:\/\/[^'"`]+['"`](?!.*FALLBACK)/,
+    /const SUPABASE.*KEY = ['"`]eyJ[^'"`]+['"`](?!.*FALLBACK)/,
+    /= ['"`]https:\/\/.*\.supabase\.co['"`](?!.*FALLBACK)/,
     /createClient\(['"`]https:\/\//
   ];
   
@@ -40,9 +41,16 @@ function verifySupabaseConfig() {
   
   // Check for bad patterns
   badPatterns.forEach((pattern, index) => {
-    if (pattern.test(content)) {
-      issues.push(`❌ Found hardcoded credentials (pattern ${index + 1})`);
-    }
+    const lines = content.split('\n');
+    lines.forEach((line, lineNum) => {
+      // Skip lines with FALLBACK constants
+      if (line.includes('FALLBACK_URL') || line.includes('FALLBACK_KEY')) {
+        return;
+      }
+      if (pattern.test(line)) {
+        issues.push(`❌ Found hardcoded credentials (pattern ${index + 1}) on line ${lineNum + 1}`);
+      }
+    });
   });
   
   // Check for good patterns

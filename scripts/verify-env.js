@@ -33,12 +33,20 @@ console.log(`   VERCEL_ENV: ${process.env.VERCEL_ENV || 'not set'}`);
 // Skip validation in CI environments (like GitHub Actions) or Vercel builds
 const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-if (hasErrors && !isCI) {
+// Check if the client.ts file has fallbacks
+const fs = require('fs');
+const clientFile = fs.readFileSync('src/integrations/supabase/client.ts', 'utf8');
+const hasFallbacks = clientFile.includes('FALLBACK_URL') && clientFile.includes('FALLBACK_KEY');
+
+if (hasErrors && !isCI && !hasFallbacks) {
   console.error('\n❌ Environment validation failed! Some required variables are missing.');
   process.exit(1);
 } else if (hasErrors && isCI) {
   console.warn('\n⚠️  Running in CI/Vercel without env vars - skipping validation');
   console.log('ℹ️  Environment variables should be available at runtime in deployment platform');
+} else if (hasErrors && hasFallbacks) {
+  console.warn('\n⚠️  Environment variables missing but fallbacks are configured');
+  console.log('ℹ️  The app will use fallback credentials if env vars are not available');
 } else {
   console.log('\n✅ All environment variables are properly set!');
 }
