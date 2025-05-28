@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Insights Dashboard - Deployment Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .status {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        h1 { color: #1f2937; }
+        .deployment-info {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .deployment-info div {
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Retail Insights Dashboard - Deployment Status</h1>
+        
+        <div class="status">
+            <h2>Deployment Information</h2>
+            <div class="deployment-info">
+                <div>
+                    <strong>Production URL:</strong> 
+                    <a href="https://retail-insights-dashboard-1b08dimmr-jakes-projects-e9f46c30.vercel.app" target="_blank" class="info">
+                        https://retail-insights-dashboard-1b08dimmr-jakes-projects-e9f46c30.vercel.app
+                    </a>
+                </div>
+                <div>
+                    <strong>Status:</strong> <span class="success">✅ Deployed Successfully</span>
+                </div>
+                <div>
+                    <strong>Environment Variables:</strong>
+                    <ul>
+                        <li><code>VITE_SUPABASE_URL</code> - <span class="success">✅ Set for all environments</span></li>
+                        <li><code>VITE_SUPABASE_ANON_KEY</code> - <span class="success">✅ Set for all environments</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="status">
+            <h2>Quick Links</h2>
+            <ul>
+                <li><a href="https://vercel.com/jakes-projects-e9f46c30/retail-insights-dashboard-ph" target="_blank">Vercel Dashboard</a></li>
+                <li><a href="https://retail-insights-dashboard-1b08dimmr-jakes-projects-e9f46c30.vercel.app" target="_blank">Live Production Site</a></li>
+                <li><a href="https://app.supabase.com/project/lcoxtanyckjzyxxcsjzz" target="_blank">Supabase Dashboard</a></li>
+            </ul>
+        </div>
+
+        <div class="status">
+            <h2>Next Steps</h2>
+            <ol>
+                <li>Visit the <a href="https://retail-insights-dashboard-1b08dimmr-jakes-projects-e9f46c30.vercel.app" target="_blank">production URL</a></li>
+                <li>The dashboard should now load with real data from Supabase</li>
+                <li>Check the browser console (F12) for any errors</li>
+                <li>Verify data is loading from your Supabase database</li>
+            </ol>
+        </div>
+
+        <div class="status">
+            <h2>Troubleshooting</h2>
+            <p>If you're still seeing mock data:</p>
+            <ol>
+                <li>Clear your browser cache (Cmd+Shift+R on Mac)</li>
+                <li>Check the Network tab in DevTools for Supabase API calls</li>
+                <li>Ensure your Supabase database has data in the required tables</li>
+                <li>Check the Vercel deployment logs for any build errors</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
