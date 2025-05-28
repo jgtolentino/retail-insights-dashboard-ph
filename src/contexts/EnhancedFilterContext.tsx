@@ -156,13 +156,32 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
   // Update filters and sync
   const setFilters = useCallback((updater: Partial<GlobalFilters> | ((prev: GlobalFilters) => GlobalFilters)) => {
     setFiltersState(prev => {
-      const newFilters = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      // Ensure prev is always properly initialized
+      const safePrev = {
+        ...defaultGlobalFilters,
+        ...prev,
+        categories: prev.categories || [],
+        brands: prev.brands || [],
+        genders: prev.genders || [],
+        ageGroups: prev.ageGroups || [],
+      };
+      
+      const newFilters = typeof updater === 'function' ? updater(safePrev) : { ...safePrev, ...updater };
+      
+      // Ensure newFilters also has safe arrays
+      const safeNewFilters = {
+        ...newFilters,
+        categories: newFilters.categories || [],
+        brands: newFilters.brands || [],
+        genders: newFilters.genders || [],
+        ageGroups: newFilters.ageGroups || [],
+      };
       
       // Sync to URL and localStorage
-      syncToURL(newFilters);
-      syncToLocalStorage(newFilters);
+      syncToURL(safeNewFilters);
+      syncToLocalStorage(safeNewFilters);
       
-      return newFilters;
+      return safeNewFilters;
     });
   }, [syncToURL, syncToLocalStorage]);
   

@@ -2,6 +2,19 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Override Array.from to catch undefined issues
+const originalArrayFrom = Array.from;
+(Array as any).from = function(arrayLike: any, mapFn?: any, thisArg?: any) {
+  if (arrayLike === undefined || arrayLike === null) {
+    console.error('🚨 Array.from called with undefined/null!');
+    console.error('- Value:', arrayLike);
+    console.error('- Stack trace:', new Error().stack);
+    console.error('- Type:', typeof arrayLike);
+    return [];
+  }
+  return originalArrayFrom.call(this, arrayLike, mapFn, thisArg);
+};
+
 // Global error handlers for debugging
 window.addEventListener('error', (event) => {
   console.error('🚨 Global Error:', event.error)

@@ -4,10 +4,10 @@
 export const safeArrayFrom = <T>(value: any): T[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (value instanceof Set) return Array.from(value);
+  if (value instanceof Set) return Array.from(value || []);
   if (typeof value?.[Symbol.iterator] === 'function') {
     try {
-      return Array.from(value);
+      return Array.from(value || []);
     } catch {
       return [];
     }
