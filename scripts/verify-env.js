@@ -11,16 +11,28 @@ console.log('🔍 Verifying environment variables...\n');
 let hasErrors = false;
 
 requiredEnvVars.forEach(varName => {
-  if (process.env[varName]) {
+  const value = process.env[varName];
+  if (value && value.trim() !== '') {
     console.log(`✅ ${varName} is set`);
-    // Log first 10 chars for debugging (safe for URLs)
+    // Log first 30 chars for debugging (safe for URLs)
     if (varName === 'VITE_SUPABASE_URL') {
-      console.log(`   Value: ${process.env[varName].substring(0, 30)}...`);
+      console.log(`   Value: ${value.substring(0, 30)}...`);
+      // Additional validation for URL format
+      if (!value.startsWith('https://')) {
+        console.warn(`   ⚠️  Warning: URL should start with https://`);
+      }
     } else {
-      console.log(`   Value: [REDACTED]`);
+      console.log(`   Value: [REDACTED - ${value.length} chars]`);
+      // Additional validation for anon key format
+      if (value.length < 100) {
+        console.warn(`   ⚠️  Warning: Anon key seems unusually short`);
+      }
     }
   } else {
-    console.error(`❌ ${varName} is NOT set`);
+    console.error(`❌ ${varName} is NOT set or is empty`);
+    if (value === '') {
+      console.error(`   (Variable exists but is empty string)`);
+    }
     hasErrors = true;
   }
 });
@@ -29,6 +41,13 @@ console.log('\n📋 Build environment:');
 console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
 console.log(`   VERCEL: ${process.env.VERCEL || 'not set'}`);
 console.log(`   VERCEL_ENV: ${process.env.VERCEL_ENV || 'not set'}`);
+console.log(`   VERCEL_GIT_COMMIT_REF: ${process.env.VERCEL_GIT_COMMIT_REF || 'not set'}`);
+
+// Additional debugging for troubleshooting
+console.log('\n🔧 Debug information:');
+console.log(`   Total env vars: ${Object.keys(process.env).length}`);
+const viteVars = Object.keys(process.env).filter(key => key.startsWith('VITE_'));
+console.log(`   VITE_ prefixed vars: ${viteVars.length} (${viteVars.join(', ') || 'none'})`);
 
 // Skip validation in CI environments (like GitHub Actions)
 const isCI = process.env.CI === 'true';
