@@ -3,6 +3,7 @@ import { ReactNode } from "react"
 import { Navigation } from "./Navigation"
 import { GlobalFiltersPanel } from "./GlobalFiltersPanel"
 import { Footer } from "./layout/Footer"
+import { DatabaseStatus } from "./DatabaseStatus"
 
 interface LayoutProps { 
   children: ReactNode 
@@ -22,6 +23,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
       
       <Footer />
+      <DatabaseStatus />
     </div>
   )
 }

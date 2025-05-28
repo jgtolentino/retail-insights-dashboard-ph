@@ -8,6 +8,7 @@ import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, User
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { Link } from 'react-router-dom'
+import { ProductCategories } from '@/components/ProductCategories'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -249,6 +250,9 @@ export default function Index() {
           <p className="text-gray-600 mt-2">Real-time retail analytics for sari-sari stores</p>
         </div>
       </div>
+
+      {/* Product Categories */}
+      <ProductCategories />
 
       {/* Error Alert */}
       {error && (

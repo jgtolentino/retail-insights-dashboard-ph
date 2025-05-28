@@ -14,29 +14,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Hardcoded fallback values for bulletproof reliability
+const FALLBACK_URL = 'https://lcoxtanyckjzyxxcsjzz.supabase.co';
+const FALLBACK_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
+
 // Check multiple possible environment variable names
 const SUPABASE_URL = 
   import.meta.env.VITE_SUPABASE_URL || 
   import.meta.env.NEXT_PUBLIC_SUPABASE_URL || 
   import.meta.env.SUPABASE_URL ||
-  process.env.VITE_SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  process.env.SUPABASE_URL;
+  process.env?.VITE_SUPABASE_URL ||
+  process.env?.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env?.SUPABASE_URL ||
+  FALLBACK_URL;
 
 const SUPABASE_ANON_KEY = 
   import.meta.env.VITE_SUPABASE_ANON_KEY || 
   import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
   import.meta.env.SUPABASE_ANON_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_ANON_KEY;
+  process.env?.VITE_SUPABASE_ANON_KEY ||
+  process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env?.SUPABASE_ANON_KEY ||
+  FALLBACK_KEY;
 
-// Validate environment variables are present
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('❌ Missing required Supabase environment variables');
-  console.error('Searched for: VITE_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_URL');
-  console.error('Please ensure these are set in Vercel Dashboard > Settings > Environment Variables');
-  throw new Error('Missing required Supabase environment variables');
+// Log if using fallbacks
+if (SUPABASE_URL === FALLBACK_URL || SUPABASE_ANON_KEY === FALLBACK_KEY) {
+  console.warn('⚠️ Using fallback Supabase configuration');
+  console.warn('To use custom configuration, set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
 }
 
 // Logging to debug which variables are being used
