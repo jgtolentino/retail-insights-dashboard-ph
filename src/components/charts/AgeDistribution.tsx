@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,7 +9,7 @@ import {
   CartesianGrid
 } from 'recharts';
 import { dashboardService, type AgeDistributionData } from '@/services/dashboard';
-import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext';
+import { useDrillThroughHandlers } from '@/hooks/useDrillThrough';
 
 interface AgeDistributionProps {
   startDate: string;
@@ -27,8 +26,7 @@ interface AgeDistributionProps {
 export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }: AgeDistributionProps) {
   const [data, setData] = useState<AgeDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const { setFilters } = useEnhancedFilters();
+  const { handleAgeChartClick } = useDrillThroughHandlers();
 
   useEffect(() => {
     setLoading(true);
@@ -46,21 +44,6 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
       })
       .finally(() => setLoading(false));
   }, [startDate, endDate, bucketSize, filters]);
-
-  const handleBarClick = (data: any) => {
-    if (data && data.activePayload && data.activePayload[0]) {
-      const ageGroup = data.activePayload[0].payload.age_bucket;
-      
-      // Update the global filters with the selected age group
-      setFilters(prev => ({
-        ...prev,
-        ageGroups: [ageGroup]
-      }));
-      
-      // Navigate to the Consumer Insights page
-      navigate('/consumer-insights');
-    }
-  };
 
   if (loading) {
     return (
@@ -89,7 +72,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
         <BarChart
           data={data}
           margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
-          onClick={handleBarClick}
+          onClick={handleAgeChartClick}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 

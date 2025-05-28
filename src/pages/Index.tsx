@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, Users } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
-import { Link, useNavigate } from 'react-router-dom'
-import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext'
+import { Link } from 'react-router-dom'
+import { useDrillThroughHandlers } from '@/hooks/useDrillThrough'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -23,8 +23,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
-  const navigate = useNavigate()
-  const { setFilters } = useEnhancedFilters()
+  const { handleBrandClick } = useDrillThroughHandlers()
   
   // Custom date range state
   const [customStartDate, setCustomStartDate] = useState('')
@@ -99,16 +98,7 @@ export default function Index() {
     }
   }
 
-  const handleBrandClick = (brandName: string) => {
-    // Update the global filters with the selected brand
-    setFilters(prev => ({
-      ...prev,
-      brands: [brandName]
-    }));
-    
-    // Navigate to the Product Mix page
-    navigate('/product-mix');
-  }
+  // handleBrandClick is now provided by useDrillThroughHandlers
 
   const dateRangeOptions = [
     { value: '1d' as DateRange, label: 'Today' },

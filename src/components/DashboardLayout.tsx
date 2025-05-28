@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { TrendingUp, Package, Users, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -86,6 +87,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </div>
       </header>
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
 
       {/* Global Filters */}
       <div className="bg-white border-b">
