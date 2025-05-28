@@ -3,7 +3,11 @@
 import pkg from 'pg';
 const { Client } = pkg;
 
-const connectionString = `postgresql://postgres.lcoxtanyckjzyxxcsjzz:R%40nd0mPA%24%242025%21@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres`;
+// Read connection string from environment variables
+const connectionString = process.env.SUPABASE_DB_URL || (() => {
+  console.error('❌ SUPABASE_DB_URL environment variable not set');
+  process.exit(1);
+})();
 
 async function checkSprint2Status() {
   const client = new Client({

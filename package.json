@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/verify-env.js && vite build",
+    "build": "node scripts/verify-supabase-config.js && node scripts/verify-env.js && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -14,7 +14,11 @@
     "deploy": "vercel --prod",
     "test:console": "echo 'Playwright tests to be implemented'",
     "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\"",
-    "verify:env": "node scripts/verify-env.js"
+    "validate:pre-deploy": "node scripts/pre-deployment-validation.js",
+    "test:all": "npm run validate:pre-deploy",
+    "verify:env": "node scripts/verify-env.js",
+    "verify:supabase": "node scripts/verify-supabase-config.js",
+    "fix:supabase-config": "echo 'Use the fixed client.ts template - check scripts/verify-supabase-config.js'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -59,6 +63,7 @@
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+    "node-fetch": "^3.3.2",
     "pg": "^8.16.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",

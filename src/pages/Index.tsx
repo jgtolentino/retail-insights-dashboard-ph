@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,7 +6,9 @@ import { Label } from "@/components/ui/label"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, Users } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
+import { CategoryFilter } from "@/components/CategoryFilter"
 import { Link } from 'react-router-dom'
+import { ProductCategories } from '@/components/ProductCategories'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -29,6 +30,15 @@ export default function Index() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
+
+  // Category filter state
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [categories] = useState([
+    { id: '1', name: 'Cigarettes', count: 89 },
+    { id: '2', name: 'Beverages', count: 42 },
+    { id: '3', name: 'Snacks', count: 28 },
+    { id: '4', name: 'Personal Care', count: 16 }
+  ])
 
   useEffect(() => {
     fetchData()
@@ -249,6 +259,9 @@ export default function Index() {
           <p className="text-gray-600 mt-2">Real-time retail analytics for sari-sari stores</p>
         </div>
       </div>
+
+      {/* Product Categories */}
+      <ProductCategories />
 
       {/* Error Alert */}
       {error && (
@@ -509,12 +522,6 @@ export default function Index() {
           )}
         </CardContent>
       </Card>
-
-      {/* Footer */}
-      <div className="text-center py-6 text-gray-500 text-sm">
-        <p>Retail Insights Dashboard PH - Powered by Dlab</p>
-        <p className="mt-1">Last updated: {new Date().toLocaleDateString()}</p>
-      </div>
     </div>
   )
 }
