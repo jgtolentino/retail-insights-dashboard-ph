@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter QA Checklist - Retail Insights Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        .test-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.pass { background: #d1fae5; color: #065f46; }
+        .status.fail { background: #fee2e2; color: #991b1b; }
+        .status.pending { background: #fef3c7; color: #92400e; }
+        h2 { color: #1f2937; margin-top: 0; }
+        h3 { color: #374151; margin-top: 20px; }
+        .url-display {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th { background: #f9fafb; font-weight: 600; }
+        .test-actions {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        .notes-section {
+            margin-top: 10px;
+        }
+        .notes-section textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 Filter QA Checklist</h1>
+        <p>Comprehensive testing for Retail Insights Dashboard filter functionality</p>
+        <div class="url-display" id="testUrl">
+            Test URL: <span id="currentUrl">Not set</span>
+        </div>
+        <div class="test-actions">
+            <button class="btn-primary" onclick="setTestUrl()">Set Test URL</button>
+            <button class="btn-secondary" onclick="exportResults()">Export Results</button>
+            <button class="btn-secondary" onclick="resetAll()">Reset Checklist</button>
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="summary-card">
+            <h3>Total Tests</h3>
+            <div class="value" id="totalTests">0</div>
+        </div>
+        <div class="summary-card">
+            <h3>Passed</h3>
+            <div class="value" id="passedTests" style="color: #059669;">0</div>
+        </div>
+        <div class="summary-card">
+            <h3>Failed</h3>
+            <div class="value" id="failedTests" style="color: #dc2626;">0</div>
+        </div>
+        <div class="summary-card">
+            <h3>Completion</h3>
+            <div class="value" id="completionRate">0%</div>
+        </div>
+    </div>
+
+    <!-- 1. Global Setup -->
+    <div class="test-section">
+        <h2>1. Global Setup</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-1-1" onchange="updateStatus(this)">
+            <label for="test-1-1">Load Dashboard with no URL params - default date range loads (e.g., 30 days)</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-1-2" onchange="updateStatus(this)">
+            <label for="test-1-2">No filter chips shown, "No filters applied" message visible</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-1-3" onchange="updateStatus(this)">
+            <label for="test-1-3">localStorage key 'retail-dashboard-filters' is clear/empty</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-1-4" onchange="updateStatus(this)">
+            <label for="test-1-4">No filter parameters in URL (categories, brands, etc.)</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Global Setup tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 2. Multi-Select Dropdowns -->
+    <div class="test-section">
+        <h2>2. Multi-Select Dropdowns</h2>
+        <p>Test each dropdown on every page (Dashboard, Product Mix, Consumer Insights, Brands, Trends, Settings)</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Dropdown</th>
+                    <th>Query Key</th>
+                    <th>Dashboard</th>
+                    <th>Product Mix</th>
+                    <th>Consumer</th>
+                    <th>Brands</th>
+                    <th>Trends</th>
+                    <th>Settings</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Categories</td>
+                    <td><code>categories</code></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                </tr>
+                <tr>
+                    <td>Brands</td>
+                    <td><code>brands</code></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                </tr>
+                <tr>
+                    <td>Products</td>
+                    <td><code>products</code></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                </tr>
+                <tr>
+                    <td>Locations</td>
+                    <td><code>locations</code></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                    <td><input type="checkbox" onchange="updateStatus(this)"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Behavior Tests</h3>
+        <div class="test-item">
+            <input type="checkbox" id="test-2-1" onchange="updateStatus(this)">
+            <label for="test-2-1">Select two items → both remain checked</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-2-2" onchange="updateStatus(this)">
+            <label for="test-2-2">Chips update → show each selected item with "×"</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-2-3" onchange="updateStatus(this)">
+            <label for="test-2-3">URL sync → e.g. ?categories=Snacks,Drinks&brands=Marlboro,Mevius</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-2-4" onchange="updateStatus(this)">
+            <label for="test-2-4">Reload page → same dropdown selections and chips</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-2-5" onchange="updateStatus(this)">
+            <label for="test-2-5">Navigate away & back → selections persist</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Multi-Select Dropdown tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 3. Single-Select Controls -->
+    <div class="test-section">
+        <h2>3. Single-Select Controls</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-3-1" onchange="updateStatus(this)">
+            <label for="test-3-1">"View by" (Product Mix): one-of dropdown → updates chart type</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-3-2" onchange="updateStatus(this)">
+            <label for="test-3-2">Date range picker: Choose custom dates → URL=?start=YYYY-MM-DD&end=YYYY-MM-DD</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-3-3" onchange="updateStatus(this)">
+            <label for="test-3-3">Date range picker: Refresh → same range persists</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Single-Select Control tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 4. Reset All Filters -->
+    <div class="test-section">
+        <h2>4. Reset All Filters</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-4-1" onchange="updateStatus(this)">
+            <label for="test-4-1">Click "Reset All" → all multi-selects clear</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-4-2" onchange="updateStatus(this)">
+            <label for="test-4-2">Filter chips disappear</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-4-3" onchange="updateStatus(this)">
+            <label for="test-4-3">URL query string emptied of filter keys</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-4-4" onchange="updateStatus(this)">
+            <label for="test-4-4">localStorage 'retail-dashboard-filters' is reset</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Reset All Filters tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 5. Cross-Page Filter Persistence -->
+    <div class="test-section">
+        <h2>5. Cross-Page Filter Persistence</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-5-1" onchange="updateStatus(this)">
+            <label for="test-5-1">Set filters on Dashboard (Categories=Cigarettes+Snacks, Brands=Mevius+Marlboro, Date=last 7 days)</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-5-2" onchange="updateStatus(this)">
+            <label for="test-5-2">Navigate to Product Mix → filters inherited</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-5-3" onchange="updateStatus(this)">
+            <label for="test-5-3">Navigate to Consumer Insights → filters inherited</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-5-4" onchange="updateStatus(this)">
+            <label for="test-5-4">Navigate back to Dashboard → filters unchanged</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Cross-Page Filter Persistence tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 6. Data-Driven Validation -->
+    <div class="test-section">
+        <h2>6. Data-Driven Validation</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-6-1" onchange="updateStatus(this)">
+            <label for="test-6-1">With filters applied, charts/tables update to reflect filtered subset</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-6-2" onchange="updateStatus(this)">
+            <label for="test-6-2">Selecting "Cigarettes" removes non-cigarette data from all visualizations</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-6-3" onchange="updateStatus(this)">
+            <label for="test-6-3">Filters that yield no data show "No data available" UI</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-6-4" onchange="updateStatus(this)">
+            <label for="test-6-4">Overlapping filters work without errors</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Data-Driven Validation tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 7. Accessibility & Keyboard -->
+    <div class="test-section">
+        <h2>7. Accessibility & Keyboard</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-7-1" onchange="updateStatus(this)">
+            <label for="test-7-1">Open each multi-select via keyboard (Tab → Enter)</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-7-2" onchange="updateStatus(this)">
+            <label for="test-7-2">Navigate options via arrow keys, select/unselect with Space</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-7-3" onchange="updateStatus(this)">
+            <label for="test-7-3">Close dropdown with Escape</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-7-4" onchange="updateStatus(this)">
+            <label for="test-7-4">"Reset All" reachable via keyboard, triggers properly</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Accessibility & Keyboard tests..."></textarea>
+        </div>
+    </div>
+
+    <!-- 8. Mobile / Responsive -->
+    <div class="test-section">
+        <h2>8. Mobile / Responsive</h2>
+        <div class="test-item">
+            <input type="checkbox" id="test-8-1" onchange="updateStatus(this)">
+            <label for="test-8-1">Emulate small viewport (≤ 640px) - layout adapts</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-8-2" onchange="updateStatus(this)">
+            <label for="test-8-2">Dropdowns and chips wrap or scroll gracefully</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="test-item">
+            <input type="checkbox" id="test-8-3" onchange="updateStatus(this)">
+            <label for="test-8-3">"Reset All" remains visible and functional</label>
+            <span class="status pending">Pending</span>
+        </div>
+        <div class="notes-section">
+            <textarea placeholder="Notes for Mobile/Responsive tests..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Initialize test URL
+        const defaultUrl = 'https://retail-insights-dashboard-ph-git-2a4977-jakes-projects-e9f46c30.vercel.app';
+        document.getElementById('currentUrl').textContent = localStorage.getItem('qaTestUrl') || defaultUrl;
+
+        function setTestUrl() {
+            const url = prompt('Enter the test URL:', document.getElementById('currentUrl').textContent);
+            if (url) {
+                localStorage.setItem('qaTestUrl', url);
+                document.getElementById('currentUrl').textContent = url;
+            }
+        }
+
+        function updateStatus(checkbox) {
+            const status = checkbox.parentElement.querySelector('.status');
+            if (checkbox.checked) {
+                status.textContent = 'Pass';
+                status.className = 'status pass';
+            } else {
+                status.textContent = 'Pending';
+                status.className = 'status pending';
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            const total = allCheckboxes.length;
+            const passed = checkedBoxes.length;
+            const completion = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('passedTests').textContent = passed;
+            document.getElementById('failedTests').textContent = '0'; // Update if you add fail functionality
+            document.getElementById('completionRate').textContent = completion + '%';
+        }
+
+        function exportResults() {
+            const results = {
+                url: document.getElementById('currentUrl').textContent,
+                timestamp: new Date().toISOString(),
+                tests: []
+            };
+
+            document.querySelectorAll('.test-item').forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const label = item.querySelector('label');
+                const status = item.querySelector('.status');
+                
+                if (checkbox && label) {
+                    results.tests.push({
+                        test: label.textContent,
+                        passed: checkbox.checked,
+                        status: status.textContent
+                    });
+                }
+            });
+
+            // Add notes
+            results.notes = {};
+            document.querySelectorAll('.notes-section textarea').forEach((textarea, index) => {
+                if (textarea.value) {
+                    results.notes[`section_${index + 1}`] = textarea.value;
+                }
+            });
+
+            // Download as JSON
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `filter-qa-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function resetAll() {
+            if (confirm('Reset all test results?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    updateStatus(cb);
+                });
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+            }
+        }
+
+        // Initialize summary
+        updateSummary();
+    </script>
+</body>
+</html>

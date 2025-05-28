@@ -1,0 +1,77 @@
+{
+  "testSession": {
+    "url": "https://retail-insights-dashboard-ph.vercel.app/",
+    "timestamp": "2025-05-28T09:45:00.000Z",
+    "tester": "Manual QA",
+    "environment": "Production"
+  },
+  "summary": {
+    "totalTests": 0,
+    "passed": 0,
+    "failed": 0,
+    "completionRate": "0%"
+  },
+  "testSections": {
+    "globalSetup": {
+      "defaultPageLoad": null,
+      "noFilterChips": null,
+      "cleanURL": null,
+      "emptyLocalStorage": null,
+      "notes": ""
+    },
+    "multiSelectDropdowns": {
+      "categoriesFilter": null,
+      "brandsFilter": null,
+      "productsFilter": null,
+      "locationsFilter": null,
+      "multipleSelections": null,
+      "chipDisplay": null,
+      "urlSync": null,
+      "reloadPersistence": null,
+      "notes": ""
+    },
+    "singleSelectControls": {
+      "dateRangePicker": null,
+      "customDateSelection": null,
+      "viewBySelector": null,
+      "notes": ""
+    },
+    "resetAllFilters": {
+      "clearsSelections": null,
+      "removesChips": null,
+      "clearsURL": null,
+      "clearsLocalStorage": null,
+      "notes": ""
+    },
+    "crossPagePersistence": {
+      "dashboardToProductMix": null,
+      "productMixToConsumer": null,
+      "consumerToBrands": null,
+      "returnToDashboard": null,
+      "notes": ""
+    },
+    "dataValidation": {
+      "chartsUpdateWithFilters": null,
+      "tablesReflectFilters": null,
+      "noDataStateHandling": null,
+      "edgeCaseHandling": null,
+      "notes": ""
+    },
+    "accessibility": {
+      "keyboardNavigation": null,
+      "tabFocus": null,
+      "escapeKey": null,
+      "screenReader": null,
+      "notes": ""
+    },
+    "responsive": {
+      "mobileLayout": null,
+      "touchInteractions": null,
+      "chipsWrapCorrectly": null,
+      "resetButtonVisible": null,
+      "notes": ""
+    }
+  },
+  "issues": [],
+  "recommendations": []
+}
