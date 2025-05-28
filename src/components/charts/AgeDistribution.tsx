@@ -16,7 +16,8 @@ export function AgeDistribution() {
       
       const { data, error } = await supabase.rpc('get_age_distribution', {
         start_date: startDate.toISOString(),
-        end_date: endDate.toISOString()
+        end_date: endDate.toISOString(),
+        bucket_size: 10
       });
       
       if (error) throw error;
@@ -38,10 +39,10 @@ export function AgeDistribution() {
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={ageData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="age_group" />
+          <XAxis dataKey="age_bucket" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="count" fill="#8884d8" />
+          <Bar dataKey="customer_count" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>
     </div>
