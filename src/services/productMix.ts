@@ -61,9 +61,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
+      // Apply brand filter - convert string to number
       if (filters.brandId && filters.brandId !== 'all') {
-        query = query.eq('products.brand_id', filters.brandId);
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: transactions, error } = await query;
@@ -159,9 +159,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
+      // Apply brand filter - convert string to number
       if (filters.brandId && filters.brandId !== 'all') {
-        query = query.eq('products.brand_id', filters.brandId);
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: items, error } = await query;
@@ -247,9 +247,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
+      // Apply brand filter - convert string to number
       if (filters.brandId && filters.brandId !== 'all') {
-        query = query.eq('products.brand_id', filters.brandId);
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: items, error } = await query;

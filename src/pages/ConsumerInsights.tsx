@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -272,17 +273,7 @@ export default function ConsumerInsights() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <AgeDistribution 
-                    startDate={startDate} 
-                    endDate={endDate}
-                    bucketSize={10}
-                    filters={{
-                      categories: filters.categories,
-                      brands: filters.brands,
-                      genders: filters.genders,
-                      ageGroups: filters.ageGroups
-                    }}
-                  />
+                  <AgeDistribution />
                 </CardContent>
               </Card>
 
@@ -295,15 +286,7 @@ export default function ConsumerInsights() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <GenderDistribution 
-                    startDate={startDate} 
-                    endDate={endDate}
-                    filters={{
-                      categories: filters.categories,
-                      brands: filters.brands,
-                      ageGroups: filters.ageGroups
-                    }}
-                  />
+                  <GenderDistribution />
                 </CardContent>
               </Card>
             </div>
@@ -350,16 +333,7 @@ export default function ConsumerInsights() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PurchasePatterns 
-                    startDate={startDate} 
-                    endDate={endDate}
-                    filters={{
-                      categories: filters.categories,
-                      brands: filters.brands,
-                      ageGroups: filters.ageGroups,
-                      genders: filters.genders
-                    }}
-                  />
+                  <PurchasePatterns />
                 </CardContent>
               </Card>
 
