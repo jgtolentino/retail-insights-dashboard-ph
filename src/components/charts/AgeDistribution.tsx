@@ -14,14 +14,26 @@ export function AgeDistribution() {
       const startDate = new Date(filters.dateRange.start);
       const endDate = new Date(filters.dateRange.end);
       
-      const { data, error } = await supabase.rpc('get_age_distribution', {
+      // Try with bucket_size parameter first
+      let { data, error } = await supabase.rpc('get_age_distribution', {
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         bucket_size: 10
       });
       
+      // If that fails due to function signature conflict, try without bucket_size
+      if (error && error.message.includes('Could not choose the best candidate function')) {
+        console.warn('Function signature conflict detected, trying alternative call...');
+        const result = await supabase.rpc('get_age_distribution', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString()
+        });
+        data = result.data;
+        error = result.error;
+      }
+      
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 
