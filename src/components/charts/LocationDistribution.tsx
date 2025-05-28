@@ -9,13 +9,22 @@ import {
   Tooltip,
   CartesianGrid
 } from 'recharts';
-import { dashboardService, type AgeDistributionData } from '@/services/dashboard';
+import { dashboardService } from '@/services/dashboard';
+import { formatCurrency } from '@/lib/utils';
 import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext';
 
-interface AgeDistributionProps {
+interface LocationDistributionData {
+  location: string;
+  customer_count: number;
+  transaction_count: number;
+  total_revenue: number;
+  avg_transaction_value: number;
+  percentage: number;
+}
+
+interface LocationDistributionProps {
   startDate: string;
   endDate: string;
-  bucketSize?: number;
   filters?: {
     categories?: string[];
     brands?: string[];
@@ -24,37 +33,34 @@ interface AgeDistributionProps {
   };
 }
 
-export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }: AgeDistributionProps) {
-  const [data, setData] = useState<AgeDistributionData[]>([]);
+export function LocationDistribution({ startDate, endDate, filters }: LocationDistributionProps) {
+  const [data, setData] = useState<LocationDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { setFilters } = useEnhancedFilters();
 
   useEffect(() => {
     setLoading(true);
-    console.log('🔍 AgeDistribution: Fetching data...', { startDate, endDate, bucketSize, filters });
-    
     dashboardService
-      .getAgeDistribution(startDate, endDate, bucketSize, filters)
-      .then((result) => {
-        console.log('📊 AgeDistribution: Data received:', result);
-        setData(result);
-      })
+      .getLocationDistribution(startDate, endDate, filters)
+      .then(setData)
       .catch((error) => {
-        console.error('❌ AgeDistribution: Error fetching data:', error);
+        console.error('Error fetching location distribution:', error);
         setData([]);
       })
       .finally(() => setLoading(false));
-  }, [startDate, endDate, bucketSize, filters]);
+  }, [startDate, endDate, filters]);
 
   const handleBarClick = (data: any) => {
     if (data && data.activePayload && data.activePayload[0]) {
-      const ageGroup = data.activePayload[0].payload.age_bucket;
+      const location = data.activePayload[0].payload.location;
       
-      // Update the global filters with the selected age group
+      // Update the global filters with the selected location
+      // Note: We'll need to add location/province to the filter types
       setFilters(prev => ({
         ...prev,
-        ageGroups: [ageGroup]
+        // For now, navigate without setting location filter
+        // TODO: Add location filter support
       }));
       
       // Navigate to the Consumer Insights page
@@ -74,28 +80,36 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
     return (
       <div className="h-64 w-full flex items-center justify-center">
         <div className="text-center space-y-2">
-          <div className="text-muted-foreground">No age distribution data available</div>
+          <div className="text-muted-foreground">No location data available</div>
           <div className="text-xs text-muted-foreground">
-            Try adjusting the date range or check if customer_age data exists
+            Try adjusting the date range or check if location data exists
           </div>
         </div>
       </div>
     );
   }
 
+  // Sort by customer count and take top 10
+  const sortedData = [...data]
+    .sort((a, b) => b.customer_count - a.customer_count)
+    .slice(0, 10);
+
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={data}
-          margin={{ top: 10, right: 20, left: 20, bottom: 10 }}
+          data={sortedData}
+          margin={{ top: 10, right: 20, left: 60, bottom: 60 }}
           onClick={handleBarClick}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
-            dataKey="age_bucket" 
-            fontSize={12}
+            dataKey="location" 
+            fontSize={11}
             tick={{ fill: '#6b7280' }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
           />
           <YAxis 
             allowDecimals={false} 
@@ -103,8 +117,13 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
             tick={{ fill: '#6b7280' }}
           />
           <Tooltip 
-            formatter={(value: number) => [`${value} customers`, 'Count']}
-            labelFormatter={(label) => `Age Group: ${label}`}
+            formatter={(value: number, name: string) => {
+              if (name === 'customer_count') return [`${value} customers`, 'Customers'];
+              if (name === 'transaction_count') return [`${value} transactions`, 'Transactions'];
+              if (name === 'total_revenue') return [formatCurrency(value), 'Revenue'];
+              return [value, name];
+            }}
+            labelFormatter={(label) => `Location: ${label}`}
             contentStyle={{
               backgroundColor: 'rgba(255, 255, 255, 0.95)',
               border: '1px solid #e5e7eb',

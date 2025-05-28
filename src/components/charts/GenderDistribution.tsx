@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ResponsiveContainer,
   PieChart,
@@ -9,6 +10,7 @@ import {
 } from 'recharts';
 import { dashboardService, type GenderDistributionData } from '@/services/dashboard';
 import { formatCurrency } from '@/lib/utils';
+import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext';
 
 interface GenderDistributionProps {
   startDate: string;
@@ -29,6 +31,8 @@ const GENDER_COLORS = {
 export function GenderDistribution({ startDate, endDate, filters }: GenderDistributionProps) {
   const [data, setData] = useState<GenderDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { setFilters } = useEnhancedFilters();
 
   useEffect(() => {
     setLoading(true);
@@ -37,6 +41,19 @@ export function GenderDistribution({ startDate, endDate, filters }: GenderDistri
       .then(setData)
       .finally(() => setLoading(false));
   }, [startDate, endDate, filters]);
+
+  const handlePieClick = (data: any) => {
+    if (data && data.name) {
+      // Update the global filters with the selected gender
+      setFilters(prev => ({
+        ...prev,
+        genders: [data.name]
+      }));
+      
+      // Navigate to the Consumer Insights page
+      navigate('/consumer-insights');
+    }
+  };
 
   if (loading) {
     return (
@@ -76,6 +93,8 @@ export function GenderDistribution({ startDate, endDate, filters }: GenderDistri
               percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
             }
             dataKey="value"
+            onClick={handlePieClick}
+            cursor="pointer"
           >
             {pieData.map((entry, index) => (
               <Cell 

@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, Users } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -22,6 +23,8 @@ export default function Index() {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
+  const navigate = useNavigate()
+  const { setFilters } = useEnhancedFilters()
   
   // Custom date range state
   const [customStartDate, setCustomStartDate] = useState('')
@@ -94,6 +97,17 @@ export default function Index() {
     if (customStartDate && customEndDate) {
       fetchData()
     }
+  }
+
+  const handleBrandClick = (brandName: string) => {
+    // Update the global filters with the selected brand
+    setFilters(prev => ({
+      ...prev,
+      brands: [brandName]
+    }));
+    
+    // Navigate to the Product Mix page
+    navigate('/product-mix');
   }
 
   const dateRangeOptions = [
@@ -458,11 +472,15 @@ export default function Index() {
                     const percentage = (brand.sales / maxSales) * 100
                     
                     return (
-                      <div key={index} className="flex items-center gap-4">
-                        <div className="w-32 text-sm font-medium text-right">{brand.name}</div>
+                      <div 
+                        key={index} 
+                        className="flex items-center gap-4 group cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                        onClick={() => handleBrandClick(brand.name)}
+                      >
+                        <div className="w-32 text-sm font-medium text-right group-hover:text-blue-600">{brand.name}</div>
                         <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                           <div 
-                            className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-300"
+                            className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-300 group-hover:bg-blue-600"
                             style={{ width: `${percentage}%` }}
                           >
                             <span className="text-xs text-white font-medium">

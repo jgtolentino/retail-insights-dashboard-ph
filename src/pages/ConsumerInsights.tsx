@@ -6,6 +6,7 @@ import { Calendar, Users, TrendingUp, Heart, Filter } from 'lucide-react';
 import { AgeDistribution } from '@/components/charts/AgeDistribution';
 import { GenderDistribution } from '@/components/charts/GenderDistribution';
 import { PurchasePatterns } from '@/components/charts/PurchasePatterns';
+import { LocationDistribution } from '@/components/charts/LocationDistribution';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { FilterSummary } from '@/components/FilterSummary';
@@ -307,6 +308,28 @@ export default function ConsumerInsights() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Location Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Customer Location Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LocationDistribution 
+                  startDate={startDate} 
+                  endDate={endDate}
+                  filters={{
+                    categories: filters.categories,
+                    brands: filters.brands,
+                    genders: filters.genders,
+                    ageGroups: filters.ageGroups
+                  }}
+                />
+              </CardContent>
+            </Card>
 
             {/* Demographics Summary Table */}
             <Card>
