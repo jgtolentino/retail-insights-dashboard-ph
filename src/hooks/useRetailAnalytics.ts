@@ -9,13 +9,12 @@ export const useRetailAnalytics = () => {
       const { data, error } = await supabase
         .from('transaction_items')
         .select(`
-          price,
-          quantity,
+          subtotal,
           products (
             name,
             brands (
               name,
-              is_tbwa
+              is_tbwa_client
             )
           )
         `)
@@ -47,8 +46,8 @@ export const useRetailAnalytics = () => {
       
       data.forEach(item => {
         const brandName = item.products?.brands?.name;
-        const subtotal = (item.price || 0) * (item.quantity || 0);
-        const isTbwaClient = item.products?.brands?.is_tbwa || false;
+        const subtotal = item.subtotal || 0;
+        const isTbwaClient = item.products?.brands?.is_tbwa_client || false;
         
         if (brandName) {
           if (!brandSales[brandName]) {
@@ -92,7 +91,7 @@ export const useRetailAnalytics = () => {
       // Get total revenue and transaction count
       const { data: transactions, error } = await supabase
         .from('transactions')
-        .select('total_amount');
+        .select('total_amount, items_count');
 
       if (error) throw error;
 

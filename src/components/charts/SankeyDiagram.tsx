@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { sankey, sankeyLinkHorizontal } from 'd3-sankey';
@@ -73,10 +72,7 @@ export function SankeyDiagram({
       .data(sankeyLinks)
       .join('path')
       .attr('d', sankeyLinkHorizontal())
-      .attr('stroke', d => {
-        const sourceNode = d.source as any;
-        return color(sourceNode.category || sourceNode.name)
-      })
+      .attr('stroke', d => color(d.source.category || d.source.name))
       .attr('stroke-width', d => Math.max(1, d.width))
       .attr('fill', 'none')
       .attr('opacity', 0.5)
@@ -89,11 +85,7 @@ export function SankeyDiagram({
 
     // Add link titles (tooltips)
     link.append('title')
-      .text(d => {
-        const sourceNode = d.source as any;
-        const targetNode = d.target as any;
-        return `${sourceNode.name} → ${targetNode.name}\n${d.value} substitutions`;
-      });
+      .text(d => `${d.source.name} → ${d.target.name}\n${d.value} substitutions`);
 
     // Add nodes
     const node = g.append('g')
@@ -104,10 +96,7 @@ export function SankeyDiagram({
       .attr('y', d => d.y0)
       .attr('height', d => d.y1 - d.y0)
       .attr('width', d => d.x1 - d.x0)
-      .attr('fill', d => {
-        const nodeData = d as any;
-        return color(nodeData.category || nodeData.name);
-      })
+      .attr('fill', d => color(d.category || d.name))
       .attr('stroke', '#000')
       .attr('stroke-width', 1);
 
@@ -121,17 +110,11 @@ export function SankeyDiagram({
       .attr('dy', '0.35em')
       .attr('text-anchor', d => d.x0 < width / 2 ? 'start' : 'end')
       .attr('font-size', '12px')
-      .text(d => {
-        const nodeData = d as any;
-        return nodeData.name;
-      });
+      .text(d => d.name);
 
     // Add node tooltips
     node.append('title')
-      .text(d => {
-        const nodeData = d as any;
-        return `${nodeData.name}\n${d.value} total`;
-      });
+      .text(d => `${d.name}\n${d.value} total`);
 
   }, [nodes, links, loading, height]);
 

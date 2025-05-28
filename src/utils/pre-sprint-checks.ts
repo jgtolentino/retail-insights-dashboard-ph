@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface SprintRequirements {
@@ -13,12 +12,6 @@ interface ValidationResult {
   passed: boolean;
   errors: string[];
   warnings: string[];
-}
-
-interface CheckResult {
-  status: 'success' | 'error' | 'warning';
-  message: string;
-  details: any;
 }
 
 export async function runPreSprintChecks(sprintNumber: number): Promise<ValidationResult> {
@@ -48,10 +41,10 @@ export async function runPreSprintChecks(sprintNumber: number): Promise<Validati
         // Check stores for location data
         const { data: storeData } = await supabase
           .from('stores')
-          .select('id, location')
+          .select('id, store_location')
           .limit(1);
         
-        if (!storeData?.[0]?.location) {
+        if (!storeData?.[0]?.store_location) {
           result.warnings.push('Missing store location data for location filters');
         }
         break;
@@ -125,7 +118,7 @@ export async function runPreSprintChecks(sprintNumber: number): Promise<Validati
         }
         
         // Check if Google Maps can be loaded
-        if (typeof window !== 'undefined' && !(window as any).google?.maps) {
+        if (typeof window !== 'undefined' && !window.google?.maps) {
           result.warnings.push('Google Maps API not loaded');
         }
         break;
@@ -165,7 +158,7 @@ export async function validateSprintRequirements(sprint: number): Promise<Valida
       tables: ['transactions', 'stores'],
       fields: {
         transactions: ['created_at', 'total_amount'],
-        stores: ['location']
+        stores: ['store_location']
       }
     },
     2: {
@@ -178,7 +171,7 @@ export async function validateSprintRequirements(sprint: number): Promise<Valida
     },
     3: {
       fields: {
-        transactions: ['customer_age', 'customer_gender']
+        transactions: ['request_method', 'suggestion_accepted']
       }
     },
     4: {
@@ -220,17 +213,9 @@ export async function validateSprintRequirements(sprint: number): Promise<Valida
   if (sprintReqs.tables) {
     for (const table of sprintReqs.tables) {
       try {
-        const validTables = ['brands', 'products', 'transactions', 'stores', 'substitutions', 'transaction_items'] as const;
-        type ValidTable = typeof validTables[number];
-        
-        if (validTables.includes(table as ValidTable)) {
-          const { error } = await supabase.from(table as ValidTable).select('*').limit(1);
-          if (error) {
-            result.errors.push(`Cannot access table: ${table}`);
-            result.passed = false;
-          }
-        } else {
-          result.errors.push(`Unknown table: ${table}`);
+        const { error } = await supabase.from(table).select('*').limit(1);
+        if (error) {
+          result.errors.push(`Cannot access table: ${table}`);
           result.passed = false;
         }
       } catch (error) {
@@ -244,17 +229,12 @@ export async function validateSprintRequirements(sprint: number): Promise<Valida
   if (sprintReqs.fields) {
     for (const [table, fields] of Object.entries(sprintReqs.fields)) {
       try {
-        const validTables = ['brands', 'products', 'transactions', 'stores', 'substitutions', 'transaction_items'] as const;
-        type ValidTable = typeof validTables[number];
-        
-        if (validTables.includes(table as ValidTable)) {
-          const { data, error } = await supabase.from(table as ValidTable).select(fields.join(',')).limit(1);
-          if (error) {
-            result.errors.push(`Cannot verify fields in ${table}: ${error.message}`);
-            result.passed = false;
-          } else if (!data || data.length === 0) {
-            result.warnings.push(`No data found in ${table} to verify fields`);
-          }
+        const { data, error } = await supabase.from(table).select(fields.join(',')).limit(1);
+        if (error) {
+          result.errors.push(`Cannot verify fields in ${table}: ${error.message}`);
+          result.passed = false;
+        } else if (!data || data.length === 0) {
+          result.warnings.push(`No data found in ${table} to verify fields`);
         }
       } catch (error) {
         result.errors.push(`Error checking fields in ${table}`);
@@ -286,252 +266,3 @@ export function displayValidationResults(results: ValidationResult): void {
     console.groupEnd();
   }
 }
-
-export const preSprintChecks = {
-  async checkSupabaseConnection(): Promise<CheckResult> {
-    console.log('🔍 Checking Supabase connection...');
-    
-    try {
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .limit(1);
-
-      if (error) {
-        return {
-          status: 'error',
-          message: `Supabase connection check failed: ${error.message}`,
-          details: { error }
-        };
-      }
-
-      return {
-        status: 'success',
-        message: 'Supabase connection check passed',
-        details: {}
-      };
-
-    } catch (error) {
-      return {
-        status: 'error',
-        message: `Supabase connection check failed: ${error}`,
-        details: { error }
-      };
-    }
-  },
-
-  async checkDatabaseStructure(): Promise<CheckResult> {
-    console.log('🔍 Checking database structure...');
-    
-    try {
-      // Check transactions table
-      const { data: transactions, error: txError } = await supabase
-        .from('transactions')
-        .select('id, total_amount, created_at')
-        .limit(1);
-
-      if (txError) {
-        return {
-          status: 'error',
-          message: `Transactions check failed: ${txError.message}`,
-          details: { error: txError }
-        };
-      }
-
-      // Check stores table
-      const { data: stores, error: storeError } = await supabase
-        .from('stores')
-        .select('id, location')
-        .limit(1);
-
-      if (storeError) {
-        return {
-          status: 'error',
-          message: `Stores check failed: ${storeError.message}`,
-          details: { error: storeError }
-        };
-      }
-
-      // Check products table
-      const { data: products, error: productError } = await supabase
-        .from('products')
-        .select('id, name, brand_id')
-        .limit(1);
-
-      if (productError) {
-        return {
-          status: 'error',
-          message: `Products check failed: ${productError.message}`,
-          details: { error: productError }
-        };
-      }
-
-      // Check brands table
-      const { data: brands, error: brandError } = await supabase
-        .from('brands')
-        .select('id, name, category')
-        .limit(1);
-
-      if (brandError) {
-        return {
-          status: 'error',
-          message: `Brands check failed: ${brandError.message}`,
-          details: { error: brandError }
-        };
-      }
-
-      // Check transaction_items table
-      const { data: items, error: itemError } = await supabase
-        .from('transaction_items')
-        .select('id, product_id, quantity')
-        .limit(1);
-
-      if (itemError) {
-        return {
-          status: 'error',
-          message: `Transaction items check failed: ${itemError.message}`,
-          details: { error: itemError }
-        };
-      }
-
-      return {
-        status: 'success',
-        message: 'Database structure check passed',
-        details: {}
-      };
-
-    } catch (error) {
-      return {
-        status: 'error',
-        message: `Database structure check failed: ${error}`,
-        details: { error }
-      };
-    }
-  },
-
-  async checkDataAvailability(): Promise<CheckResult> {
-    console.log('📊 Checking data availability...');
-    
-    try {
-      // Check transactions table
-      const { data: transactions, error: txError } = await supabase
-        .from('transactions')
-        .select('id, total_amount, created_at')
-        .limit(1);
-
-      if (txError) {
-        return {
-          status: 'error',
-          message: `Transactions check failed: ${txError.message}`,
-          details: { error: txError }
-        };
-      }
-
-      // Check stores table
-      const { data: stores, error: storeError } = await supabase
-        .from('stores')
-        .select('id, location')
-        .limit(1);
-
-      if (storeError) {
-        return {
-          status: 'error',
-          message: `Stores check failed: ${storeError.message}`,
-          details: { error: storeError }
-        };
-      }
-
-      // Check products table
-      const { data: products, error: productError } = await supabase
-        .from('products')
-        .select('id, name, brand_id')
-        .limit(1);
-
-      if (productError) {
-        return {
-          status: 'error',
-          message: `Products check failed: ${productError.message}`,
-          details: { error: productError }
-        };
-      }
-
-      // Check brands table
-      const { data: brands, error: brandError } = await supabase
-        .from('brands')
-        .select('id, name, category')
-        .limit(1);
-
-      if (brandError) {
-        return {
-          status: 'error',
-          message: `Brands check failed: ${brandError.message}`,
-          details: { error: brandError }
-        };
-      }
-
-      // Check transaction_items table
-      const { data: items, error: itemError } = await supabase
-        .from('transaction_items')
-        .select('id, product_id, quantity')
-        .limit(1);
-
-      if (itemError) {
-        return {
-          status: 'error',
-          message: `Transaction items check failed: ${itemError.message}`,
-          details: { error: itemError }
-        };
-      }
-
-      return {
-        status: 'success',
-        message: 'Data availability check passed',
-        details: {}
-      };
-
-    } catch (error) {
-      return {
-        status: 'error',
-        message: `Data availability check failed: ${error}`,
-        details: { error }
-      };
-    }
-  },
-
-  async checkTableExists(tableName: string): Promise<boolean> {
-    try {
-      // Use proper table names from the database schema
-      const validTables = ['brands', 'products', 'transactions', 'stores', 'substitutions', 'transaction_items'] as const;
-      type ValidTable = typeof validTables[number];
-      
-      if (!validTables.includes(tableName as ValidTable)) {
-        console.warn(`⚠️ Unknown table name: ${tableName}`);
-        return false;
-      }
-
-      const { data, error } = await supabase
-        .from(tableName as ValidTable)
-        .select('*')
-        .limit(1);
-
-      return !error;
-    } catch (error) {
-      console.error(`❌ Error checking table ${tableName}:`, error);
-      return false;
-    }
-  },
-
-  async checkFunctionExists(functionName: string): Promise<boolean> {
-    try {
-      // Test the function with minimal parameters
-      const { error } = await supabase
-        .rpc(functionName as any, {});
-
-      // If we get a parameter error, the function exists
-      return !error || error.message.includes('parameter');
-    } catch (error) {
-      console.error(`❌ Error checking function ${functionName}:`, error);
-      return false;
-    }
-  }
-};

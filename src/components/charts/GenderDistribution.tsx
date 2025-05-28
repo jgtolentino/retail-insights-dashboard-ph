@@ -1,97 +1,111 @@
-
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { dashboardService } from '@/services/dashboard';
-import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@/components/ui/skeleton';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-
-interface GenderDistributionData {
-  gender: string;
-  customer_count: number;
-  total_revenue: number;
-}
+import { useState, useEffect } from 'react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend
+} from 'recharts';
+import { dashboardService, type GenderDistributionData } from '@/services/dashboard';
+import { formatCurrency } from '@/lib/utils';
 
 interface GenderDistributionProps {
   startDate: string;
   endDate: string;
+  filters?: {
+    categories?: string[];
+    brands?: string[];
+    ageGroups?: string[];
+  };
 }
 
-export function GenderDistribution({ startDate, endDate }: GenderDistributionProps) {
-  const { data: genderData, isLoading, isError } = useQuery({
-    queryKey: ['genderDistribution', startDate, endDate],
-    queryFn: () => dashboardService.getGenderDistribution(startDate, endDate),
-    retry: 1
-  });
+const GENDER_COLORS = {
+  'Male': '#3b82f6',
+  'Female': '#ec4899', 
+  'Unknown': '#6b7280'
+};
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+export function GenderDistribution({ startDate, endDate, filters }: GenderDistributionProps) {
+  const [data, setData] = useState<GenderDistributionData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  useEffect(() => {
+    setLoading(true);
+    dashboardService
+      .getGenderDistribution(startDate, endDate, filters)
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [startDate, endDate, filters]);
 
+  if (loading) {
     return (
-      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-        {`${(percent * 100).toFixed(0)}%`}
-      </text>
-    );
-  };
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Gender Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="w-full h-40" />
-        </CardContent>
-      </Card>
+      <div className="h-64 w-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
-  if (isError || !genderData || genderData.length === 0) {
+  if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Gender Distribution</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center h-40">
-          <p className="text-muted-foreground">No gender distribution data available.</p>
-        </CardContent>
-      </Card>
+      <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
+        No gender distribution data available for the selected period
+      </div>
     );
   }
+
+  const pieData = data.map(item => ({
+    name: item.gender,
+    value: item.customer_count,
+    revenue: item.total_revenue
+  }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gender Distribution</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={genderData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius={120}
-              fill="#8884d8"
-              dataKey="customer_count"
-            >
-              {genderData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend />
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={pieData}
+            cx="50%"
+            cy="50%"
+            innerRadius={40}
+            outerRadius={80}
+            paddingAngle={2}
+            labelLine={false}
+            label={({ name, percent }) => 
+              percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+            }
+            dataKey="value"
+          >
+            {pieData.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || '#6b7280'} 
+              />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value: number, name: string, entry: any) => [
+              `${value} customers`,
+              entry.payload.revenue ? formatCurrency(entry.payload.revenue) : 'Revenue'
+            ]}
+            contentStyle={{
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          />
+          <Legend 
+            verticalAlign="bottom" 
+            height={36}
+            wrapperStyle={{
+              paddingTop: '20px'
+            }}
+            iconType="rect"
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
