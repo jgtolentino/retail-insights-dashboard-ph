@@ -47,7 +47,7 @@ export function GenderDistribution() {
             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             outerRadius={80}
             fill="#8884d8"
-            dataKey="count"
+            dataKey="customer_count"
           >
             {genderData?.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
