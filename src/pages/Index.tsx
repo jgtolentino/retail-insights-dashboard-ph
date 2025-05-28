@@ -124,7 +124,7 @@ export default function Index() {
     } else {
       // For daily data, show day/month
       const parts = tickItem.split('-')
-      return `${parts[2]}/${parts[1]}`
+      return `${parts?.[[2]]}/${parts?.[[1]]}`
     }
   }
 
@@ -249,7 +249,7 @@ export default function Index() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
-              {dateRangeOptions.map((option) => (
+              {(dateRangeOptions ?? []).map((option) => (
                 <Button
                   key={option.value}
                   variant={dateRange === option.value ? "default" : "outline"}
@@ -382,7 +382,7 @@ export default function Index() {
                 </p>
               </div>
               <div className="flex gap-1">
-                {chartMetricOptions.map((option) => {
+                {(chartMetricOptions ?? []).map((option) => {
                   const Icon = option.icon
                   return (
                     <Button
@@ -458,7 +458,7 @@ export default function Index() {
                 {/* CSS-based horizontal bar chart */}
                 <div className="space-y-2">
                   {data.topBrands.slice(0, 15).map((brand, index) => {
-                    const maxSales = Math.max(...data.topBrands.map(b => b.sales))
+                    const maxSales = Math.max(...(data.topBrands ?? []).map(b => b.sales))
                     const percentage = (brand.sales / maxSales) * 100
                     
                     return (

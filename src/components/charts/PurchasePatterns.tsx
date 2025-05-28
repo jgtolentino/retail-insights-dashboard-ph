@@ -10,7 +10,7 @@ import {
   LineChart,
   Line
 } from 'recharts';
-import { dashboardService } from '@/services/dashboard';
+import { dashboardService, type PurchasePatternData } from '@/services/dashboard';
 
 interface PurchasePatternsProps {
   startDate: string;
@@ -23,32 +23,19 @@ interface PurchasePatternsProps {
   };
 }
 
-interface HourlyPattern {
-  hour: number;
-  transaction_count: number;
-  avg_amount: number;
-}
-
 export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatternsProps) {
-  const [data, setData] = useState<HourlyPattern[]>([]);
+  const [data, setData] = useState<PurchasePatternData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
     console.log('🔍 PurchasePatterns: Fetching data...', { startDate, endDate, filters });
     
-    // For now, we'll use the purchase behavior function we have
     dashboardService
-      .getPurchaseBehaviorByAge(startDate, endDate)
+      .getPurchasePatternsByTime(startDate, endDate, filters)
       .then((result) => {
         console.log('📊 PurchasePatterns: Data received:', result);
-        // Transform age group data to hourly patterns for demo
-        const mockHourlyData = Array.from({ length: 24 }, (_, hour) => ({
-          hour,
-          transaction_count: Math.floor(Math.random() * 20) + 1,
-          avg_amount: Math.floor(Math.random() * 500) + 100
-        }));
-        setData(mockHourlyData);
+        setData(result);
       })
       .catch((error) => {
         console.error('❌ PurchasePatterns: Error fetching data:', error);
@@ -94,7 +81,7 @@ export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatter
           <BarChart data={data} margin={{ top: 10, right: 20, left: 20, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis 
-              dataKey="hour" 
+              dataKey="hour_of_day" 
               tickFormatter={formatHour}
               fontSize={12}
               tick={{ fill: '#6b7280' }}
@@ -129,7 +116,7 @@ export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatter
           <LineChart data={data} margin={{ top: 10, right: 20, left: 20, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis 
-              dataKey="hour" 
+              dataKey="hour_of_day" 
               tickFormatter={formatHour}
               fontSize={12}
               tick={{ fill: '#6b7280' }}

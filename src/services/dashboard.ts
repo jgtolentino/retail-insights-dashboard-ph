@@ -34,6 +34,20 @@ export interface PurchaseBehaviorData {
   preferred_categories: string[]
 }
 
+export interface LocationDistributionData {
+  location_name: string
+  customer_count: number
+  transaction_count: number
+  total_revenue: number
+}
+
+export interface PurchasePatternData {
+  hour_of_day: number
+  transaction_count: number
+  avg_amount: number
+  total_revenue: number
+}
+
 export const dashboardService = {
   async getDashboardData(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange })
@@ -152,7 +166,7 @@ export const dashboardService = {
       })
       
       // Convert to array and sort by sales - ensure sales is a number
-      const topBrands = Array.from(brandSalesMap.entries())
+      const topBrands = Array.from(brandSalesMap?.entries() ?? [])
         .map(([name, data]) => ({
           name,
           sales: Number(data.sales), // Explicitly convert to number
@@ -167,7 +181,7 @@ export const dashboardService = {
         totalRevenue, 
         totalTransactions, 
         avgTransaction,
-        brandsCount: topBrands.length 
+        brandsCount: topBrands?.length ?? 0 
       })
       
       return {
@@ -268,7 +282,7 @@ export const dashboardService = {
       })
       
       // Convert to array and sort by date
-      const timeSeriesData = Array.from(timeSeriesMap.entries())
+      const timeSeriesData = Array.from(timeSeriesMap?.entries() ?? [])
         .map(([date, data]) => ({
           date,
           transactions: data.transactions,
@@ -277,7 +291,7 @@ export const dashboardService = {
         .sort((a, b) => a.date.localeCompare(b.date))
       
       logger.info('Successfully fetched time series data', { 
-        dataPoints: timeSeriesData.length,
+        dataPoints: timeSeriesData?.length ?? 0,
         groupBy 
       })
       
@@ -315,7 +329,7 @@ export const dashboardService = {
       }))
       
       logger.info('Successfully fetched time series data by date range', { 
-        dataPoints: timeSeriesData.length,
+        dataPoints: timeSeriesData?.length ?? 0,
         startDate,
         endDate
       })
@@ -372,11 +386,7 @@ export const dashboardService = {
         .rpc('get_age_distribution', {
           start_date: startDate + 'T00:00:00Z',
           end_date: endDate + 'T23:59:59Z',
-          bucket_size: bucketSize,
-          category_filter: filters?.category !== 'All' ? filters.category : null,
-          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
-          location_filter: filters?.location !== 'All' ? filters.location : null,
-          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+          bucket_size: bucketSize
         })
       
       if (error) {
@@ -384,7 +394,28 @@ export const dashboardService = {
         throw error
       }
       
-      return data || []
+      // Ensure data is an array and handle edge cases
+      if (!Array.isArray(data)) {
+        logger.warn('Age distribution data is not an array:', data)
+        return []
+      }
+      
+      // Fill in missing age buckets to ensure consistent data
+      const buckets = []
+      for (let age = 0; age <= 100; age += bucketSize) {
+        const bucket = data.find(d => d.age_bucket === `${age}-${age + bucketSize - 1}`)
+        if (bucket) {
+          buckets.push(bucket)
+        } else {
+          // Add empty bucket for missing age ranges
+          buckets.push({
+            age_bucket: `${age}-${age + bucketSize - 1}`,
+            customer_count: 0
+          })
+        }
+      }
+      
+      return buckets
     } catch (error) {
       logger.error('Failed to fetch age distribution data', error)
       return []
@@ -402,11 +433,7 @@ export const dashboardService = {
       const { data, error } = await supabase
         .rpc('get_gender_distribution', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z',
-          category_filter: filters?.category !== 'All' ? filters.category : null,
-          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
-          location_filter: filters?.location !== 'All' ? filters.location : null,
-          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+          end_date: endDate + 'T23:59:59Z'
         })
       
       if (error) {
@@ -428,11 +455,7 @@ export const dashboardService = {
       const { data, error } = await supabase
         .rpc('get_purchase_behavior_by_age', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z',
-          category_filter: filters?.category !== 'All' ? filters.category : null,
-          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
-          location_filter: filters?.location !== 'All' ? filters.location : null,
-          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+          end_date: endDate + 'T23:59:59Z'
         })
       
       if (error) {
@@ -451,17 +474,14 @@ export const dashboardService = {
     startDate: string,
     endDate: string,
     filters?: ConsumerFilters
-  ): Promise<any[]> {
+  ): Promise<LocationDistributionData[]> {
     logger.info('Fetching location distribution data', { startDate, endDate, filters })
     
     try {
       const { data, error } = await supabase
         .rpc('get_location_distribution', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z',
-          category_filter: filters?.category !== 'All' ? filters.category : null,
-          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
-          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+          end_date: endDate + 'T23:59:59Z'
         })
       
       if (error) {
@@ -480,28 +500,24 @@ export const dashboardService = {
     startDate: string,
     endDate: string,
     filters?: ConsumerFilters
-  ): Promise<any[]> {
+  ): Promise<PurchasePatternData[]> {
     logger.info('Fetching purchase patterns by time', { startDate, endDate, filters })
     
     try {
       const { data, error } = await supabase
         .rpc('get_purchase_patterns_by_time', {
           start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z',
-          category_filter: filters?.category !== 'All' ? filters.category : null,
-          brand_filter: filters?.brand !== 'All' ? filters.brand : null,
-          location_filter: filters?.location !== 'All' ? filters.location : null,
-          weekday_weekend: filters?.weekdayWeekend !== 'all' ? filters.weekdayWeekend : null
+          end_date: endDate + 'T23:59:59Z'
         })
       
       if (error) {
-        logger.error('Error fetching purchase patterns:', error)
+        logger.error('Error fetching purchase patterns by time:', error)
         throw error
       }
       
       return data || []
     } catch (error) {
-      logger.error('Failed to fetch purchase patterns data', error)
+      logger.error('Failed to fetch purchase patterns by time data', error)
       return []
     }
   }

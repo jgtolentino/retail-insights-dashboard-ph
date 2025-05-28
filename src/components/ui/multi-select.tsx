@@ -44,23 +44,23 @@ export function MultiSelect({
   const safeSelected = selected || [];
 
   const handleUnselect = (value: string) => {
-    onChange(safeSelected.filter((item) => item !== value));
+    onChange((safeSelected ?? []).filter((item) => item !== value));
   };
 
   const handleSelectAll = () => {
-    onChange(options.map((option) => option.value));
+    onChange((options ?? []).map((option) => option.value));
   };
 
   const handleClearAll = () => {
     onChange([]);
   };
 
-  const selectedOptions = options.filter((option) => 
+  const selectedOptions = (options ?? []).filter((option) => 
     safeSelected.includes(option.value)
   );
 
   const displayedTags = selectedOptions.slice(0, maxDisplayedTags);
-  const remainingCount = selectedOptions.length - maxDisplayedTags;
+  const remainingCount = (selectedOptions?.length ?? 0) - maxDisplayedTags;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -75,11 +75,11 @@ export function MultiSelect({
           )}
         >
           <div className="flex gap-1 flex-wrap">
-            {safeSelected.length === 0 ? (
+            {(safeSelected?.length ?? 0) === 0 ? (
               <span className="text-muted-foreground">{placeholder}</span>
             ) : (
               <>
-                {displayedTags.map((option) => (
+                {(displayedTags ?? []).map((option) => (
                   <Badge
                     variant="secondary"
                     key={option.value}
@@ -131,12 +131,12 @@ export function MultiSelect({
               </Button>
             </div>
             
-            {options.map((option) => (
+            {(options ?? []).map((option) => (
               <CommandItem
                 key={option.value}
                 onSelect={() => {
                   const newSelected = safeSelected.includes(option.value)
-                    ? safeSelected.filter((item) => item !== option.value)
+                    ? (safeSelected ?? []).filter((item) => item !== option.value)
                     : [...safeSelected, option.value];
                   onChange(newSelected);
                 }}

@@ -254,15 +254,15 @@ export function displayValidationResults(results: ValidationResult): void {
     console.log('❌ Validation failed!');
   }
 
-  if (results.errors.length > 0) {
+  if ((results.errors?.length ?? 0) > 0) {
     console.group('🚨 Errors:');
-    results.errors.forEach(error => console.error(`  • ${error}`));
+    (results.errors ?? []).forEach(error => console.error(`  • ${error}`));
     console.groupEnd();
   }
 
-  if (results.warnings.length > 0) {
+  if ((results.warnings?.length ?? 0) > 0) {
     console.group('⚠️  Warnings:');
-    results.warnings.forEach(warning => console.warn(`  • ${warning}`));
+    (results.warnings ?? []).forEach(warning => console.warn(`  • ${warning}`));
     console.groupEnd();
   }
 }

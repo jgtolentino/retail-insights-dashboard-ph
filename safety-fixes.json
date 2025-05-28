@@ -1,47 +1,7 @@
 [
   {
-    "file": "src/utils/safety.ts",
-    "line": 15,
-    "issue": "Array.from without null check",
-    "code": "return Array.from(value);",
-    "match": "Array.from(value)",
-    "fix": "Array.from(value || [])"
-  },
-  {
-    "file": "src/utils/safety.ts",
-    "line": 162,
-    "issue": "Array.from without null check",
-    "code": "if (value instanceof Set) return Array.from(value);",
-    "match": "Array.from(value)",
-    "fix": "Array.from(value || [])"
-  },
-  {
-    "file": "src/utils/safeArray.ts",
-    "line": 7,
-    "issue": "Array.from without null check",
-    "code": "if (value instanceof Set) return Array.from(value);",
-    "match": "Array.from(value)",
-    "fix": "Array.from(value || [])"
-  },
-  {
-    "file": "src/utils/safeArray.ts",
-    "line": 10,
-    "issue": "Array.from without null check",
-    "code": "return Array.from(value);",
-    "match": "Array.from(value)",
-    "fix": "Array.from(value || [])"
-  },
-  {
-    "file": "src/components/charts/PurchasePatterns.tsx",
-    "line": 46,
-    "issue": "Array.from without null check",
-    "code": "const mockHourlyData = Array.from({ length: 24 }, (_, hour) => ({",
-    "match": "Array.from({ length: 24 }, (_, hour)",
-    "fix": "Array.from({ length: 24 }, (_, hour || [])"
-  },
-  {
     "file": "src/services/dashboard.ts",
-    "line": 155,
+    "line": 169,
     "issue": "Array.from without null check",
     "code": "const topBrands = Array.from(brandSalesMap.entries())",
     "match": "Array.from(brandSalesMap.entries()",
@@ -49,7 +9,7 @@
   },
   {
     "file": "src/services/dashboard.ts",
-    "line": 271,
+    "line": 285,
     "issue": "Array.from without null check",
     "code": "const timeSeriesData = Array.from(timeSeriesMap.entries())",
     "match": "Array.from(timeSeriesMap.entries()",

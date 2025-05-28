@@ -30,7 +30,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const NavLinks = () => (
     <>
-      {navigation.map((item) => {
+      {(navigation ?? []).map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.href;
         return (

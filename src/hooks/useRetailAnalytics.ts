@@ -44,7 +44,7 @@ export const useRetailAnalytics = () => {
       // Aggregate sales by brand
       const brandSales: { [key: string]: { sales: number; is_tbwa_client: boolean } } = {};
       
-      data.forEach(item => {
+      (data ?? []).forEach(item => {
         const brandName = item.products?.brands?.name;
         const subtotal = item.subtotal || 0;
         const isTbwaClient = item.products?.brands?.is_tbwa_client || false;

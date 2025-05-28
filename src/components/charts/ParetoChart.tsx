@@ -76,13 +76,13 @@ export function ParetoChart({
         <div className="bg-background border rounded-lg p-3 shadow-lg">
           <p className="font-semibold">{label}</p>
           <p className="text-sm text-primary">
-            {valueLabel}: {formatCurrency(payload[0].value)}
+            {valueLabel}: {formatCurrency(payload?.[[0]].value)}
           </p>
           <p className="text-sm text-muted-foreground">
-            Percentage: {payload[0].payload.percentage.toFixed(1)}%
+            Percentage: {payload?.[[0]].payload.percentage.toFixed(1)}%
           </p>
           <p className="text-sm text-orange-600">
-            Cumulative: {payload[1].value.toFixed(1)}%
+            Cumulative: {payload?.[[1]].value.toFixed(1)}%
           </p>
         </div>
       );
@@ -140,7 +140,7 @@ export function ParetoChart({
               name={valueLabel}
               radius={[4, 4, 0, 0]}
             >
-              {data.map((entry, index) => (
+              {(data ?? []).map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={index <= thresholdIndex ? '#3b82f6' : '#94a3b8'} 

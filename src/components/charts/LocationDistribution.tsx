@@ -9,18 +9,9 @@ import {
   Tooltip,
   CartesianGrid
 } from 'recharts';
-import { dashboardService } from '@/services/dashboard';
+import { dashboardService, type LocationDistributionData as ServiceLocationData } from '@/services/dashboard';
 import { formatCurrency } from '@/lib/utils';
 import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext';
-
-interface LocationDistributionData {
-  location: string;
-  customer_count: number;
-  transaction_count: number;
-  total_revenue: number;
-  avg_transaction_value: number;
-  percentage: number;
-}
 
 interface LocationDistributionProps {
   startDate: string;
@@ -34,7 +25,7 @@ interface LocationDistributionProps {
 }
 
 export function LocationDistribution({ startDate, endDate, filters }: LocationDistributionProps) {
-  const [data, setData] = useState<LocationDistributionData[]>([]);
+  const [data, setData] = useState<ServiceLocationData[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { setFilters } = useEnhancedFilters();
@@ -52,8 +43,8 @@ export function LocationDistribution({ startDate, endDate, filters }: LocationDi
   }, [startDate, endDate, filters]);
 
   const handleBarClick = (data: any) => {
-    if (data && data.activePayload && data.activePayload[0]) {
-      const location = data.activePayload[0].payload.location;
+    if (data && data.activePayload && data.activePayload?.[[0]]) {
+      const location = data.activePayload?.[[0]].payload.location_name;
       
       // Update the global filters with the selected location
       // Note: We'll need to add location/province to the filter types
@@ -104,7 +95,7 @@ export function LocationDistribution({ startDate, endDate, filters }: LocationDi
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
-            dataKey="location" 
+            dataKey="location_name" 
             fontSize={11}
             tick={{ fill: '#6b7280' }}
             angle={-45}

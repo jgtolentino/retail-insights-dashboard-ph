@@ -115,8 +115,8 @@ export function ProductMixDashboard() {
 
     // Convert to CSV
     const csv = [
-      Object.keys(data[0]).join(','),
-      ...data.map((row: any) => Object.values(row).join(','))
+      Object.keys(data?.[[0]]).join(','),
+      ...(data ?? []).map((row: any) => Object.values(row).join(','))
     ].join('\n');
     
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -280,7 +280,7 @@ export function ProductMixDashboard() {
                           fill="#8884d8"
                           dataKey="value"
                         >
-                          {pieData.map((_, index) => (
+                          {(pieData ?? []).map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>

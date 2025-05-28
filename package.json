@@ -17,7 +17,9 @@
     "verify:env": "node scripts/verify-env.js",
     "audit:safety": "node scripts/audit-safety.js",
     "fix:safety": "node scripts/apply-safety-fixes.js",
-    "test:safety": "npm run audit:safety -- --quiet"
+    "test:safety": "npm run audit:safety -- --quiet",
+    "audit:arrays": "node scripts/audit-array-operations.js",
+    "fix:arrays": "node scripts/apply-array-fixes.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

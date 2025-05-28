@@ -68,7 +68,7 @@ export function SprintDashboard({ sprint, children }: SprintDashboardProps) {
           <AlertTitle>Sprint {sprint} Validation Failed</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              {validationStatus.errors.map((error, index) => (
+              {(validationStatus.errors ?? []).map((error, index) => (
                 <li key={index} className="text-sm">{error}</li>
               ))}
             </ul>
@@ -82,7 +82,7 @@ export function SprintDashboard({ sprint, children }: SprintDashboardProps) {
           <AlertTitle>Sprint {sprint} Warnings</AlertTitle>
           <AlertDescription>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              {validationStatus.warnings.map((warning, index) => (
+              {(validationStatus.warnings ?? []).map((warning, index) => (
                 <li key={index} className="text-sm">{warning}</li>
               ))}
             </ul>

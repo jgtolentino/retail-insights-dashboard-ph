@@ -126,19 +126,19 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
       }
       
       // Array-based filters - using safe join
-      if (newFilters.ageGroups && newFilters.ageGroups.length > 0) {
+      if (newFilters.ageGroups && (newFilters.ageGroups?.length ?? 0) > 0) {
         params.set('ageGroups', safeJoin(newFilters.ageGroups));
       }
       
-      if (newFilters.genders && newFilters.genders.length > 0) {
+      if (newFilters.genders && (newFilters.genders?.length ?? 0) > 0) {
         params.set('genders', safeJoin(newFilters.genders));
       }
       
-      if (newFilters.brands && newFilters.brands.length > 0) {
+      if (newFilters.brands && (newFilters.brands?.length ?? 0) > 0) {
         params.set('brands', safeJoin(newFilters.brands));
       }
       
-      if (newFilters.categories && newFilters.categories.length > 0) {
+      if (newFilters.categories && (newFilters.categories?.length ?? 0) > 0) {
         params.set('categories', safeJoin(newFilters.categories));
       }
       

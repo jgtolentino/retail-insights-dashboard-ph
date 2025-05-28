@@ -88,7 +88,7 @@ export function Breadcrumbs() {
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center space-x-2 py-3 text-sm">
           <Home className="h-4 w-4 text-gray-500" />
-          {breadcrumbItems.map((item, index) => (
+          {(breadcrumbItems ?? []).map((item, index) => (
             <div key={item.label} className="flex items-center">
               {index > 0 && (
                 <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />
@@ -133,7 +133,7 @@ export function Breadcrumbs() {
           {/* Active Filters Display */}
           {hasFilters && (
             <div className="mt-3 flex flex-wrap gap-2">
-              {filterSummary.map((filter, index) => (
+              {(filterSummary ?? []).map((filter, index) => (
                 <Badge 
                   key={index} 
                   variant="secondary" 

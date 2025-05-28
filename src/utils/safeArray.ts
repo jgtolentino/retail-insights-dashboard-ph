@@ -4,10 +4,10 @@
 export const safeArrayFrom = <T>(value: any): T[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (value instanceof Set) return Array.from(value || []);
+  if (value instanceof Set) return Array.from(value ?? []);
   if (typeof value?.[Symbol.iterator] === 'function') {
     try {
-      return Array.from(value || []);
+      return Array.from(value ?? []);
     } catch {
       return [];
     }
@@ -28,5 +28,5 @@ export const safeSplit = (value: string | null | undefined): string[] => {
  */
 export const safeJoin = (arr: any[] | undefined | null, separator = ','): string => {
   if (!arr || !Array.isArray(arr)) return '';
-  return arr.filter(Boolean).join(separator);
+  return (arr ?? []).filter(Boolean).join(separator);
 };

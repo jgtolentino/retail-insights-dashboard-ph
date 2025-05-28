@@ -1,7 +1,7 @@
 {
   "summary": {
     "filesScanned": 99,
-    "totalIssues": 116,
+    "totalIssues": 53,
     "issuesByType": [
       {
         "type": ".includes() without safety check",
@@ -9,114 +9,22 @@
       },
       {
         "type": ".length without safety check",
-        "count": 55
+        "count": 40
       },
       {
         "type": ".forEach() without safety check",
-        "count": 6
-      },
-      {
-        "type": "Array.from without null check",
-        "count": 9
-      },
-      {
-        "type": ".filter() without safety check",
-        "count": 5
-      },
-      {
-        "type": ".map() without safety check",
-        "count": 29
+        "count": 1
       }
     ]
   },
   "issues": [
     {
       "file": "src/contexts/EnhancedFilterContext.tsx",
-      "line": 210,
+      "line": 219,
       "issue": ".includes() without safety check",
       "code": "return relevantFilters.includes(filterName);",
       "match": "relevantFilters.includes(",
       "fix": null
-    },
-    {
-      "file": "src/contexts/EnhancedFilterContext.tsx",
-      "line": 126,
-      "issue": ".length without safety check",
-      "code": "if (newFilters.ageGroups && newFilters.ageGroups.length > 0) {",
-      "match": "ageGroups.length",
-      "fix": null
-    },
-    {
-      "file": "src/contexts/EnhancedFilterContext.tsx",
-      "line": 130,
-      "issue": ".length without safety check",
-      "code": "if (newFilters.genders && newFilters.genders.length > 0) {",
-      "match": "genders.length",
-      "fix": null
-    },
-    {
-      "file": "src/contexts/EnhancedFilterContext.tsx",
-      "line": 134,
-      "issue": ".length without safety check",
-      "code": "if (newFilters.brands && newFilters.brands.length > 0) {",
-      "match": "brands.length",
-      "fix": null
-    },
-    {
-      "file": "src/contexts/EnhancedFilterContext.tsx",
-      "line": 138,
-      "issue": ".length without safety check",
-      "code": "if (newFilters.categories && newFilters.categories.length > 0) {",
-      "match": "categories.length",
-      "fix": null
-    },
-    {
-      "file": "src/utils/pre-sprint-checks.ts",
-      "line": 259,
-      "issue": ".forEach() without safety check",
-      "code": "results.errors.forEach(error => console.error(`  • ${error}`));",
-      "match": "errors.forEach(",
-      "fix": null
-    },
-    {
-      "file": "src/utils/pre-sprint-checks.ts",
-      "line": 265,
-      "issue": ".forEach() without safety check",
-      "code": "results.warnings.forEach(warning => console.warn(`  • ${warning}`));",
-      "match": "warnings.forEach(",
-      "fix": null
-    },
-    {
-      "file": "src/utils/pre-sprint-checks.ts",
-      "line": 257,
-      "issue": ".length without safety check",
-      "code": "if (results.errors.length > 0) {",
-      "match": "errors.length",
-      "fix": null
-    },
-    {
-      "file": "src/utils/pre-sprint-checks.ts",
-      "line": 263,
-      "issue": ".length without safety check",
-      "code": "if (results.warnings.length > 0) {",
-      "match": "warnings.length",
-      "fix": null
-    },
-    {
-      "file": "src/utils/safety.ts",
-      "line": 15,
-      "issue": "Array.from without null check",
-      "code": "return Array.from(value);",
-      "match": "Array.from(value)",
-      "fix": "Array.from(value || [])"
-    },
-    {
-      "file": "src/utils/safety.ts",
-      "line": 162,
-      "issue": "Array.from without null check",
-      "code": "if (value instanceof Set) return Array.from(value);",
-      "match": "Array.from(value)",
-      "fix": "Array.from(value || [])"
     },
     {
       "file": "src/utils/safety.ts",
@@ -167,30 +75,6 @@
       "fix": null
     },
     {
-      "file": "src/utils/safeArray.ts",
-      "line": 7,
-      "issue": "Array.from without null check",
-      "code": "if (value instanceof Set) return Array.from(value);",
-      "match": "Array.from(value)",
-      "fix": "Array.from(value || [])"
-    },
-    {
-      "file": "src/utils/safeArray.ts",
-      "line": 10,
-      "issue": "Array.from without null check",
-      "code": "return Array.from(value);",
-      "match": "Array.from(value)",
-      "fix": "Array.from(value || [])"
-    },
-    {
-      "file": "src/utils/safeArray.ts",
-      "line": 31,
-      "issue": ".filter() without safety check",
-      "code": "return arr.filter(Boolean).join(separator);",
-      "match": "arr.filter(",
-      "fix": null
-    },
-    {
       "file": "src/integrations/supabase/client.ts",
       "line": 23,
       "issue": ".includes() without safety check",
@@ -207,30 +91,6 @@
       "fix": null
     },
     {
-      "file": "src/components/ui/toaster.tsx",
-      "line": 16,
-      "issue": ".map() without safety check",
-      "code": "{toasts.map(function ({ id, title, description, action, ...props }) {",
-      "match": "toasts.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/chart.tsx",
-      "line": 186,
-      "issue": ".map() without safety check",
-      "code": "{payload.map((item, index) => {",
-      "match": "payload.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/chart.tsx",
-      "line": 286,
-      "issue": ".map() without safety check",
-      "code": "{payload.map((item) => {",
-      "match": "payload.map(",
-      "fix": null
-    },
-    {
       "file": "src/components/ui/chart.tsx",
       "line": 73,
       "issue": ".length without safety check",
@@ -244,54 +104,6 @@
       "issue": ".length without safety check",
       "code": "const nestLabel = payload.length === 1 && indicator !== \"dot\"",
       "match": "payload.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 51,
-      "issue": ".map() without safety check",
-      "code": "onChange(options.map((option) => option.value));",
-      "match": "options.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 82,
-      "issue": ".map() without safety check",
-      "code": "{displayedTags.map((option) => (",
-      "match": "displayedTags.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 134,
-      "issue": ".map() without safety check",
-      "code": "{options.map((option) => (",
-      "match": "options.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 47,
-      "issue": ".filter() without safety check",
-      "code": "onChange(safeSelected.filter((item) => item !== value));",
-      "match": "safeSelected.filter(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 58,
-      "issue": ".filter() without safety check",
-      "code": "const selectedOptions = options.filter((option) =>",
-      "match": "options.filter(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 139,
-      "issue": ".filter() without safety check",
-      "code": "? safeSelected.filter((item) => item !== option.value)",
-      "match": "safeSelected.filter(",
       "fix": null
     },
     {
@@ -320,22 +132,6 @@
     },
     {
       "file": "src/components/ui/multi-select.tsx",
-      "line": 63,
-      "issue": ".length without safety check",
-      "code": "const remainingCount = selectedOptions.length - maxDisplayedTags;",
-      "match": "selectedOptions.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
-      "line": 78,
-      "issue": ".length without safety check",
-      "code": "{safeSelected.length === 0 ? (",
-      "match": "safeSelected.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/ui/multi-select.tsx",
       "line": 118,
       "issue": ".length without safety check",
       "code": "disabled={safeSelected.length === options.length}",
@@ -356,22 +152,6 @@
       "issue": ".length without safety check",
       "code": "disabled={safeSelected.length === 0}",
       "match": "safeSelected.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/layout/Breadcrumbs.tsx",
-      "line": 91,
-      "issue": ".map() without safety check",
-      "code": "{breadcrumbItems.map((item, index) => (",
-      "match": "breadcrumbItems.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/layout/Breadcrumbs.tsx",
-      "line": 136,
-      "issue": ".map() without safety check",
-      "code": "{filterSummary.map((filter, index) => (",
-      "match": "filterSummary.map(",
       "fix": null
     },
     {
@@ -463,22 +243,6 @@
       "fix": null
     },
     {
-      "file": "src/components/charts/PurchasePatterns.tsx",
-      "line": 46,
-      "issue": "Array.from without null check",
-      "code": "const mockHourlyData = Array.from({ length: 24 }, (_, hour) => ({",
-      "match": "Array.from({ length: 24 }, (_, hour)",
-      "fix": "Array.from({ length: 24 }, (_, hour || [])"
-    },
-    {
-      "file": "src/components/charts/ProductSubstitutionsChart.tsx",
-      "line": 123,
-      "issue": ".map() without safety check",
-      "code": "{chartData.map((entry, index) => (",
-      "match": "chartData.map(",
-      "fix": null
-    },
-    {
       "file": "src/components/charts/ProductSubstitutionsChart.tsx",
       "line": 53,
       "issue": ".length without safety check",
@@ -519,38 +283,6 @@
       "fix": null
     },
     {
-      "file": "src/components/charts/GenderDistribution.tsx",
-      "line": 59,
-      "issue": ".map() without safety check",
-      "code": "const pieData = data.map(item => ({",
-      "match": "data.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/charts/GenderDistribution.tsx",
-      "line": 84,
-      "issue": ".map() without safety check",
-      "code": "{pieData.map((entry, index) => (",
-      "match": "pieData.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/charts/SankeyDiagram.tsx",
-      "line": 62,
-      "issue": ".map() without safety check",
-      "code": "nodes: nodes.map(d => ({ ...d })),",
-      "match": "nodes.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/charts/SankeyDiagram.tsx",
-      "line": 63,
-      "issue": ".map() without safety check",
-      "code": "links: links.map(d => ({ ...d }))",
-      "match": "links.map(",
-      "fix": null
-    },
-    {
       "file": "src/components/charts/SankeyDiagram.tsx",
       "line": 37,
       "issue": ".length without safety check",
@@ -580,14 +312,6 @@
       "issue": ".length without safety check",
       "code": "if (!nodes.length || !links.length) {",
       "match": "links.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/charts/ParetoChart.tsx",
-      "line": 143,
-      "issue": ".map() without safety check",
-      "code": "{data.map((entry, index) => (",
-      "match": "data.map(",
       "fix": null
     },
     {
@@ -632,22 +356,6 @@
     },
     {
       "file": "src/components/ProductMixDashboard.tsx",
-      "line": 119,
-      "issue": ".map() without safety check",
-      "code": "...data.map((row: any) => Object.values(row).join(','))",
-      "match": "data.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ProductMixDashboard.tsx",
-      "line": 283,
-      "issue": ".map() without safety check",
-      "code": "{pieData.map((_, index) => (",
-      "match": "pieData.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/ProductMixDashboard.tsx",
       "line": 284,
       "issue": ".length without safety check",
       "code": "<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />",
@@ -660,62 +368,6 @@
       "issue": ".length without safety check",
       "code": "style={{ backgroundColor: COLORS[index % COLORS.length] }}",
       "match": "COLORS.length",
-      "fix": null
-    },
-    {
-      "file": "src/components/GlobalFiltersPanel.tsx",
-      "line": 173,
-      "issue": ".map() without safety check",
-      "code": "{categories.map((cat) => (",
-      "match": "categories.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/GlobalFiltersPanel.tsx",
-      "line": 197,
-      "issue": ".map() without safety check",
-      "code": "{brands.map((brand) => (",
-      "match": "brands.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/GlobalFiltersPanel.tsx",
-      "line": 221,
-      "issue": ".map() without safety check",
-      "code": "{locations.map((loc) => (",
-      "match": "locations.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/FilterSummary.tsx",
-      "line": 43,
-      "issue": ".map() without safety check",
-      "code": "{summary.map((item, index) => (",
-      "match": "summary.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/DashboardLayout.tsx",
-      "line": 33,
-      "issue": ".map() without safety check",
-      "code": "{navigation.map((item) => {",
-      "match": "navigation.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/SprintDashboard.tsx",
-      "line": 71,
-      "issue": ".map() without safety check",
-      "code": "{validationStatus.errors.map((error, index) => (",
-      "match": "errors.map(",
-      "fix": null
-    },
-    {
-      "file": "src/components/SprintDashboard.tsx",
-      "line": 85,
-      "issue": ".map() without safety check",
-      "code": "{validationStatus.warnings.map((warning, index) => (",
-      "match": "warnings.map(",
       "fix": null
     },
     {
@@ -743,54 +395,6 @@
       "fix": null
     },
     {
-      "file": "src/hooks/use-toast.ts",
-      "line": 85,
-      "issue": ".map() without safety check",
-      "code": "toasts: state.toasts.map((t) =>",
-      "match": "toasts.map(",
-      "fix": null
-    },
-    {
-      "file": "src/hooks/use-toast.ts",
-      "line": 105,
-      "issue": ".map() without safety check",
-      "code": "toasts: state.toasts.map((t) =>",
-      "match": "toasts.map(",
-      "fix": null
-    },
-    {
-      "file": "src/hooks/use-toast.ts",
-      "line": 98,
-      "issue": ".forEach() without safety check",
-      "code": "state.toasts.forEach((toast) => {",
-      "match": "toasts.forEach(",
-      "fix": null
-    },
-    {
-      "file": "src/hooks/use-toast.ts",
-      "line": 135,
-      "issue": ".forEach() without safety check",
-      "code": "listeners.forEach((listener) => {",
-      "match": "listeners.forEach(",
-      "fix": null
-    },
-    {
-      "file": "src/hooks/use-toast.ts",
-      "line": 124,
-      "issue": ".filter() without safety check",
-      "code": "toasts: state.toasts.filter((t) => t.id !== action.toastId),",
-      "match": "toasts.filter(",
-      "fix": null
-    },
-    {
-      "file": "src/hooks/useRetailAnalytics.ts",
-      "line": 47,
-      "issue": ".forEach() without safety check",
-      "code": "data.forEach(item => {",
-      "match": "data.forEach(",
-      "fix": null
-    },
-    {
       "file": "src/hooks/useRetailAnalytics.ts",
       "line": 72,
       "issue": ".length without safety check",
@@ -804,30 +408,6 @@
       "issue": ".length without safety check",
       "code": "const totalTransactions = transactions.length;",
       "match": "transactions.length",
-      "fix": null
-    },
-    {
-      "file": "src/pages/Index.tsx",
-      "line": 252,
-      "issue": ".map() without safety check",
-      "code": "{dateRangeOptions.map((option) => (",
-      "match": "dateRangeOptions.map(",
-      "fix": null
-    },
-    {
-      "file": "src/pages/Index.tsx",
-      "line": 385,
-      "issue": ".map() without safety check",
-      "code": "{chartMetricOptions.map((option) => {",
-      "match": "chartMetricOptions.map(",
-      "fix": null
-    },
-    {
-      "file": "src/pages/Index.tsx",
-      "line": 461,
-      "issue": ".map() without safety check",
-      "code": "const maxSales = Math.max(...data.topBrands.map(b => b.sales))",
-      "match": "topBrands.map(",
       "fix": null
     },
     {
@@ -855,107 +435,11 @@
       "fix": null
     },
     {
-      "file": "src/services/dashboard.ts",
-      "line": 155,
-      "issue": "Array.from without null check",
-      "code": "const topBrands = Array.from(brandSalesMap.entries())",
-      "match": "Array.from(brandSalesMap.entries()",
-      "fix": "Array.from(brandSalesMap.entries( || [])"
-    },
-    {
-      "file": "src/services/dashboard.ts",
-      "line": 271,
-      "issue": "Array.from without null check",
-      "code": "const timeSeriesData = Array.from(timeSeriesMap.entries())",
-      "match": "Array.from(timeSeriesMap.entries()",
-      "fix": "Array.from(timeSeriesMap.entries( || [])"
-    },
-    {
-      "file": "src/services/dashboard.ts",
-      "line": 170,
-      "issue": ".length without safety check",
-      "code": "brandsCount: topBrands.length",
-      "match": "topBrands.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/dashboard.ts",
-      "line": 280,
-      "issue": ".length without safety check",
-      "code": "dataPoints: timeSeriesData.length,",
-      "match": "timeSeriesData.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/dashboard.ts",
-      "line": 318,
-      "issue": ".length without safety check",
-      "code": "dataPoints: timeSeriesData.length,",
-      "match": "timeSeriesData.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 202,
-      "issue": "Array.from without null check",
-      "code": "const sortedItems = Array.from(revenueMap.entries())",
-      "match": "Array.from(revenueMap.entries()",
-      "fix": "Array.from(revenueMap.entries( || [])"
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 286,
-      "issue": "Array.from without null check",
-      "code": "return Array.from(categoryMap.entries()).map(([category, data]) => ({",
-      "match": "Array.from(categoryMap.entries()",
-      "fix": "Array.from(categoryMap.entries( || [])"
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 210,
-      "issue": ".map() without safety check",
-      "code": "const paretoData: ParetoItem[] = sortedItems.map(([name, value]) => {",
-      "match": "sortedItems.map(",
-      "fix": null
-    },
-    {
       "file": "src/services/productMix.ts",
       "line": 101,
       "issue": ".forEach() without safety check",
       "code": "productsByCategory.forEach((products, category) => {",
       "match": "productsByCategory.forEach(",
-      "fix": null
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 102,
-      "issue": ".length without safety check",
-      "code": "if (products.length < 2) return;",
-      "match": "products.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 105,
-      "issue": ".length without safety check",
-      "code": "for (let i = 0; i < Math.min(products.length - 1, 5); i++) {",
-      "match": "products.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 106,
-      "issue": ".length without safety check",
-      "code": "for (let j = i + 1; j < Math.min(products.length, i + 3); j++) {",
-      "match": "products.length",
-      "fix": null
-    },
-    {
-      "file": "src/services/productMix.ts",
-      "line": 108,
-      "issue": ".length without safety check",
-      "code": "const reasonIndex = Math.floor(Math.random() * reasons.length);",
-      "match": "reasons.length",
       "fix": null
     }
   ]

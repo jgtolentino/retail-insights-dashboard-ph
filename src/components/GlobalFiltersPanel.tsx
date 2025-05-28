@@ -170,7 +170,7 @@ export function GlobalFiltersPanel({ className = '' }: { className?: string }) {
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
+                {(categories ?? []).map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>
@@ -194,7 +194,7 @@ export function GlobalFiltersPanel({ className = '' }: { className?: string }) {
                 <SelectValue placeholder="Select brand" />
               </SelectTrigger>
               <SelectContent>
-                {brands.map((brand) => (
+                {(brands ?? []).map((brand) => (
                   <SelectItem key={brand} value={brand}>
                     {brand}
                   </SelectItem>
@@ -218,7 +218,7 @@ export function GlobalFiltersPanel({ className = '' }: { className?: string }) {
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
-                {locations.map((loc) => (
+                {(locations ?? []).map((loc) => (
                   <SelectItem key={loc} value={loc}>
                     {loc}
                   </SelectItem>

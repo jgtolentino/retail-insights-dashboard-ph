@@ -99,13 +99,13 @@ export const productMixService = {
       
       // For each category, create substitution patterns
       productsByCategory.forEach((products, category) => {
-        if (products.length < 2) return;
+        if ((products?.length ?? 0) < 2) return;
         
         // Create substitutions within the same category
-        for (let i = 0; i < Math.min(products.length - 1, 5); i++) {
-          for (let j = i + 1; j < Math.min(products.length, i + 3); j++) {
+        for (let i = 0; i < Math.min((products?.length ?? 0) - 1, 5); i++) {
+          for (let j = i + 1; j < Math.min((products?.length ?? 0), i + 3); j++) {
             const count = Math.floor(Math.random() * 50) + 10;
-            const reasonIndex = Math.floor(Math.random() * reasons.length);
+            const reasonIndex = Math.floor(Math.random() * (reasons?.length ?? 0));
             
             substitutions.push({
               original_product: products[i],
@@ -199,15 +199,15 @@ export const productMixService = {
       });
 
       // Sort by revenue descending
-      const sortedItems = Array.from(revenueMap.entries())
-        .sort((a, b) => b[1] - a[1]);
+      const sortedItems = Array.from(revenueMap?.entries() ?? [])
+        .sort((a, b) => b?.[[1]] - a?.[[1]]);
 
       // Calculate total revenue
       const totalRevenue = sortedItems.reduce((sum, [_, value]) => sum + value, 0);
 
       // Build Pareto data
       let cumulativePercentage = 0;
-      const paretoData: ParetoItem[] = sortedItems.map(([name, value]) => {
+      const paretoData: ParetoItem[] = (sortedItems ?? []).map(([name, value]) => {
         const percentage = (value / totalRevenue) * 100;
         cumulativePercentage += percentage;
         
@@ -283,7 +283,7 @@ export const productMixService = {
         categoryMap.set(category, existing);
       });
 
-      return Array.from(categoryMap.entries()).map(([category, data]) => ({
+      return Array.from(categoryMap?.entries() ?? []).map(([category, data]) => ({
         category,
         ...data
       }));

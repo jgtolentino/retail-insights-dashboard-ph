@@ -56,7 +56,7 @@ export function GenderDistribution({ startDate, endDate, filters }: GenderDistri
     );
   }
 
-  const pieData = data.map(item => ({
+  const pieData = (data ?? []).map(item => ({
     name: item.gender,
     value: item.customer_count,
     revenue: item.total_revenue
@@ -81,7 +81,7 @@ export function GenderDistribution({ startDate, endDate, filters }: GenderDistri
             onClick={handleGenderChartClick}
             cursor="pointer"
           >
-            {pieData.map((entry, index) => (
+            {(pieData ?? []).map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || '#6b7280'} 

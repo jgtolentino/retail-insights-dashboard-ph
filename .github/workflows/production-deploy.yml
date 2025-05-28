@@ -1,0 +1,225 @@
+name: Production Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '18'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run safety audits
+        run: |
+          npm run audit:arrays
+          npm run audit:safety
+
+      - name: Type checking
+        run: npm run build
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Generate version
+        id: version
+        run: |
+          VERSION=$(date +%Y%m%d)-$(git rev-parse --short HEAD)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  sql-deployment:
+    name: Deploy SQL Functions
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy SQL functions to Supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          # Install Supabase CLI
+          npm install -g @supabase/cli
+          
+          # Deploy SQL functions
+          supabase db push --project-ref $SUPABASE_PROJECT_REF
+          
+          # Run SQL function scripts
+          for sql_file in sql-functions/*.sql; do
+            echo "Deploying $sql_file..."
+            supabase db exec --file "$sql_file" --project-ref $SUPABASE_PROJECT_REF
+          done
+
+  performance-tests:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: [quality-gates, sql-deployment]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g lighthouse
+
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Start preview server
+        run: |
+          npm run preview &
+          sleep 10
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Run Lighthouse performance audit
+        run: |
+          lighthouse http://localhost:4173 \
+            --output=json \
+            --output-path=./lighthouse-report.json \
+            --chrome-flags="--headless --no-sandbox"
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report.json
+
+  staging-deployment:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [quality-gates, performance-tests]
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel (Staging)
+        run: |
+          vercel deploy \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --env VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL_STAGING }} \
+            --env VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY_STAGING }} \
+            --build-env VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL_STAGING }} \
+            --build-env VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY_STAGING }}
+
+  integration-tests:
+    name: Integration Testing
+    runs-on: ubuntu-latest
+    needs: staging-deployment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: |
+          npm run test:integration
+        env:
+          TEST_URL: ${{ needs.staging-deployment.outputs.preview-url }}
+
+  production-deployment:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [quality-gates, integration-tests]
+    environment: production
+    if: github.ref == 'refs/heads/main'
+    outputs:
+      deployment-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel (Production)
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }} \
+            --env VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
+            --env VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} \
+            --build-env VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
+            --build-env VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Tag release
+        run: |
+          git tag v${{ needs.quality-gates.outputs.version }}
+          git push origin v${{ needs.quality-gates.outputs.version }}
+
+  post-deployment:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: production-deployment
+    steps:
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f ${{ needs.production-deployment.outputs.deployment-url }}/api/health || exit 1
+
+      - name: Setup monitoring alerts
+        run: |
+          # Placeholder for monitoring setup
+          echo "Setting up monitoring for ${{ needs.production-deployment.outputs.deployment-url }}"

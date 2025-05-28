@@ -78,7 +78,7 @@ export function ProductSubstitutionsChart({
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload?.[[0]].payload;
       return (
         <div className="bg-background border rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-sm">{data.original}</p>
@@ -120,7 +120,7 @@ export function ProductSubstitutionsChart({
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                  {chartData.map((entry, index) => (
+                  {(chartData ?? []).map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={index === 0 ? '#3b82f6' : '#60a5fa'} 

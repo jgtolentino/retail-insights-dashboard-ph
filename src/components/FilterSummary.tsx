@@ -40,7 +40,7 @@ export function FilterSummary({
         Filters applied:
       </div>
       
-      {summary.map((item, index) => (
+      {(summary ?? []).map((item, index) => (
         <Badge key={index} variant="secondary" className="text-xs">
           {item}
           {onClearFilter && (
