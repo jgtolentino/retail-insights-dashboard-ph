@@ -3,6 +3,7 @@ import { useSearchParams, useLocation } from 'react-router-dom';
 import { debounce } from 'lodash-es';
 import type { GlobalFilters } from '@/types/filters';
 import { defaultGlobalFilters } from '@/types/filters';
+import { safeSplit, safeJoin } from '@/utils/safeArray';
 
 interface FilterContextValue {
   filters: GlobalFilters;
@@ -52,18 +53,18 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
     const dayType = searchParams.get('dayType') as 'all' | 'weekday' | 'weekend';
     if (dayType) urlFilters.weekdayWeekend = dayType;
     
-    // Array-based filters from URL
+    // Array-based filters from URL - using safe parsing
     const ageGroups = searchParams.get('ageGroups');
-    if (ageGroups) urlFilters.ageGroups = ageGroups.split(',');
+    if (ageGroups) urlFilters.ageGroups = safeSplit(ageGroups);
     
     const genders = searchParams.get('genders');
-    if (genders) urlFilters.genders = genders.split(',');
+    if (genders) urlFilters.genders = safeSplit(genders);
     
     const brands = searchParams.get('brands');
-    if (brands) urlFilters.brands = brands.split(',');
+    if (brands) urlFilters.brands = safeSplit(brands);
     
     const categories = searchParams.get('categories');
-    if (categories) urlFilters.categories = categories.split(',');
+    if (categories) urlFilters.categories = safeSplit(categories);
     
     // 2. Try localStorage next
     let savedFilters: Partial<GlobalFilters> = {};
@@ -77,10 +78,19 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
     }
     
     // 3. Merge: URL > localStorage > defaults
-    return {
+    const mergedFilters = {
       ...defaultGlobalFilters,
       ...savedFilters,
       ...urlFilters,
+    };
+    
+    // 4. Ensure all array fields are properly initialized
+    return {
+      ...mergedFilters,
+      categories: mergedFilters.categories || [],
+      brands: mergedFilters.brands || [],
+      genders: mergedFilters.genders || [],
+      ageGroups: mergedFilters.ageGroups || [],
     };
   };
   
@@ -112,21 +122,21 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
         params.set('dayType', newFilters.weekdayWeekend);
       }
       
-      // Array-based filters
+      // Array-based filters - using safe join
       if (newFilters.ageGroups && newFilters.ageGroups.length > 0) {
-        params.set('ageGroups', newFilters.ageGroups.join(','));
+        params.set('ageGroups', safeJoin(newFilters.ageGroups));
       }
       
       if (newFilters.genders && newFilters.genders.length > 0) {
-        params.set('genders', newFilters.genders.join(','));
+        params.set('genders', safeJoin(newFilters.genders));
       }
       
       if (newFilters.brands && newFilters.brands.length > 0) {
-        params.set('brands', newFilters.brands.join(','));
+        params.set('brands', safeJoin(newFilters.brands));
       }
       
       if (newFilters.categories && newFilters.categories.length > 0) {
-        params.set('categories', newFilters.categories.join(','));
+        params.set('categories', safeJoin(newFilters.categories));
       }
       
       setSearchParams(params, { replace: true });

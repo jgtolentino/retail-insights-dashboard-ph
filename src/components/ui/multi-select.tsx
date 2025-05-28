@@ -23,7 +23,7 @@ export interface MultiSelectOption {
 
 interface MultiSelectProps {
   options: MultiSelectOption[];
-  selected: string[];
+  selected: string[] | undefined;
   onChange: (values: string[]) => void;
   placeholder?: string;
   className?: string;
@@ -39,9 +39,12 @@ export function MultiSelect({
   maxDisplayedTags = 3,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
+  
+  // Ensure selected is always an array
+  const safeSelected = selected || [];
 
   const handleUnselect = (value: string) => {
-    onChange(selected.filter((item) => item !== value));
+    onChange(safeSelected.filter((item) => item !== value));
   };
 
   const handleSelectAll = () => {
@@ -53,7 +56,7 @@ export function MultiSelect({
   };
 
   const selectedOptions = options.filter((option) => 
-    selected.includes(option.value)
+    safeSelected.includes(option.value)
   );
 
   const displayedTags = selectedOptions.slice(0, maxDisplayedTags);
@@ -72,7 +75,7 @@ export function MultiSelect({
           )}
         >
           <div className="flex gap-1 flex-wrap">
-            {selected.length === 0 ? (
+            {safeSelected.length === 0 ? (
               <span className="text-muted-foreground">{placeholder}</span>
             ) : (
               <>
@@ -112,7 +115,7 @@ export function MultiSelect({
                 variant="ghost"
                 size="sm"
                 onClick={handleSelectAll}
-                disabled={selected.length === options.length}
+                disabled={safeSelected.length === options.length}
                 className="h-8 text-xs"
               >
                 Select All
@@ -121,7 +124,7 @@ export function MultiSelect({
                 variant="ghost"
                 size="sm"
                 onClick={handleClearAll}
-                disabled={selected.length === 0}
+                disabled={safeSelected.length === 0}
                 className="h-8 text-xs"
               >
                 Clear All
@@ -132,9 +135,9 @@ export function MultiSelect({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  const newSelected = selected.includes(option.value)
-                    ? selected.filter((item) => item !== option.value)
-                    : [...selected, option.value];
+                  const newSelected = safeSelected.includes(option.value)
+                    ? safeSelected.filter((item) => item !== option.value)
+                    : [...safeSelected, option.value];
                   onChange(newSelected);
                 }}
                 className="cursor-pointer"
@@ -142,7 +145,7 @@ export function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                    safeSelected.includes(option.value) ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {option.label}
