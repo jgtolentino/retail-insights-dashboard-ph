@@ -1,9 +1,8 @@
-
 export default function Trends() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Trends</h2>
-      <p className="text-gray-600">Trend analytics coming soon…</p>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-2">Trends</h1>
+      <p>Trend analytics coming soon…</p>
     </div>
   )
 }

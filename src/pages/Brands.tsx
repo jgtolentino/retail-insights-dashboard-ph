@@ -1,9 +1,8 @@
-
 export default function Brands() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Brands</h2>
-      <p className="text-gray-600">Brand analytics coming soon…</p>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-2">Brands</h1>
+      <p>Brand analytics coming soon…</p>
     </div>
   )
 }
