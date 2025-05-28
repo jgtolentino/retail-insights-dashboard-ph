@@ -1,111 +1,60 @@
+import React from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useFilters } from '@/contexts/FilterContext';
 
-import { useState, useEffect } from 'react';
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend
-} from 'recharts';
-import { dashboardService, type GenderDistributionData } from '@/services/dashboard';
-import { formatCurrency } from '@/lib/utils';
-import { useGlobalFilters } from '@/contexts/FilterContext';
-import { formatDateForQuery } from '@/types/filters';
-
-const GENDER_COLORS = {
-  'Male': '#3b82f6',
-  'Female': '#ec4899', 
-  'Unknown': '#6b7280'
-};
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export function GenderDistribution() {
-  const [data, setData] = useState<GenderDistributionData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { globalFilters } = useGlobalFilters();
+  const { filters } = useFilters();
 
-  useEffect(() => {
-    setLoading(true);
-    dashboardService
-      .getGenderDistribution(
-        formatDateForQuery(globalFilters.startDate), 
-        formatDateForQuery(globalFilters.endDate), 
-        {
-          categories: globalFilters.categories,
-          brands: globalFilters.brands,
-          ageGroups: globalFilters.ageGroups
-        }
-      )
-      .then(setData)
-      .finally(() => setLoading(false));
-  }, [globalFilters]);
+  const { data: genderData, isLoading, error } = useQuery({
+    queryKey: ['gender-distribution', filters.dateRange.start, filters.dateRange.end],
+    queryFn: async () => {
+      // Convert string dates to Date objects for the RPC call
+      const startDate = new Date(filters.dateRange.start);
+      const endDate = new Date(filters.dateRange.end);
+      
+      const { data, error } = await supabase.rpc('get_gender_distribution', {
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString()
+      });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
-  if (loading) {
-    return (
-      <div className="h-64 w-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (isLoading) {
+    return <div className="flex justify-center p-4">Loading gender distribution...</div>;
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
-        No gender distribution data available for the selected period
-      </div>
-    );
+  if (error) {
+    return <div className="text-red-500 p-4">Error loading gender distribution: {error.message}</div>;
   }
-
-  const pieData = data.map(item => ({
-    name: item.gender,
-    value: item.customer_count,
-    revenue: item.total_revenue || 0
-  }));
 
   return (
-    <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="bg-white p-6 rounded-lg shadow">
+      <h3 className="text-lg font-semibold mb-4">Gender Distribution</h3>
+      <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
-            data={pieData}
+            data={genderData}
             cx="50%"
             cy="50%"
-            innerRadius={40}
-            outerRadius={80}
-            paddingAngle={2}
             labelLine={false}
-            label={({ name, percent }) => 
-              percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
-            }
-            dataKey="value"
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="count"
           >
-            {pieData.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill={GENDER_COLORS[entry.name as keyof typeof GENDER_COLORS] || '#6b7280'} 
-              />
+            {genderData?.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip 
-            formatter={(value: number, name: string, entry: any) => [
-              `${value} customers`,
-              entry.payload.revenue ? formatCurrency(entry.payload.revenue) : 'Revenue'
-            ]}
-            contentStyle={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}
-          />
-          <Legend 
-            verticalAlign="bottom" 
-            height={36}
-            wrapperStyle={{
-              paddingTop: '20px'
-            }}
-            iconType="rect"
-          />
+          <Tooltip />
+          <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
