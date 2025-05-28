@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EnhancedFilterProvider as FilterProvider } from "@/contexts/EnhancedFilterContext";
 import { AppShell } from "@/components/AppShell";
+import { DebugPanel } from "@/components/DebugPanel";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProductMix from "./pages/ProductMix";
@@ -27,6 +28,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <DebugPanel />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<AppShell />}>
