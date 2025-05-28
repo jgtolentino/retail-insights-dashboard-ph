@@ -7,6 +7,12 @@ interface CheckResult {
   details?: string;
 }
 
+export interface ValidationResult {
+  passed: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
 export class PreSprintChecks {
   private results: CheckResult[] = [];
 
@@ -144,7 +150,6 @@ export class PreSprintChecks {
   private async checkFunctions(): Promise<void> {
     try {
       // Test if key functions exist by calling them
-      const testFunctions: Array<keyof typeof supabase['functions']> = [];
       const rpcFunctions = [
         'get_daily_trends',
         'get_age_distribution', 
@@ -203,6 +208,39 @@ export class PreSprintChecks {
 
 // Export a singleton instance
 export const preSprintChecks = new PreSprintChecks();
+
+// Export the missing functions that SprintDashboard.tsx expects
+export async function runPreSprintChecks(sprintNumber: number): Promise<ValidationResult> {
+  const checks = new PreSprintChecks();
+  const results = await checks.runAllChecks();
+  const summary = checks.getSummary();
+  
+  const errors = results.filter(r => r.status === 'fail').map(r => r.message);
+  const warnings = results.filter(r => r.status === 'warning').map(r => r.message);
+  
+  return {
+    passed: errors.length === 0,
+    errors,
+    warnings
+  };
+}
+
+export function displayValidationResults(results: ValidationResult): void {
+  console.log(`\n📊 Validation Results:`);
+  console.log(`   Passed: ${results.passed}`);
+  console.log(`   Errors: ${results.errors.length}`);
+  console.log(`   Warnings: ${results.warnings.length}\n`);
+  
+  if (results.errors.length > 0) {
+    console.log('❌ Errors:');
+    results.errors.forEach(error => console.log(`   - ${error}`));
+  }
+  
+  if (results.warnings.length > 0) {
+    console.log('⚠️ Warnings:');
+    results.warnings.forEach(warning => console.log(`   - ${warning}`));
+  }
+}
 
 // Helper function to run checks quickly
 export async function runQuickCheck(): Promise<void> {

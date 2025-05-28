@@ -13,6 +13,11 @@ export interface GlobalFilters {
   products:   string[]
   locations:  string[]
   incomeRanges: string[]
+  // Add missing properties that charts expect
+  startDate?: string
+  endDate?: string
+  genders?: string[]
+  ageGroups?: string[]
 }
 
 export const defaultGlobalFilters: GlobalFilters = {
@@ -22,6 +27,10 @@ export const defaultGlobalFilters: GlobalFilters = {
   products:     [],
   locations:    [],
   incomeRanges: [],
+  startDate:    '2025-04-30',
+  endDate:      '2025-05-30',
+  genders:      [],
+  ageGroups:    [],
 }
 
 export interface ProductMixFilters extends BaseFilters {
