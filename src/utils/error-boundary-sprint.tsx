@@ -67,7 +67,7 @@ export class SprintErrorBoundary extends Component<Props, State> {
     const errorMessage = error.message.toLowerCase();
     
     const isExpected = this.expectedErrors[sprint]?.some(
-      msg => errorMessage.includes(msg)
+      msg => (errorMessage || []).includes(msg)
     );
 
     console.error(`Sprint ${sprint} Error (${isExpected ? 'Expected' : 'Unexpected'}):`, {
@@ -93,7 +93,7 @@ export class SprintErrorBoundary extends Component<Props, State> {
     const sprintSolutions = this.errorSolutions[this.props.sprint] || {};
     
     for (const [key, solution] of Object.entries(sprintSolutions)) {
-      if (errorMessage.includes(key)) {
+      if ((errorMessage || []).includes(key)) {
         return solution;
       }
     }

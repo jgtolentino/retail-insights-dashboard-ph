@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+import { safeArrayFrom } from '@/utils/safeArray';
 
 export interface ProductSubstitution {
   fromProduct: string;
@@ -199,11 +200,11 @@ export const productMixService = {
       });
 
       // Sort by revenue descending
-      const sortedItems = Array.from(revenueMap?.entries() ?? [])
+      const sortedItems = safeArrayFrom(revenueMap?.entries() ?? [])
         .sort((a, b) => b?.[[1]] - a?.[[1]]);
 
       // Calculate total revenue
-      const totalRevenue = sortedItems.reduce((sum, [_, value]) => sum + value, 0);
+      const totalRevenue = (sortedItems || []).reduce((sum, [_, value]) => sum + value, 0);
 
       // Build Pareto data
       let cumulativePercentage = 0;
@@ -283,7 +284,7 @@ export const productMixService = {
         categoryMap.set(category, existing);
       });
 
-      return Array.from(categoryMap?.entries() ?? []).map(([category, data]) => ({
+      return safeArrayFrom(categoryMap?.entries() ?? []).map(([category, data]) => ({
         category,
         ...data
       }));

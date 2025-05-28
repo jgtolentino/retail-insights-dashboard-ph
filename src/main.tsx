@@ -2,20 +2,44 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Global safety wrapper - catches ALL Array.from calls
+// Enhanced global safety wrapper - catches ALL Array.from calls
 const originalArrayFrom = Array.from;
 (Array as any).from = function(arrayLike: any, mapFn?: any, thisArg?: any) {
   if (arrayLike === undefined || arrayLike === null) {
-    console.warn('⚠️ Array.from called with undefined/null, returning empty array');
-    console.warn('- Stack trace:', new Error().stack?.split('\n').slice(2, 5).join('\n'));
+    console.group('⚠️ Array.from null/undefined warning');
+    console.warn('Input:', arrayLike);
+    console.warn('Type:', typeof arrayLike);
+    console.warn('Stack trace:', new Error().stack?.split('\n').slice(2, 8).join('\n'));
+    console.groupEnd();
     return [];
   }
+  
+  // Enhanced debugging for problematic cases
+  if (typeof arrayLike === 'object' && arrayLike !== null) {
+    if (!Array.isArray(arrayLike) && typeof arrayLike[Symbol.iterator] !== 'function') {
+      console.group('🔍 Array.from potential issue');
+      console.warn('Object passed to Array.from that may not be iterable');
+      console.warn('Input:', arrayLike);
+      console.warn('Type:', typeof arrayLike);
+      console.warn('Constructor:', arrayLike.constructor?.name);
+      console.warn('Keys:', Object.keys(arrayLike || {}));
+      console.warn('Stack:', new Error().stack?.split('\n').slice(2, 6).join('\n'));
+      console.groupEnd();
+    }
+  }
+  
   try {
-    return originalArrayFrom.call(this, arrayLike, mapFn, thisArg);
+    const result = originalArrayFrom.call(this, arrayLike, mapFn, thisArg);
+    return result;
   } catch (e) {
-    console.error('❌ Array.from failed:', e);
-    console.error('- Input was:', arrayLike);
-    console.error('- Type:', typeof arrayLike);
+    console.group('❌ Array.from failed');
+    console.error('Error:', e);
+    console.error('Input was:', arrayLike);
+    console.error('Input type:', typeof arrayLike);
+    console.error('Input constructor:', arrayLike?.constructor?.name);
+    console.error('Has Symbol.iterator:', typeof arrayLike?.[Symbol.iterator]);
+    console.error('Stack:', new Error().stack);
+    console.groupEnd();
     return [];
   }
 };

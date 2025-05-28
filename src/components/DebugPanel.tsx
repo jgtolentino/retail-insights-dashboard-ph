@@ -74,7 +74,7 @@ export function DebugPanel() {
         
         <div>
           <strong>Supabase:</strong>
-          <p className={debugInfo.supabaseConnection.includes('Error') ? 'text-red-400' : 'text-green-400'}>
+          <p className={(debugInfo.supabaseConnection || '').includes('Error') ? 'text-red-400' : 'text-green-400'}>
             {debugInfo.supabaseConnection}
           </p>
         </div>

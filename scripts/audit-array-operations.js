@@ -2,9 +2,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const glob = require('glob');
-const { promisify } = require('util');
-const globAsync = promisify(glob);
+const { glob } = require('glob');
 
 const ARRAY_OPERATIONS = {
   arrayFrom: {
@@ -138,7 +136,7 @@ async function main() {
   
   try {
     // Find all TypeScript/JavaScript files
-    const files = await globAsync('src/**/*.{ts,tsx,js,jsx}', {
+    const files = await glob('src/**/*.{ts,tsx,js,jsx}', {
       cwd: process.cwd(),
       ignore: ['**/node_modules/**', '**/dist/**', '**/build/**']
     });

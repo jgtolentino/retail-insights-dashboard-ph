@@ -9,10 +9,10 @@
 export function safeArray<T>(value: any): T[] {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (value instanceof Set || value instanceof Map) return Array.from(value);
+  if (value instanceof Set || value instanceof Map) return safeArrayFrom(value);
   if (typeof value?.[Symbol.iterator] === 'function') {
     try {
-      return Array.from(value || []);
+      return safeArrayFrom(value || []);
     } catch (error) {
       console.warn('Failed to convert to array:', value, error);
       return [];
@@ -109,7 +109,7 @@ export function makeSafe<T extends Record<string, any>>(obj: T): T {
     }
     
     // If it's supposed to be an array but might be undefined
-    if (key.includes('Array') || key.includes('List') || key.includes('Items') || 
+    if ((key || []).includes('Array') || (key || []).includes('List') || (key || []).includes('Items') || 
         key.startsWith('selected') || key.endsWith('s')) {
       Object.defineProperty(safeObj, key, {
         get() {
@@ -159,6 +159,6 @@ export function toSet<T>(value: any): Set<T> {
  */
 export function fromSet<T>(value: any): T[] {
   if (!value) return [];
-  if (value instanceof Set) return Array.from(value || []);
+  if (value instanceof Set) return safeArrayFrom(value || []);
   return safeArray<T>(value);
 }

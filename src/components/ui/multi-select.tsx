@@ -56,7 +56,7 @@ export function MultiSelect({
   };
 
   const selectedOptions = (options ?? []).filter((option) => 
-    safeSelected.includes(option.value)
+    (safeSelected || []).includes(option.value)
   );
 
   const displayedTags = selectedOptions.slice(0, maxDisplayedTags);
@@ -135,7 +135,7 @@ export function MultiSelect({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  const newSelected = safeSelected.includes(option.value)
+                  const newSelected = (safeSelected || []).includes(option.value)
                     ? (safeSelected ?? []).filter((item) => item !== option.value)
                     : [...safeSelected, option.value];
                   onChange(newSelected);
@@ -145,7 +145,7 @@ export function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    safeSelected.includes(option.value) ? "opacity-100" : "opacity-0"
+                    (safeSelected || []).includes(option.value) ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {option.label}

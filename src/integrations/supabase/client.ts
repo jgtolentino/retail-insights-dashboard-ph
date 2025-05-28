@@ -20,10 +20,10 @@ if (!SUPABASE_PUBLISHABLE_KEY) {
 
 // Development warnings
 if (import.meta.env.DEV) {
-  if (SUPABASE_URL.includes('your-supabase-url')) {
+  if ((SUPABASE_URL || []).includes('your-supabase-url')) {
     console.warn('⚠️ Using placeholder Supabase URL. Please update your .env file with your actual Supabase project URL.');
   }
-  if (SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key')) {
+  if ((SUPABASE_PUBLISHABLE_KEY || []).includes('your-anon-key')) {
     console.warn('⚠️ Using placeholder Supabase key. Please update your .env file with your actual Supabase anon key.');
   }
   console.log('✅ Supabase client initialized successfully');

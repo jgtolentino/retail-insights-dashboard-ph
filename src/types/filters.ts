@@ -22,28 +22,38 @@ export interface GlobalFilters extends ConsumerFilters {
   dateRange: DateRange;
 }
 
-export const defaultConsumerFilters: ConsumerFilters = {
+// Safe array creation with defensive programming
+const createSafeArray = <T>(): T[] => {
+  try {
+    return [] as T[];
+  } catch (error) {
+    console.error('Failed to create safe array:', error);
+    return [] as T[];
+  }
+};
+
+export const defaultConsumerFilters: ConsumerFilters = Object.freeze({
   category: 'All',
   brand: 'All',
   location: 'All',
-  weekdayWeekend: 'all',
-  // Array-based filters for drill-through navigation
-  categories: [],
-  brands: [],
-  genders: [],
-  ageGroups: [],
-  locations: [],
-  products: [],
-  incomeRanges: []
-};
+  weekdayWeekend: 'all' as const,
+  // Array-based filters for drill-through navigation - safely initialized
+  categories: createSafeArray<string>(),
+  brands: createSafeArray<string>(),
+  genders: createSafeArray<string>(),
+  ageGroups: createSafeArray<string>(),
+  locations: createSafeArray<string>(),
+  products: createSafeArray<string>(),
+  incomeRanges: createSafeArray<string>()
+});
 
-export const defaultGlobalFilters: GlobalFilters = {
+export const defaultGlobalFilters: GlobalFilters = Object.freeze({
   ...defaultConsumerFilters,
-  dateRange: {
+  dateRange: Object.freeze({
     start: '2025-04-30',
     end: '2025-05-30'
-  }
-};
+  })
+});
 
 // Helper to check if any filters are active
 export const hasActiveFilters = (filters: ConsumerFilters | GlobalFilters): boolean => {

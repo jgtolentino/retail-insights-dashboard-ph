@@ -95,7 +95,7 @@ export const useRetailAnalytics = () => {
 
       if (error) throw error;
 
-      const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
+      const totalRevenue = (transactions || []).reduce((sum, t) => sum + (t.total_amount || 0), 0);
       const totalTransactions = transactions.length;
       const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
 

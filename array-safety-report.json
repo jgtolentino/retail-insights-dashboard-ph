@@ -1,0 +1,1202 @@
+{
+  "timestamp": "2025-05-28T05:43:59.342Z",
+  "totalIssues": 67,
+  "riskCounts": {
+    "high": 7,
+    "medium": 13,
+    "low": 47
+  },
+  "issues": [
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safety.ts",
+      "line": 12,
+      "column": 60,
+      "type": "arrayFrom",
+      "riskLevel": "high",
+      "description": "Array.from() can fail if passed undefined/null",
+      "code": "if (value instanceof Set || value instanceof Map) return Array.from(value);",
+      "match": "Array.from("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safety.ts",
+      "line": 112,
+      "column": 9,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (key.includes('Array') || key.includes('List') || key.includes('Items') ||",
+      "match": "key.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safety.ts",
+      "line": 112,
+      "column": 34,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (key.includes('Array') || key.includes('List') || key.includes('Items') ||",
+      "match": "key.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safety.ts",
+      "line": 112,
+      "column": 58,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (key.includes('Array') || key.includes('List') || key.includes('Items') ||",
+      "match": "key.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safeArray.ts",
+      "line": 7,
+      "column": 36,
+      "type": "arrayFrom",
+      "riskLevel": "high",
+      "description": "Array.from() can fail if passed undefined/null",
+      "code": "if (value instanceof Set) return Array.from(value ?? []);",
+      "match": "Array.from("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safeArray.ts",
+      "line": 10,
+      "column": 14,
+      "type": "arrayFrom",
+      "riskLevel": "high",
+      "description": "Array.from() can fail if passed undefined/null",
+      "code": "return Array.from(value ?? []);",
+      "match": "Array.from("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/pre-sprint-checks.ts",
+      "line": 236,
+      "column": 29,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "} else if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/monitoring.ts",
+      "line": 139,
+      "column": 35,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const lastEntry = entries[entries.length - 1];",
+      "match": "entries.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/monitoring.ts",
+      "line": 161,
+      "column": 14,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (this.metricsBuffer.length >= 100) {",
+      "match": "metricsBuffer.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/logger.ts",
+      "line": 26,
+      "column": 14,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (this.logs.length > this.maxLogs) {",
+      "match": "logs.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/error-boundary-sprint.tsx",
+      "line": 70,
+      "column": 14,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "msg => errorMessage.includes(msg)",
+      "match": "errorMessage.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/error-boundary-sprint.tsx",
+      "line": 96,
+      "column": 11,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (errorMessage.includes(key)) {",
+      "match": "errorMessage.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/pages/Index.tsx",
+      "line": 139,
+      "column": 9,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (timeSeriesData.length === 0) {",
+      "match": "timeSeriesData.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/pages/Index.tsx",
+      "line": 434,
+      "column": 22,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": ") : data.topBrands.length === 0 ? (",
+      "match": "topBrands.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/pages/Index.tsx",
+      "line": 455,
+      "column": 37,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "Showing top {data.topBrands.length} brands",
+      "match": "topBrands.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/productMix.ts",
+      "line": 202,
+      "column": 27,
+      "type": "arrayFrom",
+      "riskLevel": "high",
+      "description": "Array.from() can fail if passed undefined/null",
+      "code": "const sortedItems = Array.from(revenueMap?.entries() ?? [])",
+      "match": "Array.from("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/productMix.ts",
+      "line": 286,
+      "column": 14,
+      "type": "arrayFrom",
+      "riskLevel": "high",
+      "description": "Array.from() can fail if passed undefined/null",
+      "code": "return Array.from(categoryMap?.entries() ?? []).map(([category, data]) => ({",
+      "match": "Array.from("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/productMix.ts",
+      "line": 206,
+      "column": 28,
+      "type": "unsafeReduce",
+      "riskLevel": "high",
+      "description": "reduce() on potentially undefined arrays",
+      "code": "const totalRevenue = sortedItems.reduce((sum, [_, value]) => sum + value, 0);",
+      "match": "sortedItems.reduce("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/dashboard.ts",
+      "line": 111,
+      "column": 31,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!transactionData || transactionData.length === 0) {",
+      "match": "transactionData.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/dashboard.ts",
+      "line": 116,
+      "column": 63,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "console.log('✅ Successfully fetched transaction data:', transactionData.length, 'transactions')",
+      "match": "transactionData.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/hooks/useRetailAnalytics.ts",
+      "line": 98,
+      "column": 28,
+      "type": "unsafeReduce",
+      "riskLevel": "high",
+      "description": "reduce() on potentially undefined arrays",
+      "code": "const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);",
+      "match": "transactions.reduce("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/hooks/useRetailAnalytics.ts",
+      "line": 32,
+      "column": 20,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/hooks/useRetailAnalytics.ts",
+      "line": 72,
+      "column": 11,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (topBrands.length === 0) {",
+      "match": "topBrands.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/hooks/useRetailAnalytics.ts",
+      "line": 99,
+      "column": 33,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const totalTransactions = transactions.length;",
+      "match": "transactions.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/SprintDashboard.tsx",
+      "line": 65,
+      "column": 53,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{!validationStatus.passed && validationStatus.errors.length > 0 && (",
+      "match": "errors.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/SprintDashboard.tsx",
+      "line": 79,
+      "column": 25,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{validationStatus.warnings.length > 0 && (",
+      "match": "warnings.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/SprintDashboard.tsx",
+      "line": 93,
+      "column": 52,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{validationStatus.passed && validationStatus.errors.length === 0 && (",
+      "match": "errors.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ProductMixDashboard.tsx",
+      "line": 284,
+      "column": 78,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />",
+      "match": "COLORS.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ProductMixDashboard.tsx",
+      "line": 325,
+      "column": 70,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "style={{ backgroundColor: COLORS[index % COLORS.length] }}",
+      "match": "COLORS.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/DebugPanel.tsx",
+      "line": 77,
+      "column": 35,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "<p className={debugInfo.supabaseConnection.includes('Error') ? 'text-red-400' : 'text-green-400'}>",
+      "match": "supabaseConnection.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/contexts/EnhancedFilterContext.tsx",
+      "line": 219,
+      "column": 12,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "return relevantFilters.includes(filterName);",
+      "match": "relevantFilters.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/integrations/supabase/client.ts",
+      "line": 23,
+      "column": 7,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (SUPABASE_URL.includes('your-supabase-url')) {",
+      "match": "SUPABASE_URL.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/integrations/supabase/client.ts",
+      "line": 26,
+      "column": 7,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "if (SUPABASE_PUBLISHABLE_KEY.includes('your-anon-key')) {",
+      "match": "SUPABASE_PUBLISHABLE_KEY.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/SankeyDiagram.tsx",
+      "line": 134,
+      "column": 25,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!nodes.length || !links.length) {",
+      "match": "links.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/PurchasePatterns.tsx",
+      "line": 55,
+      "column": 16,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx",
+      "line": 53,
+      "column": 8,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data.length) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx",
+      "line": 74,
+      "column": 21,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "shortName: item.original_product.length > 20",
+      "match": "original_product.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx",
+      "line": 80,
+      "column": 30,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (active && payload && payload.length) {",
+      "match": "payload.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx",
+      "line": 169,
+      "column": 14,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{data.length > 10 && (",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx",
+      "line": 171,
+      "column": 36,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "Showing top 10 of {data.length} substitutions",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ParetoChart.tsx",
+      "line": 58,
+      "column": 8,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data.length) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ParetoChart.tsx",
+      "line": 74,
+      "column": 30,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (active && payload && payload.length) {",
+      "match": "payload.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ParetoChart.tsx",
+      "line": 99,
+      "column": 38,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{thresholdIndex + 1} of {data.length} items ({((thresholdIndex + 1) / data.length * 100).toFixed(0)}%)",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ParetoChart.tsx",
+      "line": 99,
+      "column": 83,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{thresholdIndex + 1} of {data.length} items ({((thresholdIndex + 1) / data.length * 100).toFixed(0)}%)",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/LocationDistribution.tsx",
+      "line": 70,
+      "column": 16,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/GenderDistribution.tsx",
+      "line": 51,
+      "column": 16,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/AgeDistribution.tsx",
+      "line": 56,
+      "column": 16,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!data || data.length === 0) {",
+      "match": "data.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 39,
+      "column": 36,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (filters.ageGroups && filters.ageGroups.length > 0) {",
+      "match": "ageGroups.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 43,
+      "column": 34,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (filters.genders && filters.genders.length > 0) {",
+      "match": "genders.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 47,
+      "column": 33,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (filters.brands && filters.brands.length > 0) {",
+      "match": "brands.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 51,
+      "column": 37,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (filters.categories && filters.categories.length > 0) {",
+      "match": "categories.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 67,
+      "column": 22,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const hasFilters = filterSummary.length > 0;",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 127,
+      "column": 20,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{filterSummary.length} filter{filterSummary.length !== 1 ? 's' : ''} applied",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 127,
+      "column": 49,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{filterSummary.length} filter{filterSummary.length !== 1 ? 's' : ''} applied",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 161,
+      "column": 22,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const hasFilters = filterSummary.length > 0;",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 181,
+      "column": 16,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "{filterSummary.length}",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 199,
+      "column": 22,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const hasFilters = filterSummary.length > 0;",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx",
+      "line": 205,
+      "column": 18,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "filterCount: filterSummary.length",
+      "match": "filterSummary.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 118,
+      "column": 27,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "disabled={safeSelected.length === options.length}",
+      "match": "safeSelected.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 118,
+      "column": 51,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "disabled={safeSelected.length === options.length}",
+      "match": "options.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 127,
+      "column": 27,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "disabled={safeSelected.length === 0}",
+      "match": "safeSelected.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 59,
+      "column": 5,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "safeSelected.includes(option.value)",
+      "match": "safeSelected.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 138,
+      "column": 39,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "const newSelected = safeSelected.includes(option.value)",
+      "match": "safeSelected.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx",
+      "line": 148,
+      "column": 21,
+      "type": "unsafeIncludes",
+      "riskLevel": "medium",
+      "description": "includes() on potentially undefined arrays",
+      "code": "safeSelected.includes(option.value) ? \"opacity-100\" : \"opacity-0\"",
+      "match": "safeSelected.includes("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/chart.tsx",
+      "line": 84,
+      "column": 3,
+      "type": "unsafeMap",
+      "riskLevel": "medium",
+      "description": "map() on potentially undefined arrays",
+      "code": "${colorConfig",
+      "match": "colorConfig\n  .map("
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/chart.tsx",
+      "line": 73,
+      "column": 8,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "if (!colorConfig.length) {",
+      "match": "colorConfig.length"
+    },
+    {
+      "file": "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/chart.tsx",
+      "line": 174,
+      "column": 23,
+      "type": "unsafeLength",
+      "riskLevel": "low",
+      "description": "length access without optional chaining",
+      "code": "const nestLabel = payload.length === 1 && indicator !== \"dot\"",
+      "match": "payload.length"
+    }
+  ],
+  "fixes": {
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safety.ts": [
+      {
+        "old": "Array.from(",
+        "new": "safeArrayFrom(",
+        "note": "Use safeArrayFrom utility",
+        "line": 12,
+        "riskLevel": "high"
+      },
+      {
+        "old": "key.includes(",
+        "new": "(key || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 112,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "key.includes(",
+        "new": "(key || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 112,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "key.includes(",
+        "new": "(key || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 112,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/safeArray.ts": [
+      {
+        "old": "Array.from(",
+        "new": "safeArrayFrom(",
+        "note": "Use safeArrayFrom utility",
+        "line": 7,
+        "riskLevel": "high"
+      },
+      {
+        "old": "Array.from(",
+        "new": "safeArrayFrom(",
+        "note": "Use safeArrayFrom utility",
+        "line": 10,
+        "riskLevel": "high"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/pre-sprint-checks.ts": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 236,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/monitoring.ts": [
+      {
+        "old": "entries.length",
+        "new": "(entries?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 139,
+        "riskLevel": "low"
+      },
+      {
+        "old": "metricsBuffer.length",
+        "new": "(metricsBuffer?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 161,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/logger.ts": [
+      {
+        "old": "logs.length",
+        "new": "(logs?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 26,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/utils/error-boundary-sprint.tsx": [
+      {
+        "old": "errorMessage.includes(",
+        "new": "(errorMessage || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 70,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "errorMessage.includes(",
+        "new": "(errorMessage || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 96,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/pages/Index.tsx": [
+      {
+        "old": "timeSeriesData.length",
+        "new": "(timeSeriesData?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 139,
+        "riskLevel": "low"
+      },
+      {
+        "old": "topBrands.length",
+        "new": "(topBrands?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 434,
+        "riskLevel": "low"
+      },
+      {
+        "old": "topBrands.length",
+        "new": "(topBrands?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 455,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/productMix.ts": [
+      {
+        "old": "Array.from(",
+        "new": "safeArrayFrom(",
+        "note": "Use safeArrayFrom utility",
+        "line": 202,
+        "riskLevel": "high"
+      },
+      {
+        "old": "Array.from(",
+        "new": "safeArrayFrom(",
+        "note": "Use safeArrayFrom utility",
+        "line": 286,
+        "riskLevel": "high"
+      },
+      {
+        "old": "sortedItems.reduce(",
+        "new": "(sortedItems || []).reduce(",
+        "note": "Add null check with fallback",
+        "line": 206,
+        "riskLevel": "high"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/services/dashboard.ts": [
+      {
+        "old": "transactionData.length",
+        "new": "(transactionData?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 111,
+        "riskLevel": "low"
+      },
+      {
+        "old": "transactionData.length",
+        "new": "(transactionData?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 116,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/hooks/useRetailAnalytics.ts": [
+      {
+        "old": "transactions.reduce(",
+        "new": "(transactions || []).reduce(",
+        "note": "Add null check with fallback",
+        "line": 98,
+        "riskLevel": "high"
+      },
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 32,
+        "riskLevel": "low"
+      },
+      {
+        "old": "topBrands.length",
+        "new": "(topBrands?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 72,
+        "riskLevel": "low"
+      },
+      {
+        "old": "transactions.length",
+        "new": "(transactions?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 99,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/SprintDashboard.tsx": [
+      {
+        "old": "errors.length",
+        "new": "(errors?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 65,
+        "riskLevel": "low"
+      },
+      {
+        "old": "warnings.length",
+        "new": "(warnings?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 79,
+        "riskLevel": "low"
+      },
+      {
+        "old": "errors.length",
+        "new": "(errors?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 93,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ProductMixDashboard.tsx": [
+      {
+        "old": "COLORS.length",
+        "new": "(COLORS?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 284,
+        "riskLevel": "low"
+      },
+      {
+        "old": "COLORS.length",
+        "new": "(COLORS?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 325,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/DebugPanel.tsx": [
+      {
+        "old": "supabaseConnection.includes(",
+        "new": "(supabaseConnection || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 77,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/contexts/EnhancedFilterContext.tsx": [
+      {
+        "old": "relevantFilters.includes(",
+        "new": "(relevantFilters || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 219,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/integrations/supabase/client.ts": [
+      {
+        "old": "SUPABASE_URL.includes(",
+        "new": "(SUPABASE_URL || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 23,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "SUPABASE_PUBLISHABLE_KEY.includes(",
+        "new": "(SUPABASE_PUBLISHABLE_KEY || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 26,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/SankeyDiagram.tsx": [
+      {
+        "old": "links.length",
+        "new": "(links?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 134,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/PurchasePatterns.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 55,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ProductSubstitutionsChart.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 53,
+        "riskLevel": "low"
+      },
+      {
+        "old": "original_product.length",
+        "new": "(original_product?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 74,
+        "riskLevel": "low"
+      },
+      {
+        "old": "payload.length",
+        "new": "(payload?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 80,
+        "riskLevel": "low"
+      },
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 169,
+        "riskLevel": "low"
+      },
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 171,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/ParetoChart.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 58,
+        "riskLevel": "low"
+      },
+      {
+        "old": "payload.length",
+        "new": "(payload?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 74,
+        "riskLevel": "low"
+      },
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 99,
+        "riskLevel": "low"
+      },
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 99,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/LocationDistribution.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 70,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/GenderDistribution.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 51,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/charts/AgeDistribution.tsx": [
+      {
+        "old": "data.length",
+        "new": "(data?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 56,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/layout/Breadcrumbs.tsx": [
+      {
+        "old": "ageGroups.length",
+        "new": "(ageGroups?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 39,
+        "riskLevel": "low"
+      },
+      {
+        "old": "genders.length",
+        "new": "(genders?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 43,
+        "riskLevel": "low"
+      },
+      {
+        "old": "brands.length",
+        "new": "(brands?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 47,
+        "riskLevel": "low"
+      },
+      {
+        "old": "categories.length",
+        "new": "(categories?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 51,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 67,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 127,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 127,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 161,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 181,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 199,
+        "riskLevel": "low"
+      },
+      {
+        "old": "filterSummary.length",
+        "new": "(filterSummary?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 205,
+        "riskLevel": "low"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/multi-select.tsx": [
+      {
+        "old": "safeSelected.length",
+        "new": "(safeSelected?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 118,
+        "riskLevel": "low"
+      },
+      {
+        "old": "options.length",
+        "new": "(options?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 118,
+        "riskLevel": "low"
+      },
+      {
+        "old": "safeSelected.length",
+        "new": "(safeSelected?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 127,
+        "riskLevel": "low"
+      },
+      {
+        "old": "safeSelected.includes(",
+        "new": "(safeSelected || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 59,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "safeSelected.includes(",
+        "new": "(safeSelected || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 138,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "safeSelected.includes(",
+        "new": "(safeSelected || []).includes(",
+        "note": "Add null check with fallback",
+        "line": 148,
+        "riskLevel": "medium"
+      }
+    ],
+    "/Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/src/components/ui/chart.tsx": [
+      {
+        "old": "colorConfig.map(",
+        "new": "(colorConfig || []).map(",
+        "note": "Add null check with fallback",
+        "line": 84,
+        "riskLevel": "medium"
+      },
+      {
+        "old": "colorConfig.length",
+        "new": "(colorConfig?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 73,
+        "riskLevel": "low"
+      },
+      {
+        "old": "payload.length",
+        "new": "(payload?.length || 0)",
+        "note": "Add optional chaining with fallback",
+        "line": 174,
+        "riskLevel": "low"
+      }
+    ]
+  }
+}

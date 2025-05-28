@@ -32,7 +32,28 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.group('🚨 ErrorBoundary Caught Error');
+    console.error('Error:', error);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    console.error('Component Stack:', errorInfo.componentStack);
+    console.error('Full Error Info:', errorInfo);
+    
+    // Analyze if it's a filter-related error
+    if (error.stack?.includes('filter') || error.stack?.includes('Filter') || 
+        error.message.toLowerCase().includes('filter')) {
+      console.error('🔍 FILTER-RELATED ERROR DETECTED');
+      console.error('This may be related to filter context initialization');
+    }
+    
+    // Check for array-related errors
+    if (error.stack?.includes('Array') || error.message.includes('array') ||
+        error.message.includes('undefined') || error.message.includes('Cannot read property')) {
+      console.error('🔍 ARRAY ACCESS ERROR DETECTED');
+      console.error('This may be related to unsafe array operations');
+    }
+    
+    console.groupEnd();
     
     // Update state with error details
     this.setState({
@@ -52,7 +73,9 @@ export class ErrorBoundary extends Component<Props, State> {
         message: error.message,
         stack: error.stack,
         componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+        userAgent: navigator.userAgent
       });
     }
   }

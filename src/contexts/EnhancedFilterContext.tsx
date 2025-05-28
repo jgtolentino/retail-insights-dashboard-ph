@@ -216,7 +216,7 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
   // Check if a filter is relevant for the current page
   const isFilterRelevant = useCallback((filterName: keyof GlobalFilters): boolean => {
     const relevantFilters = filterRelevance[location.pathname] || Object.keys(defaultGlobalFilters);
-    return relevantFilters.includes(filterName);
+    return (relevantFilters || []).includes(filterName);
   }, [location.pathname]);
   
   // Listen for browser back/forward
