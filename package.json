@@ -19,7 +19,13 @@
     "fix:safety": "node scripts/apply-safety-fixes.js",
     "test:safety": "npm run audit:safety -- --quiet",
     "audit:arrays": "node scripts/audit-array-operations.js",
-    "fix:arrays": "node scripts/apply-array-fixes.js"
+    "fix:arrays": "node scripts/apply-array-fixes.js",
+    "test:integration": "playwright test tests/integration/",
+    "test:cross-browser": "playwright test tests/cross-browser/",
+    "test:performance": "k6 run tests/performance/load-testing.js",
+    "test:all": "npm run test:integration && npm run test:cross-browser",
+    "deploy:sql": "./scripts/deploy-sql-functions.sh",
+    "health:check": "curl -f ${DEPLOYMENT_URL:-http://localhost:4173}/api/health"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -98,6 +104,10 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "@playwright/test": "^1.40.0",
+    "vitest": "^1.0.0",
+    "k6": "^0.48.0",
+    "lighthouse": "^11.0.0"
   }
 }
