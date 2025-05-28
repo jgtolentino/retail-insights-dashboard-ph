@@ -24,26 +24,34 @@ function verifySupabaseConfig() {
   
   // Check for hardcoded credentials (bad patterns)
   // Allow FALLBACK_ constants but not direct hardcoded values
-  const badPatterns = [
-    /const SUPABASE_URL = ['"`]https:\/\/[^'"`]+['"`]/,
-    /const SUPABASE.*KEY = ['"`]eyJ[^'"`]+['"`]/,
-    /createClient\(['"`]https:\/\//
-  ];
+  const lines = content.split('\n');
+  const issues = [];
+  
+  lines.forEach((line, lineNum) => {
+    // Skip FALLBACK_ constants - these are allowed
+    if (line.includes('FALLBACK_')) return;
+    
+    // Check for direct hardcoded Supabase URLs
+    if (/const SUPABASE_URL = ['"`]https:\/\/[^'"`]+['"`]/.test(line)) {
+      issues.push(`❌ Found hardcoded SUPABASE_URL at line ${lineNum + 1}`);
+    }
+    
+    // Check for direct hardcoded Supabase keys  
+    if (/const SUPABASE.*KEY = ['"`]eyJ[^'"`]+['"`]/.test(line)) {
+      issues.push(`❌ Found hardcoded SUPABASE key at line ${lineNum + 1}`);
+    }
+    
+    // Check for direct hardcoded createClient calls
+    if (/createClient\(['"`]https:\/\//.test(line)) {
+      issues.push(`❌ Found hardcoded createClient URL at line ${lineNum + 1}`);
+    }
+  });
   
   // Check for good patterns (environment variables)
   const goodPatterns = [
     /import\.meta\.env\.VITE_SUPABASE_URL/,
     /import\.meta\.env\.VITE_SUPABASE_ANON_KEY/
   ];
-  
-  const issues = [];
-  
-  // Check for bad patterns
-  badPatterns.forEach((pattern, index) => {
-    if (pattern.test(content)) {
-      issues.push(`❌ Found hardcoded credentials (pattern ${index + 1})`);
-    }
-  });
   
   // Check for good patterns
   goodPatterns.forEach((pattern, index) => {
