@@ -504,31 +504,5 @@ export const dashboardService = {
       logger.error('Failed to fetch purchase patterns data', error)
       return []
     }
-  },
-
-  async getLocationDistribution(
-    startDate: string,
-    endDate: string,
-    filters?: ConsumerFilters
-  ): Promise<any[]> {
-    logger.info('Fetching location distribution', { startDate, endDate, filters })
-    
-    try {
-      const { data, error } = await supabase
-        .rpc('get_location_distribution', {
-          start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z'
-        })
-      
-      if (error) {
-        logger.error('Error fetching location distribution:', error)
-        throw error
-      }
-      
-      return data || []
-    } catch (error) {
-      logger.error('Failed to fetch location distribution data', error)
-      return []
-    }
   }
 }

@@ -180,3 +180,6 @@ export function useFilters() {
   }
   return context;
 }
+
+// Alias for backwards compatibility
+export const useEnhancedFilters = useFilters;

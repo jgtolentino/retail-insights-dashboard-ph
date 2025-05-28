@@ -3,6 +3,11 @@ export interface ConsumerFilters {
   brand: string;
   location: string;
   weekdayWeekend: 'all' | 'weekday' | 'weekend';
+  // Array-based filters for drill-through navigation
+  categories?: string[];
+  brands?: string[];
+  genders?: string[];
+  ageGroups?: string[];
 }
 
 export interface DateRange {
