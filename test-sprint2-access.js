@@ -1,7 +1,46 @@
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
-const supabaseUrl = 'https://lcoxtanyckjzyxxcsjzz.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA'
+// Function to load environment variables from .env file
+function loadEnvFile() {
+  try {
+    const envPath = join(process.cwd(), '.env')
+    const envContent = readFileSync(envPath, 'utf8')
+    const envVars = {}
+    
+    envContent.split('\n').forEach(line => {
+      const trimmedLine = line.trim()
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=')
+        if (key && valueParts.length > 0) {
+          envVars[key.trim()] = valueParts.join('=').trim()
+        }
+      }
+    })
+    
+    return envVars
+  } catch (error) {
+    console.error('❌ Could not read .env file:', error.message)
+    return {}
+  }
+}
+
+// Load environment variables
+const envVars = loadEnvFile()
+
+// Use environment variables for credentials
+const supabaseUrl = envVars.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL
+const supabaseKey = envVars.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase credentials in environment variables')
+  console.error('Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env file')
+  console.error('Expected format in .env file:')
+  console.error('VITE_SUPABASE_URL=https://your-project.supabase.co')
+  console.error('VITE_SUPABASE_ANON_KEY=your-anon-key-here')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
