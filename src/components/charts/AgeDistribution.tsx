@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
@@ -9,29 +10,39 @@ import {
   CartesianGrid
 } from 'recharts';
 import { dashboardService, type AgeDistributionData } from '@/services/dashboard';
+import { useGlobalFilters } from '@/contexts/FilterContext';
+import { formatDateForQuery } from '@/types/filters';
 
 interface AgeDistributionProps {
-  startDate: string;
-  endDate: string;
   bucketSize?: number;
-  filters?: {
-    categories?: string[];
-    brands?: string[];
-    genders?: string[];
-    ageGroups?: string[];
-  };
 }
 
-export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }: AgeDistributionProps) {
+export function AgeDistribution({ bucketSize = 10 }: AgeDistributionProps) {
   const [data, setData] = useState<AgeDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { globalFilters } = useGlobalFilters();
 
   useEffect(() => {
     setLoading(true);
-    console.log('🔍 AgeDistribution: Fetching data...', { startDate, endDate, bucketSize, filters });
+    console.log('🔍 AgeDistribution: Fetching data...', { 
+      startDate: formatDateForQuery(globalFilters.startDate), 
+      endDate: formatDateForQuery(globalFilters.endDate), 
+      bucketSize, 
+      filters: globalFilters 
+    });
     
     dashboardService
-      .getAgeDistribution(startDate, endDate, bucketSize, filters)
+      .getAgeDistribution(
+        formatDateForQuery(globalFilters.startDate), 
+        formatDateForQuery(globalFilters.endDate), 
+        bucketSize, 
+        {
+          categories: globalFilters.categories,
+          brands: globalFilters.brands,
+          genders: globalFilters.genders,
+          ageGroups: globalFilters.ageGroups
+        }
+      )
       .then((result) => {
         console.log('📊 AgeDistribution: Data received:', result);
         setData(result);
@@ -41,7 +52,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
         setData([]);
       })
       .finally(() => setLoading(false));
-  }, [startDate, endDate, bucketSize, filters]);
+  }, [globalFilters, bucketSize]);
 
   if (loading) {
     return (

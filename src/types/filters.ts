@@ -1,8 +1,21 @@
+
 // Filter types for multi-select functionality across dashboards
 
 export interface BaseFilters {
   startDate: Date;
   endDate: Date;
+}
+
+export interface GlobalFilters {
+  startDate: Date;
+  endDate: Date;
+  categories: string[];
+  brands: string[];
+  products: string[];
+  ageGroups: string[];
+  genders: string[];
+  locations: string[];
+  incomeRanges: string[];
 }
 
 export interface ProductMixFilters extends BaseFilters {
@@ -61,7 +74,49 @@ export const LOCATION_OPTIONS = [
   { label: "Other", value: "other" },
 ];
 
+// Category options
+export const CATEGORY_OPTIONS = [
+  { label: "Cigarettes", value: "Cigarettes" },
+  { label: "Beverages", value: "Beverages" },
+  { label: "Snacks", value: "Snacks" },
+  { label: "Personal Care", value: "Personal Care" },
+  { label: "Candy", value: "Candy" },
+  { label: "Household", value: "Household" },
+];
+
+// Brand options
+export const BRAND_OPTIONS = [
+  { label: "Marlboro", value: "Marlboro" },
+  { label: "Philip Morris", value: "Philip Morris" },
+  { label: "Fortune", value: "Fortune" },
+  { label: "Hope", value: "Hope" },
+  { label: "More", value: "More" },
+  { label: "Champion", value: "Champion" },
+];
+
+// Product options
+export const PRODUCT_OPTIONS = [
+  { label: "Marlboro Red", value: "Marlboro Red" },
+  { label: "Philip Morris Blue", value: "Philip Morris Blue" },
+  { label: "Fortune Green", value: "Fortune Green" },
+  { label: "Hope Lights", value: "Hope Lights" },
+  { label: "More Menthol", value: "More Menthol" },
+  { label: "Champion Gold", value: "Champion Gold" },
+];
+
 // Default filter values
+export const DEFAULT_GLOBAL_FILTERS: GlobalFilters = {
+  startDate: new Date('2025-04-30'),
+  endDate: new Date('2025-05-30'),
+  categories: [],
+  brands: [],
+  products: [],
+  ageGroups: [],
+  genders: [],
+  locations: [],
+  incomeRanges: [],
+};
+
 export const DEFAULT_PRODUCT_MIX_FILTERS: ProductMixFilters = {
   startDate: new Date('2025-04-30'),
   endDate: new Date('2025-05-30'),
@@ -87,7 +142,7 @@ export function formatDateForQuery(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-export function getActiveFiltersCount(filters: ConsumerFilters | ProductMixFilters): number {
+export function getActiveFiltersCount(filters: ConsumerFilters | ProductMixFilters | GlobalFilters): number {
   let count = 0;
   if ('categories' in filters && filters.categories.length > 0) count++;
   if ('brands' in filters && filters.brands.length > 0) count++;
@@ -99,7 +154,7 @@ export function getActiveFiltersCount(filters: ConsumerFilters | ProductMixFilte
   return count;
 }
 
-export function getFilterSummary(filters: ConsumerFilters | ProductMixFilters): string[] {
+export function getFilterSummary(filters: ConsumerFilters | ProductMixFilters | GlobalFilters): string[] {
   const summary: string[] = [];
   
   if ('categories' in filters && filters.categories.length > 0) {

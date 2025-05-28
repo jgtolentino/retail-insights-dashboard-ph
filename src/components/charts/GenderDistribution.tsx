@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
@@ -9,16 +10,8 @@ import {
 } from 'recharts';
 import { dashboardService, type GenderDistributionData } from '@/services/dashboard';
 import { formatCurrency } from '@/lib/utils';
-
-interface GenderDistributionProps {
-  startDate: string;
-  endDate: string;
-  filters?: {
-    categories?: string[];
-    brands?: string[];
-    ageGroups?: string[];
-  };
-}
+import { useGlobalFilters } from '@/contexts/FilterContext';
+import { formatDateForQuery } from '@/types/filters';
 
 const GENDER_COLORS = {
   'Male': '#3b82f6',
@@ -26,17 +19,26 @@ const GENDER_COLORS = {
   'Unknown': '#6b7280'
 };
 
-export function GenderDistribution({ startDate, endDate, filters }: GenderDistributionProps) {
+export function GenderDistribution() {
   const [data, setData] = useState<GenderDistributionData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { globalFilters } = useGlobalFilters();
 
   useEffect(() => {
     setLoading(true);
     dashboardService
-      .getGenderDistribution(startDate, endDate, filters)
+      .getGenderDistribution(
+        formatDateForQuery(globalFilters.startDate), 
+        formatDateForQuery(globalFilters.endDate), 
+        {
+          categories: globalFilters.categories,
+          brands: globalFilters.brands,
+          ageGroups: globalFilters.ageGroups
+        }
+      )
       .then(setData)
       .finally(() => setLoading(false));
-  }, [startDate, endDate, filters]);
+  }, [globalFilters]);
 
   if (loading) {
     return (
