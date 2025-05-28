@@ -26,5 +26,6 @@ dist-ssr
 
 # Secrets and sensitive data
 .env.secrets
+.env.service
 .env.local
 *.secrets
