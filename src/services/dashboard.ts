@@ -278,11 +278,18 @@ export const dashboardService = {
         throw error;
       }
 
+      // Map the database response to our interface
       const result = data?.map(item => ({
-        age_group: item.age_group,
-        count: item.count,
-        percentage: item.percentage
+        age_group: item.age_bucket, // Map age_bucket to age_group
+        count: item.customer_count, // Map customer_count to count
+        percentage: 0 // Calculate percentage if needed
       })) || [];
+
+      // Calculate percentages
+      const totalCount = result.reduce((sum, item) => sum + item.count, 0);
+      result.forEach(item => {
+        item.percentage = totalCount > 0 ? (item.count / totalCount) * 100 : 0;
+      });
 
       console.log('📊 Age distribution data:', result);
       return result;
