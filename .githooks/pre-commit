@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Pre-commit hook to prevent Supabase configuration issues
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if Supabase client file is being committed
+if git diff --cached --name-only | grep -q "src/integrations/supabase/client.ts"; then
+    echo "🔍 Supabase client file detected in commit - verifying configuration..."
+    
+    # Check for hardcoded credentials
+    if git diff --cached src/integrations/supabase/client.ts | grep -E "eyJ|https://.*\.supabase\.co" | grep -v "import\.meta\.env"; then
+        echo "❌ COMMIT BLOCKED: Hardcoded Supabase credentials detected!"
+        echo ""
+        echo "🚨 The Supabase client contains hardcoded credentials."
+        echo "   This will cause deployment issues and is a security risk."
+        echo ""
+        echo "✅ Use environment variables instead:"
+        echo "   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;"
+        echo "   const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;"
+        echo ""
+        echo "🔧 Run: npm run verify:supabase"
+        echo ""
+        exit 1
+    fi
+    
+    # Check for auto-generation comment
+    if git diff --cached src/integrations/supabase/client.ts | grep -q "automatically generated"; then
+        echo "❌ COMMIT BLOCKED: Supabase client marked as auto-generated!"
+        echo ""
+        echo "🚨 This file should NOT be auto-generated."
+        echo "   Remove the auto-generation comment and use environment variables."
+        echo ""
+        echo "🔧 Run: npm run verify:supabase"
+        echo ""
+        exit 1
+    fi
+    
+    echo "✅ Supabase configuration looks good"
+fi
+
+# Run Supabase verification if the script exists
+if [ -f "scripts/verify-supabase-config.js" ]; then
+    echo "🔍 Running Supabase configuration verification..."
+    if ! node scripts/verify-supabase-config.js; then
+        echo "❌ COMMIT BLOCKED: Supabase configuration verification failed!"
+        exit 1
+    fi
+fi
+
+echo "✅ Pre-commit checks passed"
+exit 0
