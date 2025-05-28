@@ -9,8 +9,9 @@ import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { CategoryFilter } from "@/components/CategoryFilter"
 import { Link } from 'react-router-dom'
 import { ProductCategories } from '@/components/ProductCategories'
-import { AIPanel } from '@/components/AIPanel'
-import { type DashboardData } from '@/services/aiService'
+// AI Panel disabled for production
+// import { AIPanel } from '@/components/AIPanel'
+// import { type DashboardData } from '@/services/aiService'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -252,7 +253,8 @@ export default function Index() {
     )
   }
 
-  // Prepare AI dashboard data
+  // AI dashboard data - Disabled for production
+  /*
   const aiDashboardData: DashboardData = {
     transactions: {
       total: data.totalTransactions,
@@ -284,6 +286,7 @@ export default function Index() {
       ],
     },
   };
+  */
 
   return (
     <div className="space-y-6">
@@ -298,8 +301,8 @@ export default function Index() {
       {/* Product Categories */}
       <ProductCategories />
 
-      {/* AI Insights Panel */}
-      <AIPanel dashboardData={aiDashboardData} className="lg:max-w-md" />
+      {/* AI Insights Panel - Disabled for production */}
+      {/* <AIPanel dashboardData={aiDashboardData} className="lg:max-w-md" /> */}
 
       {/* Error Alert */}
       {error && (

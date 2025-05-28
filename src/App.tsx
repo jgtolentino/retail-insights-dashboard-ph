@@ -14,7 +14,7 @@ import ConsumerInsights from "./pages/ConsumerInsights";
 import Brands from "./pages/Brands";
 import Trends from "./pages/Trends";
 import Settings from "./pages/Settings";
-import EnvTest from "./pages/EnvTest";
+// import EnvTest from "./pages/EnvTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +41,7 @@ const App = () => (
                 <Route path="/brands" element={<Brands />} />
                 <Route path="/trends" element={<Trends />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/env-test" element={<EnvTest />} />
+                {/* <Route path="/env-test" element={<EnvTest />} /> */}
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
