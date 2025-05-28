@@ -115,7 +115,7 @@ export function FiltersPanel({ filters, onChange, onReset, className = '' }: Fil
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent className="z-50">
-              {categories.map((cat) => (
+              {(categories || []).map((cat) => (
                 <SelectItem key={cat} value={cat} className="cursor-pointer">
                   {cat}
                 </SelectItem>
@@ -140,7 +140,7 @@ export function FiltersPanel({ filters, onChange, onReset, className = '' }: Fil
               <SelectValue placeholder="Select brand" />
             </SelectTrigger>
             <SelectContent className="z-50">
-              {brands.map((brand) => (
+              {(brands || []).map((brand) => (
                 <SelectItem key={brand} value={brand} className="cursor-pointer">
                   {brand}
                 </SelectItem>
@@ -165,7 +165,7 @@ export function FiltersPanel({ filters, onChange, onReset, className = '' }: Fil
               <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent className="z-50">
-              {locations.map((loc) => (
+              {(locations || []).map((loc) => (
                 <SelectItem key={loc} value={loc} className="cursor-pointer">
                   {loc}
                 </SelectItem>
