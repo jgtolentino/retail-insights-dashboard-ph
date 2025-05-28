@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 // This script verifies that required environment variables are set during build
 const requiredEnvVars = [
   'VITE_SUPABASE_URL',
