@@ -9,6 +9,8 @@ import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { CategoryFilter } from "@/components/CategoryFilter"
 import { Link } from 'react-router-dom'
 import { ProductCategories } from '@/components/ProductCategories'
+import { AIPanel } from '@/components/AIPanel'
+import { type DashboardData } from '@/services/aiService'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -250,6 +252,39 @@ export default function Index() {
     )
   }
 
+  // Prepare AI dashboard data
+  const aiDashboardData: DashboardData = {
+    transactions: {
+      total: data.totalTransactions,
+      growth: timeSeriesData.length > 1 ? 
+        ((timeSeriesData[timeSeriesData.length - 1]?.transactions - timeSeriesData[0]?.transactions) / timeSeriesData[0]?.transactions * 100) || 0 : 0,
+      avgBasketSize: data.avgTransaction,
+    },
+    revenue: {
+      total: data.totalRevenue,
+      growth: timeSeriesData.length > 1 ? 
+        ((timeSeriesData[timeSeriesData.length - 1]?.revenue - timeSeriesData[0]?.revenue) / timeSeriesData[0]?.revenue * 100) || 0 : 0,
+      trend: timeSeriesData.map(d => d.revenue),
+    },
+    products: {
+      topSellers: data.topBrands.map(brand => ({ name: brand.name, sales: brand.total_sales })),
+      categories: categories.map(cat => ({ name: cat.name, performance: cat.count })),
+    },
+    customers: {
+      ageDistribution: [
+        { age: '18-24', count: 120 },
+        { age: '25-34', count: 350 },
+        { age: '35-44', count: 280 },
+        { age: '45-54', count: 180 },
+        { age: '55+', count: 70 },
+      ],
+      genderDistribution: [
+        { gender: 'Female', count: 520 },
+        { gender: 'Male', count: 480 },
+      ],
+    },
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -262,6 +297,9 @@ export default function Index() {
 
       {/* Product Categories */}
       <ProductCategories />
+
+      {/* AI Insights Panel */}
+      <AIPanel dashboardData={aiDashboardData} className="lg:max-w-md" />
 
       {/* Error Alert */}
       {error && (

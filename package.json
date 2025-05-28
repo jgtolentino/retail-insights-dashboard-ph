@@ -12,13 +12,18 @@
     "deploy:check": "./scripts/deployment-check.sh",
     "predeploy": "npm run deploy:check",
     "deploy": "vercel --prod",
+    "setup": "node scripts/setup-env.js",
+    "test": "vitest",
+    "test:ui": "vitest --ui", 
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
     "test:console": "echo 'Playwright tests to be implemented'",
     "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\"",
     "validate:pre-deploy": "node scripts/pre-deployment-validation.js",
     "test:all": "npm run validate:pre-deploy",
     "verify:env": "node scripts/verify-env.js",
     "verify:supabase": "node scripts/verify-supabase-config.js",
-    "fix:supabase-config": "echo 'Use the fixed client.ts template - check scripts/verify-supabase-config.js'"
+    "fix:supabase-config": "echo 'Supabase client now uses environment variables only. Please ensure your .env file is configured.'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

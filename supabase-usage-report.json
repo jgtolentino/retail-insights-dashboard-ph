@@ -1,0 +1,110 @@
+{
+  "rpcFunctions": [
+    {
+      "name": "get_age_distribution",
+      "calls": 4,
+      "locations": [
+        "src/components/charts/AgeDistribution.tsx:18",
+        "src/components/charts/AgeDistribution.tsx:26",
+        "src/components/charts/DataTestComponent.tsx:21",
+        "src/services/dashboard.ts:434"
+      ]
+    },
+    {
+      "name": "get_gender_distribution",
+      "calls": 3,
+      "locations": [
+        "src/components/charts/DataTestComponent.tsx:37",
+        "src/components/charts/GenderDistribution.tsx:19",
+        "src/services/dashboard.ts:466"
+      ]
+    },
+    {
+      "name": "get_daily_trends",
+      "calls": 1,
+      "locations": [
+        "src/services/dashboard.ts:358"
+      ]
+    },
+    {
+      "name": "get_purchase_behavior_by_age",
+      "calls": 1,
+      "locations": [
+        "src/services/dashboard.ts:493"
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "brands",
+      "queries": 11,
+      "locations": [
+        "src/components/DatabaseStatus.tsx:16",
+        "src/components/ProductCategories.tsx:33",
+        "src/components/filters/ConsumerInsightsFilters.tsx:40",
+        "src/components/filters/ConsumerInsightsFilters.tsx:54",
+        "src/components/filters/DashboardFilters.tsx:27",
+        "src/components/filters/DashboardFilters.tsx:44",
+        "src/components/filters/ProductMixFilters.tsx:31",
+        "src/components/filters/ProductMixFilters.tsx:45",
+        "src/services/dashboard.ts:172",
+        "src/utils/pre-sprint-checks.ts:42",
+        "src/utils/pre-sprint-checks.ts:93"
+      ]
+    },
+    {
+      "name": "products",
+      "queries": 4,
+      "locations": [
+        "src/components/ProductCategories.tsx:41",
+        "src/components/filters/ConsumerInsightsFilters.tsx:66",
+        "src/services/dashboard.ts:162",
+        "src/utils/pre-sprint-checks.ts:107"
+      ]
+    },
+    {
+      "name": "transactions",
+      "queries": 9,
+      "locations": [
+        "src/components/charts/DataTestComponent.tsx:52",
+        "src/components/filters/ProductMixFilters.tsx:57",
+        "src/hooks/useRetailAnalytics.ts:94",
+        "src/services/dashboard.ts:50",
+        "src/services/dashboard.ts:128",
+        "src/services/dashboard.ts:283",
+        "src/services/dashboardWithFilters.ts:46",
+        "src/services/dashboardWithFilters.ts:196",
+        "src/utils/pre-sprint-checks.ts:79"
+      ]
+    },
+    {
+      "name": "stores",
+      "queries": 4,
+      "locations": [
+        "src/components/filters/DashboardFilters.tsx:65",
+        "src/components/filters/DashboardFilters.tsx:86",
+        "src/services/dashboardWithFilters.ts:60",
+        "src/services/dashboardWithFilters.ts:210"
+      ]
+    },
+    {
+      "name": "transaction_items",
+      "queries": 7,
+      "locations": [
+        "src/hooks/useRetailAnalytics.ts:10",
+        "src/services/dashboard.ts:145",
+        "src/services/dashboardWithFilters.ts:87",
+        "src/services/dashboardWithFilters.ts:235",
+        "src/services/productMix.ts:38",
+        "src/services/productMix.ts:138",
+        "src/services/productMix.ts:229"
+      ]
+    }
+  ],
+  "auth": [],
+  "summary": {
+    "totalRPCs": 4,
+    "totalTables": 5,
+    "totalAuthMethods": 0
+  }
+}
