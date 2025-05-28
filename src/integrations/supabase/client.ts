@@ -14,27 +14,47 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Read from environment variables with temporary fallback for development
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://lcoxtanyckjzyxxcsjzz.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
+// Check multiple possible environment variable names
+const SUPABASE_URL = 
+  import.meta.env.VITE_SUPABASE_URL || 
+  import.meta.env.NEXT_PUBLIC_SUPABASE_URL || 
+  import.meta.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.SUPABASE_URL;
 
-// Show warning if using fallback values
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn('⚠️ Using fallback Supabase configuration.');
-  console.warn('For production, set these environment variables in Vercel:');
-  console.warn('- VITE_SUPABASE_URL');
-  console.warn('- VITE_SUPABASE_ANON_KEY');
-  
-  if (import.meta.env.PROD) {
-    console.error('❌ Environment variables MUST be set in production!');
-  }
+const SUPABASE_ANON_KEY = 
+  import.meta.env.VITE_SUPABASE_ANON_KEY || 
+  import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+  import.meta.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY;
+
+// Validate environment variables are present
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ Missing required Supabase environment variables');
+  console.error('Searched for: VITE_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_URL');
+  console.error('Please ensure these are set in Vercel Dashboard > Settings > Environment Variables');
+  throw new Error('Missing required Supabase environment variables');
 }
 
-// Development logging
-if (import.meta.env.DEV) {
-  console.log('✅ Supabase client initialized with environment variables');
-  console.log('📍 Supabase URL:', SUPABASE_URL);
-  console.log('🔑 Anon Key configured:', SUPABASE_ANON_KEY ? 'Yes' : 'No');
+// Logging to debug which variables are being used
+if (import.meta.env.DEV || !import.meta.env.SSR) {
+  console.log('✅ Supabase client initialized');
+  console.log('📍 Using URL from:', 
+    import.meta.env.VITE_SUPABASE_URL ? 'VITE_SUPABASE_URL' :
+    import.meta.env.NEXT_PUBLIC_SUPABASE_URL ? 'NEXT_PUBLIC_SUPABASE_URL' :
+    import.meta.env.SUPABASE_URL ? 'SUPABASE_URL' :
+    'process.env variables'
+  );
+  console.log('🔑 Using key from:', 
+    import.meta.env.VITE_SUPABASE_ANON_KEY ? 'VITE_SUPABASE_ANON_KEY' :
+    import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'NEXT_PUBLIC_SUPABASE_ANON_KEY' :
+    import.meta.env.SUPABASE_ANON_KEY ? 'SUPABASE_ANON_KEY' :
+    'process.env variables'
+  );
+  console.log('🌐 URL:', SUPABASE_URL?.substring(0, 30) + '...');
 }
 
 // Create and export the Supabase client

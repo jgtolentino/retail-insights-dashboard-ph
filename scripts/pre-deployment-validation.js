@@ -152,7 +152,7 @@ async function validateDashboardData() {
     const { data: transactions, error: transError } = await supabase
       .from('transactions')
       .select('total_amount')
-      .gte('transaction_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
     
     if (transError) {
       error(`Transaction data loading failed: ${transError.message}`);
@@ -164,9 +164,9 @@ async function validateDashboardData() {
     
     // Test brands data
     const { data: brands, error: brandsError } = await supabase
-      .from('products')
-      .select('brand')
-      .not('brand', 'is', null);
+      .from('brands')
+      .select('name')
+      .not('name', 'is', null);
     
     if (brandsError) {
       error(`Brands data loading failed: ${brandsError.message}`);
@@ -203,7 +203,8 @@ async function validateChartFunctions() {
         fn: 'get_age_distribution',
         params: {
           start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          end_date: new Date().toISOString()
+          end_date: new Date().toISOString(),
+          bucket_size: 10
         }
       },
       {
@@ -226,9 +227,9 @@ async function validateChartFunctions() {
     
     for (const test of chartTests) {
       try {
-        const { data, error } = await supabase.rpc(test.fn, test.params);
+        const { data, error: rpcError } = await supabase.rpc(test.fn, test.params);
         
-        if (error) {
+        if (rpcError) {
           // Try alternative parameter signature
           const altParams = {
             start_date: test.params.start_date,
