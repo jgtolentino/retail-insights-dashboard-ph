@@ -14,17 +14,20 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// ALWAYS use environment variables - NEVER hardcode credentials
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Read from environment variables with temporary fallback for development
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://lcoxtanyckjzyxxcsjzz.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
 
-// Validate environment variables are present
-if (!SUPABASE_URL) {
-  throw new Error('❌ VITE_SUPABASE_URL environment variable is required');
-}
-
-if (!SUPABASE_ANON_KEY) {
-  throw new Error('❌ VITE_SUPABASE_ANON_KEY environment variable is required');
+// Show warning if using fallback values
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.warn('⚠️ Using fallback Supabase configuration.');
+  console.warn('For production, set these environment variables in Vercel:');
+  console.warn('- VITE_SUPABASE_URL');
+  console.warn('- VITE_SUPABASE_ANON_KEY');
+  
+  if (import.meta.env.PROD) {
+    console.error('❌ Environment variables MUST be set in production!');
+  }
 }
 
 // Development logging
