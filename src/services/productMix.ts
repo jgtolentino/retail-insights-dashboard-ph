@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
@@ -60,14 +61,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
-      if (filters.brand && filters.brand !== 'all') {
-        query = query.eq('products.brand_id', filters.brand);
-      }
-
-      // Apply product filter
-      if (filters.product && filters.product !== 'all') {
-        query = query.eq('products.name', filters.product);
+      // Apply brand filter - convert string to number
+      if (filters.brandId && filters.brandId !== 'all') {
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: transactions, error } = await query;
@@ -163,14 +159,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
-      if (filters.brand && filters.brand !== 'all') {
-        query = query.eq('products.brand_id', filters.brand);
-      }
-
-      // Apply product filter
-      if (filters.product && filters.product !== 'all') {
-        query = query.eq('products.name', filters.product);
+      // Apply brand filter - convert string to number
+      if (filters.brandId && filters.brandId !== 'all') {
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: items, error } = await query;
@@ -256,14 +247,9 @@ export const productMixService = {
         query = query.eq('products.brands.category', filters.category);
       }
 
-      // Apply brand filter
-      if (filters.brand && filters.brand !== 'all') {
-        query = query.eq('products.brand_id', filters.brand);
-      }
-
-      // Apply product filter
-      if (filters.product && filters.product !== 'all') {
-        query = query.eq('products.name', filters.product);
+      // Apply brand filter - convert string to number
+      if (filters.brandId && filters.brandId !== 'all') {
+        query = query.eq('products.brand_id', parseInt(filters.brandId));
       }
 
       const { data: items, error } = await query;

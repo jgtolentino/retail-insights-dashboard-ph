@@ -34,6 +34,54 @@ export interface PurchaseBehaviorData {
 }
 
 export const dashboardService = {
+  async getConsumerInsights(
+    startDate:    string,
+    endDate:      string,
+    categories:   string[] | null,
+    brands:       string[] | null,
+    products:     string[] | null,
+    locations:    string[] | null,
+    incomeRanges: string[] | null
+  ) {
+    try {
+      // Build query with filters
+      let query = supabase
+        .from('transactions')
+        .select(`
+          *,
+          transaction_items(
+            *,
+            products(
+              *,
+              brands(*)
+            )
+          )
+        `)
+        .gte('created_at', startDate + 'T00:00:00Z')
+        .lte('created_at', endDate + 'T23:59:59Z')
+
+      // Apply location filter if provided
+      if (locations?.length) {
+        query = query.in('store_location', locations)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+
+      // Process the data locally to apply other filters
+      const filteredData = data?.filter(transaction => {
+        // Apply other filters as needed
+        return true // placeholder
+      })
+
+      return filteredData || []
+    } catch (error) {
+      logger.error('Error fetching consumer insights:', error)
+      throw error
+    }
+  },
+
   async getDashboardData(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange })
     
@@ -143,7 +191,7 @@ export const dashboardService = {
             } else {
               brandSalesMap.set(brand.name, {
                 sales: sales,
-                is_tbwa: brand.is_tbwa_client || false
+                is_tbwa: brand.is_tbwa || false
               })
             }
           }
@@ -289,7 +337,6 @@ export const dashboardService = {
     }
   },
 
-  // New method for date-parametric queries using the RPC function
   async getTimeSeriesDataByDateRange(startDate: string, endDate: string): Promise<TimeSeriesData[]> {
     logger.info('Fetching time series data by date range', { startDate, endDate })
     
@@ -327,7 +374,6 @@ export const dashboardService = {
     }
   },
 
-  // Helper method to convert preset time ranges to actual dates
   convertTimeRangeTodates(timeRange: string): { startDate: string, endDate: string } {
     // Use fixed end date that matches your data (May 30, 2025)
     const endDate = '2025-05-30'
@@ -357,7 +403,6 @@ export const dashboardService = {
     }
   },
 
-  // Consumer Insights Methods for Sprint 3
   async getAgeDistribution(
     startDate: string, 
     endDate: string, 
@@ -414,7 +459,11 @@ export const dashboardService = {
         throw error
       }
       
-      return data || []
+      // Add missing total_revenue field
+      return (data || []).map(item => ({
+        ...item,
+        total_revenue: 0 // Placeholder since the RPC doesn't return this
+      }))
     } catch (error) {
       logger.error('Failed to fetch gender distribution data', error)
       return []
