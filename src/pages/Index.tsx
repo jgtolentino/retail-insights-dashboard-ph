@@ -9,6 +9,7 @@ import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { CategoryFilter } from "@/components/CategoryFilter"
 import { Link } from 'react-router-dom'
 import { ProductCategories } from '@/components/ProductCategories'
+import { FEATURE_FLAGS } from '@/config/features'
 // AI Panel disabled for production
 // import { AIPanel } from '@/components/AIPanel'
 // import { type DashboardData } from '@/services/aiService'

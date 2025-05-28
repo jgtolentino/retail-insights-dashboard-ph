@@ -14,13 +14,15 @@ import ConsumerInsights from "./pages/ConsumerInsights";
 import Brands from "./pages/Brands";
 import Trends from "./pages/Trends";
 import Settings from "./pages/Settings";
+import { FEATURE_FLAGS } from "@/config/features";
 // import EnvTest from "./pages/EnvTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
-      refetchOnWindowFocus: false,
+      retry: process.env.NODE_ENV === 'production' ? 2 : 0,
+      refetchOnWindowFocus: process.env.NODE_ENV === 'production',
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
@@ -35,12 +37,12 @@ const App = () => (
           <BrowserRouter>
             <Layout>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/product-mix" element={<ProductMix />} />
-                <Route path="/consumer-insights" element={<ConsumerInsights />} />
-                <Route path="/brands" element={<Brands />} />
-                <Route path="/trends" element={<Trends />} />
-                <Route path="/settings" element={<Settings />} />
+                {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
+                {FEATURE_FLAGS.PRODUCT_MIX && <Route path="/product-mix" element={<ProductMix />} />}
+                {FEATURE_FLAGS.CONSUMER_INSIGHTS && <Route path="/consumer-insights" element={<ConsumerInsights />} />}
+                {FEATURE_FLAGS.BRANDS_PAGE && <Route path="/brands" element={<Brands />} />}
+                {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
+                {FEATURE_FLAGS.SETTINGS_PAGE && <Route path="/settings" element={<Settings />} />}
                 {/* <Route path="/env-test" element={<EnvTest />} /> */}
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
