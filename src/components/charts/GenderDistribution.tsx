@@ -59,7 +59,7 @@ export function GenderDistribution() {
   const pieData = data.map(item => ({
     name: item.gender,
     value: item.customer_count,
-    revenue: item.total_revenue
+    revenue: item.total_revenue || 0
   }));
 
   return (

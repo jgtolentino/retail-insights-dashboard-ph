@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/utils/logger'
 import type { DashboardData } from '@/types/database.types'
@@ -143,7 +144,7 @@ export const dashboardService = {
             } else {
               brandSalesMap.set(brand.name, {
                 sales: sales,
-                is_tbwa: brand.is_tbwa_client || false
+                is_tbwa: brand.is_tbwa || false
               })
             }
           }
@@ -414,7 +415,11 @@ export const dashboardService = {
         throw error
       }
       
-      return data || []
+      // Add missing total_revenue field
+      return (data || []).map(item => ({
+        ...item,
+        total_revenue: 0 // Placeholder since the RPC doesn't return this
+      }))
     } catch (error) {
       logger.error('Failed to fetch gender distribution data', error)
       return []

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,7 +67,7 @@ export function ProductMixDashboard() {
     setFilters(prev => ({
       ...prev,
       category: selectedCategory === 'all' ? undefined : selectedCategory,
-      brand: selectedBrand === 'all' ? undefined : selectedBrand
+      brandId: selectedBrand === 'all' ? undefined : selectedBrand
     }));
   }, [selectedCategory, selectedBrand]);
 
@@ -170,7 +171,7 @@ export function ProductMixDashboard() {
                 <SelectContent>
                   <SelectItem value="all">All Brands</SelectItem>
                   {brands?.map(brand => (
-                    <SelectItem key={brand.id} value={brand.id}>
+                    <SelectItem key={brand.id} value={brand.id.toString()}>
                       {brand.name}
                     </SelectItem>
                   ))}
