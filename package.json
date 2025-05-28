@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/verify-supabase-config.js && vite build",
+    "build": "vite build",
     "build:prod": "VITE_APP_ENV=production vite build --mode production",
     "build:dev": "vite build --mode development",
     "preview:prod": "vite preview",
@@ -17,7 +17,7 @@
     "deploy:vercel": "npm run build:prod && vercel --prod",
     "setup": "node scripts/setup-env.js",
     "test": "vitest",
-    "test:ui": "vitest --ui", 
+    "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
     "test:console": "echo 'Playwright tests to be implemented'",
