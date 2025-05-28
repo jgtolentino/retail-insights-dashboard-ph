@@ -13,9 +13,8 @@ import { FilterSummary } from '@/components/FilterSummary';
 import { DateRange } from 'react-day-picker';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnhancedFilters } from '@/contexts/EnhancedFilterContext';
 import { 
-  ConsumerFilters, 
-  DEFAULT_CONSUMER_FILTERS,
   AGE_GROUP_OPTIONS,
   GENDER_OPTIONS,
   LOCATION_OPTIONS,
@@ -24,25 +23,23 @@ import {
 } from '@/types/filters';
 
 export default function ConsumerInsights() {
-  const [filters, setFilters] = useState<ConsumerFilters>(DEFAULT_CONSUMER_FILTERS);
+  const { filters, setFilters, updateDateRange, resetFilters: globalResetFilters } = useEnhancedFilters();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: filters.startDate,
-    to: filters.endDate
+    from: new Date(filters.dateRange.start),
+    to: new Date(filters.dateRange.end)
   });
 
-  // Update filters when date range changes
+  // Update global filters when date range changes
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
-      setFilters(prev => ({
-        ...prev,
-        startDate: dateRange.from!,
-        endDate: dateRange.to!
-      }));
+      const startDate = dateRange.from.toISOString().split('T')[0];
+      const endDate = dateRange.to.toISOString().split('T')[0];
+      updateDateRange(startDate, endDate);
     }
-  }, [dateRange]);
+  }, [dateRange, updateDateRange]);
 
-  const startDate = formatDateForQuery(filters.startDate);
-  const endDate = formatDateForQuery(filters.endDate);
+  const startDate = filters.dateRange.start;
+  const endDate = filters.dateRange.end;
 
   // Fetch categories
   const { data: categories } = useQuery({
@@ -82,15 +79,15 @@ export default function ConsumerInsights() {
     }
   });
 
-  const updateFilters = (updates: Partial<ConsumerFilters>) => {
+  const updateFilters = (updates: any) => {
     setFilters(prev => ({ ...prev, ...updates }));
   };
 
   const resetFilters = () => {
-    setFilters(DEFAULT_CONSUMER_FILTERS);
+    globalResetFilters();
     setDateRange({
-      from: DEFAULT_CONSUMER_FILTERS.startDate,
-      to: DEFAULT_CONSUMER_FILTERS.endDate
+      from: new Date('2025-04-30'),
+      to: new Date('2025-05-30')
     });
   };
 
