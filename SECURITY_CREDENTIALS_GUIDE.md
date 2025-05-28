@@ -12,8 +12,8 @@ The file `test-sprint2-access.js` contained hardcoded Supabase credentials:
 
 ```javascript
 // ❌ SECURITY RISK - Never do this!
-const supabaseUrl = 'https://lcoxtanyckjzyxxcsjzz.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+const supabaseUrl = 'https://your-project.supabase.co'
+const supabaseKey = 'your_anon_key_here...'
 ```
 
 **Why this is dangerous:**
