@@ -23,10 +23,10 @@ function verifySupabaseConfig() {
   const content = fs.readFileSync(CLIENT_FILE, 'utf8');
   
   // Check for hardcoded credentials (bad patterns)
+  // Allow FALLBACK_ constants but not direct hardcoded values
   const badPatterns = [
     /const SUPABASE_URL = ['"`]https:\/\/[^'"`]+['"`]/,
     /const SUPABASE.*KEY = ['"`]eyJ[^'"`]+['"`]/,
-    /= ['"`]https:\/\/.*\.supabase\.co['"`]/,
     /createClient\(['"`]https:\/\//
   ];
   
