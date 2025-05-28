@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
@@ -31,7 +32,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
     console.log('🔍 AgeDistribution: Fetching data...', { startDate, endDate, bucketSize, filters });
     
     dashboardService
-      .getAgeDistribution(startDate, endDate, bucketSize, filters)
+      .getAgeDistribution(startDate, endDate)
       .then((result) => {
         console.log('📊 AgeDistribution: Data received:', result);
         setData(result);
@@ -73,7 +74,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis 
-            dataKey="age_bucket" 
+            dataKey="age_group" 
             fontSize={12}
             tick={{ fill: '#6b7280' }}
           />
@@ -93,7 +94,7 @@ export function AgeDistribution({ startDate, endDate, bucketSize = 10, filters }
             }}
           />
           <Bar 
-            dataKey="customer_count" 
+            dataKey="count" 
             fill="#3b82f6" 
             radius={[2, 2, 0, 0]}
             name="Customers"

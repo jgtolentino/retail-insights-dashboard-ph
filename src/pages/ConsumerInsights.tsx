@@ -298,11 +298,6 @@ export default function ConsumerInsights() {
                   <GenderDistribution 
                     startDate={startDate} 
                     endDate={endDate}
-                    filters={{
-                      categories: filters.categories,
-                      brands: filters.brands,
-                      ageGroups: filters.ageGroups
-                    }}
                   />
                 </CardContent>
               </Card>
