@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7,8 +6,13 @@ import { Label } from "@/components/ui/label"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Package, Users } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
+import { CategoryFilter } from "@/components/CategoryFilter"
 import { Link } from 'react-router-dom'
 import { ProductCategories } from '@/components/ProductCategories'
+import { FEATURE_FLAGS } from '@/config/features'
+// AI Panel disabled for production
+// import { AIPanel } from '@/components/AIPanel'
+// import { type DashboardData } from '@/services/aiService'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
@@ -30,6 +34,15 @@ export default function Index() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
+
+  // Category filter state
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [categories] = useState([
+    { id: '1', name: 'Cigarettes', count: 89 },
+    { id: '2', name: 'Beverages', count: 42 },
+    { id: '3', name: 'Snacks', count: 28 },
+    { id: '4', name: 'Personal Care', count: 16 }
+  ])
 
   useEffect(() => {
     fetchData()
@@ -241,6 +254,41 @@ export default function Index() {
     )
   }
 
+  // AI dashboard data - Disabled for production
+  /*
+  const aiDashboardData: DashboardData = {
+    transactions: {
+      total: data.totalTransactions,
+      growth: timeSeriesData.length > 1 ? 
+        ((timeSeriesData[timeSeriesData.length - 1]?.transactions - timeSeriesData[0]?.transactions) / timeSeriesData[0]?.transactions * 100) || 0 : 0,
+      avgBasketSize: data.avgTransaction,
+    },
+    revenue: {
+      total: data.totalRevenue,
+      growth: timeSeriesData.length > 1 ? 
+        ((timeSeriesData[timeSeriesData.length - 1]?.revenue - timeSeriesData[0]?.revenue) / timeSeriesData[0]?.revenue * 100) || 0 : 0,
+      trend: timeSeriesData.map(d => d.revenue),
+    },
+    products: {
+      topSellers: data.topBrands.map(brand => ({ name: brand.name, sales: brand.total_sales })),
+      categories: categories.map(cat => ({ name: cat.name, performance: cat.count })),
+    },
+    customers: {
+      ageDistribution: [
+        { age: '18-24', count: 120 },
+        { age: '25-34', count: 350 },
+        { age: '35-44', count: 280 },
+        { age: '45-54', count: 180 },
+        { age: '55+', count: 70 },
+      ],
+      genderDistribution: [
+        { gender: 'Female', count: 520 },
+        { gender: 'Male', count: 480 },
+      ],
+    },
+  };
+  */
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -253,6 +301,9 @@ export default function Index() {
 
       {/* Product Categories */}
       <ProductCategories />
+
+      {/* AI Insights Panel - Disabled for production */}
+      {/* <AIPanel dashboardData={aiDashboardData} className="lg:max-w-md" /> */}
 
       {/* Error Alert */}
       {error && (

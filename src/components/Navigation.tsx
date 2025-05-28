@@ -8,15 +8,16 @@ import {
   TrendingUp,
   Settings
 } from "lucide-react"
+import { FEATURE_FLAGS } from "@/config/features"
 
 const navItems = [
-  { href: "/",           label: "Dashboard", icon: LayoutDashboard },
-  { href: "/product-mix", label: "Products",  icon: Package },
-  { href: "/brands",     label: "Brands",    icon: BarChart3 },
-  { href: "/consumer-insights", label: "Consumers", icon: Users },
-  { href: "/trends",     label: "Trends",    icon: TrendingUp },
-  { href: "/settings",   label: "Settings",  icon: Settings },
-]
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
+  { href: "/product-mix", label: "Products", icon: Package, feature: 'PRODUCT_MIX' },
+  { href: "/brands", label: "Brands", icon: BarChart3, feature: 'BRANDS_PAGE' },
+  { href: "/consumer-insights", label: "Consumers", icon: Users, feature: 'CONSUMER_INSIGHTS' },
+  { href: "/trends", label: "Trends", icon: TrendingUp, feature: 'TRENDS_PAGE' },
+  { href: "/settings", label: "Settings", icon: Settings, feature: 'SETTINGS_PAGE' },
+].filter(item => FEATURE_FLAGS[item.feature as keyof typeof FEATURE_FLAGS])
 
 export function Navigation() {
   const location = useLocation()
