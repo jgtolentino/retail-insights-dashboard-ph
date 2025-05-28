@@ -21,8 +21,8 @@ const FILTER_STORAGE_KEY = 'retail-dashboard-filters';
 // Page-specific filter relevance
 const filterRelevance: Record<string, (keyof GlobalFilters)[]> = {
   '/': ['dateRange', 'location'], // Transaction Trends
-  '/product-mix': ['dateRange', 'category', 'brand', 'location'], // Product Mix
-  '/consumer-insights': ['dateRange', 'category', 'brand', 'location', 'weekdayWeekend'], // Consumer Insights
+  '/product-mix': ['dateRange', 'category', 'brand', 'location', 'categories', 'brands'], // Product Mix
+  '/consumer-insights': ['dateRange', 'category', 'brand', 'location', 'weekdayWeekend', 'categories', 'brands', 'genders', 'ageGroups'], // Consumer Insights
 };
 
 export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
@@ -51,6 +51,19 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
     
     const dayType = searchParams.get('dayType') as 'all' | 'weekday' | 'weekend';
     if (dayType) urlFilters.weekdayWeekend = dayType;
+    
+    // Array-based filters from URL
+    const ageGroups = searchParams.get('ageGroups');
+    if (ageGroups) urlFilters.ageGroups = ageGroups.split(',');
+    
+    const genders = searchParams.get('genders');
+    if (genders) urlFilters.genders = genders.split(',');
+    
+    const brands = searchParams.get('brands');
+    if (brands) urlFilters.brands = brands.split(',');
+    
+    const categories = searchParams.get('categories');
+    if (categories) urlFilters.categories = categories.split(',');
     
     // 2. Try localStorage next
     let savedFilters: Partial<GlobalFilters> = {};
@@ -97,6 +110,23 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
       
       if (newFilters.weekdayWeekend !== 'all') {
         params.set('dayType', newFilters.weekdayWeekend);
+      }
+      
+      // Array-based filters
+      if (newFilters.ageGroups && newFilters.ageGroups.length > 0) {
+        params.set('ageGroups', newFilters.ageGroups.join(','));
+      }
+      
+      if (newFilters.genders && newFilters.genders.length > 0) {
+        params.set('genders', newFilters.genders.join(','));
+      }
+      
+      if (newFilters.brands && newFilters.brands.length > 0) {
+        params.set('brands', newFilters.brands.join(','));
+      }
+      
+      if (newFilters.categories && newFilters.categories.length > 0) {
+        params.set('categories', newFilters.categories.join(','));
       }
       
       setSearchParams(params, { replace: true });

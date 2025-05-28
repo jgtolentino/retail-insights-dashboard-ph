@@ -23,7 +23,12 @@ export const defaultConsumerFilters: ConsumerFilters = {
   category: 'All',
   brand: 'All',
   location: 'All',
-  weekdayWeekend: 'all'
+  weekdayWeekend: 'all',
+  // Array-based filters for drill-through navigation
+  categories: [],
+  brands: [],
+  genders: [],
+  ageGroups: []
 };
 
 export const defaultGlobalFilters: GlobalFilters = {
