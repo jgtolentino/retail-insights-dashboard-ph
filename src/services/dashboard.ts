@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/utils/logger'
 import type { DashboardData } from '@/types/database.types'
@@ -35,6 +34,30 @@ export interface PurchaseBehaviorData {
 }
 
 export const dashboardService = {
+  async getConsumerInsights(
+    startDate:    string,
+    endDate:      string,
+    categories:   string[] | null,
+    brands:       string[] | null,
+    products:     string[] | null,
+    locations:    string[] | null,
+    incomeRanges: string[] | null
+  ) {
+    const { data, error } = await supabase
+      .rpc('get_consumer_insights', {
+        start_date:        startDate,
+        end_date:          endDate,
+        category_filters:   categories?.length   ? categories   : null,
+        brand_filters:      brands?.length       ? brands       : null,
+        product_filters:    products?.length     ? products     : null,
+        location_filters:   locations?.length    ? locations    : null,
+        income_range_filters: incomeRanges?.length ? incomeRanges : null,
+      })
+
+    if (error) throw error
+    return data
+  },
+
   async getDashboardData(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange })
     

@@ -12,8 +12,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      {/* Global filters panel - available on every page */}
-      <div className="max-w-7xl mx-auto px-4 pt-4">
+      <div className="max-w-7xl mx-auto mt-4">
         <GlobalFiltersPanel />
       </div>
       

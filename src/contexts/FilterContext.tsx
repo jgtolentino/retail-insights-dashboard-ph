@@ -6,15 +6,14 @@ import {
   GlobalFilters,
   DEFAULT_CONSUMER_FILTERS, 
   DEFAULT_PRODUCT_MIX_FILTERS,
-  DEFAULT_GLOBAL_FILTERS
+  defaultGlobalFilters
 } from '@/types/filters';
 
 interface FilterContextType {
   // Global filters
-  globalFilters: GlobalFilters;
-  setGlobalFilters: (filters: GlobalFilters) => void;
-  updateGlobalFilters: (updates: Partial<GlobalFilters>) => void;
-  resetGlobalFilters: () => void;
+  filters: GlobalFilters;
+  setFilters: (updates: Partial<GlobalFilters>) => void;
+  resetFilters: () => void;
   
   // Consumer Insights filters
   consumerFilters: ConsumerFilters;
@@ -32,16 +31,16 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
-  const [globalFilters, setGlobalFilters] = useState<GlobalFilters>(DEFAULT_GLOBAL_FILTERS);
+  const [filters, setGlobalFilters] = useState<GlobalFilters>(defaultGlobalFilters);
   const [consumerFilters, setConsumerFilters] = useState<ConsumerFilters>(DEFAULT_CONSUMER_FILTERS);
   const [productMixFilters, setProductMixFilters] = useState<ProductMixFilters>(DEFAULT_PRODUCT_MIX_FILTERS);
 
-  const updateGlobalFilters = (updates: Partial<GlobalFilters>) => {
+  const setFilters = (updates: Partial<GlobalFilters>) => {
     setGlobalFilters(prev => ({ ...prev, ...updates }));
   };
 
-  const resetGlobalFilters = () => {
-    setGlobalFilters(DEFAULT_GLOBAL_FILTERS);
+  const resetFilters = () => {
+    setGlobalFilters(defaultGlobalFilters);
   };
 
   const updateConsumerFilters = (updates: Partial<ConsumerFilters>) => {
@@ -61,10 +60,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   };
 
   const value: FilterContextType = {
-    globalFilters,
-    setGlobalFilters,
-    updateGlobalFilters,
-    resetGlobalFilters,
+    filters,
+    setFilters,
+    resetFilters,
     consumerFilters,
     setConsumerFilters,
     updateConsumerFilters,
@@ -92,8 +90,8 @@ export function useFilters() {
 
 // Convenience hooks for specific filter types
 export function useGlobalFilters() {
-  const { globalFilters, setGlobalFilters, updateGlobalFilters, resetGlobalFilters } = useFilters();
-  return { globalFilters, setGlobalFilters, updateGlobalFilters, resetGlobalFilters };
+  const { filters, setFilters, resetFilters } = useFilters();
+  return { globalFilters: filters, setGlobalFilters: setFilters, updateGlobalFilters: setFilters, resetGlobalFilters: resetFilters };
 }
 
 export function useConsumerFilters() {

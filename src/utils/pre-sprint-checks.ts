@@ -51,7 +51,7 @@ export class PreSprintChecks {
     for (const table of tables) {
       try {
         const { data, error } = await supabase
-          .from(table)
+          .from(table as any)
           .select('*')
           .limit(1);
         
@@ -123,7 +123,7 @@ export class PreSprintChecks {
       for (const table of tables) {
         try {
           const { data, error } = await supabase
-            .from(table)
+            .from(table as any)
             .select('*')
             .limit(1);
           
@@ -144,15 +144,16 @@ export class PreSprintChecks {
   private async checkFunctions(): Promise<void> {
     try {
       // Test if key functions exist by calling them
-      const testFunctions = [
+      const testFunctions: Array<keyof typeof supabase['functions']> = [];
+      const rpcFunctions = [
         'get_daily_trends',
-        'get_age_distribution',
+        'get_age_distribution', 
         'get_gender_distribution'
       ];
 
-      for (const funcName of testFunctions) {
+      for (const funcName of rpcFunctions) {
         try {
-          const { data, error } = await supabase.rpc(funcName, {
+          const { data, error } = await supabase.rpc(funcName as any, {
             start_date: '2025-05-01T00:00:00Z',
             end_date: '2025-05-02T00:00:00Z'
           });

@@ -7,15 +7,21 @@ export interface BaseFilters {
 }
 
 export interface GlobalFilters {
-  startDate: Date;
-  endDate: Date;
-  categories: string[];
-  brands: string[];
-  products: string[];
-  ageGroups: string[];
-  genders: string[];
-  locations: string[];
-  incomeRanges: string[];
+  dateRange: { start: string; end: string }
+  categories: string[]
+  brands:     string[]
+  products:   string[]
+  locations:  string[]
+  incomeRanges: string[]
+}
+
+export const defaultGlobalFilters: GlobalFilters = {
+  dateRange:    { start: '2025-04-30', end: '2025-05-30' },
+  categories:   [],
+  brands:       [],
+  products:     [],
+  locations:    [],
+  incomeRanges: [],
 }
 
 export interface ProductMixFilters extends BaseFilters {
@@ -105,17 +111,7 @@ export const PRODUCT_OPTIONS = [
 ];
 
 // Default filter values
-export const DEFAULT_GLOBAL_FILTERS: GlobalFilters = {
-  startDate: new Date('2025-04-30'),
-  endDate: new Date('2025-05-30'),
-  categories: [],
-  brands: [],
-  products: [],
-  ageGroups: [],
-  genders: [],
-  locations: [],
-  incomeRanges: [],
-};
+export const DEFAULT_GLOBAL_FILTERS: GlobalFilters = defaultGlobalFilters;
 
 export const DEFAULT_PRODUCT_MIX_FILTERS: ProductMixFilters = {
   startDate: new Date('2025-04-30'),
