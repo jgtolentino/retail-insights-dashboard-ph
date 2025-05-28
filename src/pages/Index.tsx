@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ export default function Index() {
   })
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>('30d')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
   
@@ -34,6 +36,7 @@ export default function Index() {
 
   const fetchData = async () => {
     setLoading(true)
+    setError(null)
     try {
       let dashboardData, timeSeriesResult
       
@@ -52,7 +55,7 @@ export default function Index() {
           dashboardService.getTimeSeriesData(dateRange)
         ])
         dashboardData = dashboardDataResult
-        timeSeriesResult = timeSeriesResult
+        timeSeriesResult = timeSeriesDataResult
       } else {
         // Custom range selected but dates not set yet
         return
@@ -61,10 +64,27 @@ export default function Index() {
       console.log('📊 Dashboard data received:', dashboardData)
       console.log('📈 Time series data received:', timeSeriesResult)
       
-      setData(dashboardData)
-      setTimeSeriesData(timeSeriesResult)
+      // Ensure we have valid data with fallbacks
+      setData(dashboardData || {
+        totalRevenue: 0,
+        totalTransactions: 0,
+        avgTransaction: 0,
+        topBrands: []
+      })
+      
+      // Ensure timeSeriesResult is an array
+      setTimeSeriesData(Array.isArray(timeSeriesResult) ? timeSeriesResult : [])
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
+      setError('Failed to load dashboard data. Please check your connection.')
+      // Set fallback data
+      setData({
+        totalRevenue: 0,
+        totalTransactions: 0,
+        avgTransaction: 0,
+        topBrands: []
+      })
+      setTimeSeriesData([])
     } finally {
       setLoading(false)
     }
@@ -132,7 +152,8 @@ export default function Index() {
   }
 
   const renderChart = () => {
-    if (timeSeriesData.length === 0) {
+    // Safety check for timeSeriesData
+    if (!timeSeriesData || !Array.isArray(timeSeriesData) || timeSeriesData.length === 0) {
       return (
         <div className="h-80 flex flex-col items-center justify-center text-gray-500 space-y-4">
           <div className="text-center">
@@ -140,6 +161,9 @@ export default function Index() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Available</h3>
             <p className="text-sm">No transaction data found for the selected time period.</p>
             <p className="text-sm mt-1">Try selecting a different date range or check your database connection.</p>
+            {error && (
+              <p className="text-sm mt-2 text-red-600">{error}</p>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -226,6 +250,22 @@ export default function Index() {
         </div>
       </div>
 
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Controls */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -309,7 +349,7 @@ export default function Index() {
               {loading ? (
                 <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
               ) : (
-                `₱${data.totalRevenue.toLocaleString()}`
+                `₱${(data.totalRevenue || 0).toLocaleString()}`
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
@@ -325,7 +365,7 @@ export default function Index() {
               {loading ? (
                 <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
               ) : (
-                data.totalTransactions
+                data.totalTransactions || 0
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
@@ -341,7 +381,7 @@ export default function Index() {
               {loading ? (
                 <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
               ) : (
-                `₱${Math.round(data.avgTransaction)}`
+                `₱${Math.round(data.avgTransaction || 0)}`
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">{getDateRangeLabel()}</p>
@@ -412,13 +452,16 @@ export default function Index() {
                 </div>
               ))}
             </div>
-          ) : data.topBrands.length === 0 ? (
+          ) : (!data.topBrands || data.topBrands.length === 0) ? (
             <div className="text-center py-8 text-gray-500 space-y-4">
               <div>
                 <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Brand Data</h3>
                 <p className="text-sm">No brand sales data found for the selected time period.</p>
                 <p className="text-sm mt-1">Try a different date range or verify your database has transaction data.</p>
+                {error && (
+                  <p className="text-sm mt-2 text-red-600">{error}</p>
+                )}
               </div>
               <div className="flex gap-2 justify-center">
                 <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -456,7 +499,7 @@ export default function Index() {
                         </div>
                       </div>
                       <div className="w-16 text-sm text-gray-600 text-right">
-                        {((brand.sales / data.totalRevenue) * 100).toFixed(1)}%
+                        {((brand.sales / (data.totalRevenue || 1)) * 100).toFixed(1)}%
                       </div>
                     </div>
                   )
