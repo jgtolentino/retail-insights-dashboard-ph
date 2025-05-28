@@ -91,6 +91,9 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
       brands: mergedFilters.brands || [],
       genders: mergedFilters.genders || [],
       ageGroups: mergedFilters.ageGroups || [],
+      locations: mergedFilters.locations || [],
+      products: mergedFilters.products || [],
+      incomeRanges: mergedFilters.incomeRanges || [],
     };
   };
   
@@ -164,6 +167,9 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
         brands: prev.brands || [],
         genders: prev.genders || [],
         ageGroups: prev.ageGroups || [],
+        locations: prev.locations || [],
+        products: prev.products || [],
+        incomeRanges: prev.incomeRanges || [],
       };
       
       const newFilters = typeof updater === 'function' ? updater(safePrev) : { ...safePrev, ...updater };
@@ -175,6 +181,9 @@ export function EnhancedFilterProvider({ children }: { children: ReactNode }) {
         brands: newFilters.brands || [],
         genders: newFilters.genders || [],
         ageGroups: newFilters.ageGroups || [],
+        locations: newFilters.locations || [],
+        products: newFilters.products || [],
+        incomeRanges: newFilters.incomeRanges || [],
       };
       
       // Sync to URL and localStorage

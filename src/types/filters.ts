@@ -8,6 +8,9 @@ export interface ConsumerFilters {
   brands?: string[];
   genders?: string[];
   ageGroups?: string[];
+  locations?: string[];
+  products?: string[];
+  incomeRanges?: string[];
 }
 
 export interface DateRange {
@@ -28,7 +31,10 @@ export const defaultConsumerFilters: ConsumerFilters = {
   categories: [],
   brands: [],
   genders: [],
-  ageGroups: []
+  ageGroups: [],
+  locations: [],
+  products: [],
+  incomeRanges: []
 };
 
 export const defaultGlobalFilters: GlobalFilters = {
