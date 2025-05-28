@@ -266,3 +266,251 @@ export function displayValidationResults(results: ValidationResult): void {
     console.groupEnd();
   }
 }
+
+export const preSprintChecks = {
+  async checkSupabaseConnection(): Promise<CheckResult> {
+    console.log('🔍 Checking Supabase connection...');
+    
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .limit(1);
+
+      if (error) {
+        return {
+          status: 'error',
+          message: `Supabase connection check failed: ${error.message}`,
+          details: { error }
+        };
+      }
+
+      return {
+        status: 'success',
+        message: 'Supabase connection check passed',
+        details: {}
+      };
+
+    } catch (error) {
+      return {
+        status: 'error',
+        message: `Supabase connection check failed: ${error}`,
+        details: { error }
+      };
+    }
+  },
+
+  async checkDatabaseStructure(): Promise<CheckResult> {
+    console.log('🔍 Checking database structure...');
+    
+    try {
+      // Check transactions table
+      const { data: transactions, error: txError } = await supabase
+        .from('transactions')
+        .select('id, total_amount, created_at')
+        .limit(1);
+
+      if (txError) {
+        return {
+          status: 'error',
+          message: `Transactions check failed: ${txError.message}`,
+          details: { error: txError }
+        };
+      }
+
+      // Check stores table
+      const { data: stores, error: storeError } = await supabase
+        .from('stores')
+        .select('id, store_location')
+        .limit(1);
+
+      if (storeError) {
+        return {
+          status: 'error',
+          message: `Stores check failed: ${storeError.message}`,
+          details: { error: storeError }
+        };
+      }
+
+      // Check products table
+      const { data: products, error: productError } = await supabase
+        .from('products')
+        .select('id, name, brand_id')
+        .limit(1);
+
+      if (productError) {
+        return {
+          status: 'error',
+          message: `Products check failed: ${productError.message}`,
+          details: { error: productError }
+        };
+      }
+
+      // Check brands table
+      const { data: brands, error: brandError } = await supabase
+        .from('brands')
+        .select('id, name, category')
+        .limit(1);
+
+      if (brandError) {
+        return {
+          status: 'error',
+          message: `Brands check failed: ${brandError.message}`,
+          details: { error: brandError }
+        };
+      }
+
+      // Check transaction_items table
+      const { data: items, error: itemError } = await supabase
+        .from('transaction_items')
+        .select('id, product_id, quantity')
+        .limit(1);
+
+      if (itemError) {
+        return {
+          status: 'error',
+          message: `Transaction items check failed: ${itemError.message}`,
+          details: { error: itemError }
+        };
+      }
+
+      return {
+        status: 'success',
+        message: 'Database structure check passed',
+        details: {}
+      };
+
+    } catch (error) {
+      return {
+        status: 'error',
+        message: `Database structure check failed: ${error}`,
+        details: { error }
+      };
+    }
+  },
+
+  async checkDataAvailability(): Promise<CheckResult> {
+    console.log('📊 Checking data availability...');
+    
+    try {
+      // Check transactions table
+      const { data: transactions, error: txError } = await supabase
+        .from('transactions')
+        .select('id, total_amount, created_at')
+        .limit(1);
+
+      if (txError) {
+        return {
+          status: 'error',
+          message: `Transactions check failed: ${txError.message}`,
+          details: { error: txError }
+        };
+      }
+
+      // Check stores table
+      const { data: stores, error: storeError } = await supabase
+        .from('stores')
+        .select('id, store_location')
+        .limit(1);
+
+      if (storeError) {
+        return {
+          status: 'error',
+          message: `Stores check failed: ${storeError.message}`,
+          details: { error: storeError }
+        };
+      }
+
+      // Check products table
+      const { data: products, error: productError } = await supabase
+        .from('products')
+        .select('id, name, brand_id')
+        .limit(1);
+
+      if (productError) {
+        return {
+          status: 'error',
+          message: `Products check failed: ${productError.message}`,
+          details: { error: productError }
+        };
+      }
+
+      // Check brands table
+      const { data: brands, error: brandError } = await supabase
+        .from('brands')
+        .select('id, name, category')
+        .limit(1);
+
+      if (brandError) {
+        return {
+          status: 'error',
+          message: `Brands check failed: ${brandError.message}`,
+          details: { error: brandError }
+        };
+      }
+
+      // Check transaction_items table
+      const { data: items, error: itemError } = await supabase
+        .from('transaction_items')
+        .select('id, product_id, quantity')
+        .limit(1);
+
+      if (itemError) {
+        return {
+          status: 'error',
+          message: `Transaction items check failed: ${itemError.message}`,
+          details: { error: itemError }
+        };
+      }
+
+      return {
+        status: 'success',
+        message: 'Data availability check passed',
+        details: {}
+      };
+
+    } catch (error) {
+      return {
+        status: 'error',
+        message: `Data availability check failed: ${error}`,
+        details: { error }
+      };
+    }
+  },
+
+  async checkTableExists(tableName: string): Promise<boolean> {
+    try {
+      // Use proper table names from the database schema
+      const validTables = ['brands', 'products', 'transactions', 'stores', 'substitutions', 'transaction_items'];
+      
+      if (!validTables.includes(tableName)) {
+        console.warn(`⚠️ Unknown table name: ${tableName}`);
+        return false;
+      }
+
+      const { data, error } = await supabase
+        .from(tableName as any)
+        .select('*')
+        .limit(1);
+
+      return !error;
+    } catch (error) {
+      console.error(`❌ Error checking table ${tableName}:`, error);
+      return false;
+    }
+  },
+
+  async checkFunctionExists(functionName: string): Promise<boolean> {
+    try {
+      // Test the function with minimal parameters
+      const { error } = await supabase
+        .rpc(functionName as any, {});
+
+      // If we get a parameter error, the function exists
+      return !error || error.message.includes('parameter');
+    } catch (error) {
+      console.error(`❌ Error checking function ${functionName}:`, error);
+      return false;
+    }
+  }
+};

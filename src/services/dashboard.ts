@@ -25,6 +25,19 @@ export interface GenderDistributionData {
   total_revenue: number;
 }
 
+export interface AgeDistributionData {
+  age_group: string;
+  count: number;
+  percentage: number;
+}
+
+export interface PurchaseBehaviorData {
+  age_group: string;
+  avg_transaction_value: number;
+  purchase_frequency: number;
+  preferred_categories: string[];
+}
+
 export const dashboardService = {
   async getDashboardData(dateRange: string): Promise<DashboardData> {
     console.log('🔍 Fetching dashboard data for range:', dateRange);
@@ -234,7 +247,7 @@ export const dashboardService = {
         throw error;
       }
 
-      // Transform the data to include total_revenue (we'll calculate it from the transactions)
+      // Transform the data to include total_revenue (we'll calculate it if needed later)
       const result = data?.map(item => ({
         gender: item.gender,
         customer_count: item.customer_count,
@@ -246,6 +259,67 @@ export const dashboardService = {
 
     } catch (error) {
       console.error('💥 Error in getGenderDistribution:', error);
+      return [];
+    }
+  },
+
+  async getAgeDistribution(startDate: string, endDate: string): Promise<AgeDistributionData[]> {
+    console.log('📊 Fetching age distribution data');
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_age_distribution', {
+          start_date: startDate,
+          end_date: endDate
+        });
+
+      if (error) {
+        console.error('❌ Error calling get_age_distribution:', error);
+        throw error;
+      }
+
+      const result = data?.map(item => ({
+        age_group: item.age_group,
+        count: item.count,
+        percentage: item.percentage
+      })) || [];
+
+      console.log('📊 Age distribution data:', result);
+      return result;
+
+    } catch (error) {
+      console.error('💥 Error in getAgeDistribution:', error);
+      return [];
+    }
+  },
+
+  async getPurchaseBehaviorByAge(startDate: string, endDate: string): Promise<PurchaseBehaviorData[]> {
+    console.log('🛒 Fetching purchase behavior by age');
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_purchase_behavior_by_age', {
+          start_date: startDate,
+          end_date: endDate
+        });
+
+      if (error) {
+        console.error('❌ Error calling get_purchase_behavior_by_age:', error);
+        throw error;
+      }
+
+      const result = data?.map(item => ({
+        age_group: item.age_group,
+        avg_transaction_value: item.avg_transaction_value,
+        purchase_frequency: item.purchase_frequency,
+        preferred_categories: item.preferred_categories
+      })) || [];
+
+      console.log('🛒 Purchase behavior data:', result);
+      return result;
+
+    } catch (error) {
+      console.error('💥 Error in getPurchaseBehaviorByAge:', error);
       return [];
     }
   }
