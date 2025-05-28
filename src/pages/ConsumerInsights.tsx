@@ -333,7 +333,10 @@ export default function ConsumerInsights() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <PurchasePatterns />
+                  <PurchasePatterns 
+                    startDate={startDate} 
+                    endDate={endDate}
+                  />
                 </CardContent>
               </Card>
 
