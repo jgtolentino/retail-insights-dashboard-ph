@@ -137,24 +137,48 @@ export const dashboardService = {
         timeRange
       })
 
-      // Get total revenue and transaction count from transactions table
-      const { data: transactionData, error: transactionError } = await supabase
+      // Get total transaction count using count query (no 1000 row limit)
+      const { count: totalTransactions, error: countError } = await supabase
         .from('transactions')
-        .select('total_amount, created_at')
+        .select('*', { count: 'exact', head: true })
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
       
-      if (transactionError) {
-        logger.error('Error fetching transactions:', transactionError)
-        throw transactionError
+      if (countError) {
+        logger.error('Error counting transactions:', countError)
+        throw countError
       }
       
-      const totalRevenue = transactionData?.reduce((sum, transaction) => 
-        sum + (transaction.total_amount || 0), 0) || 0
-      const totalTransactions = transactionData?.length || 0
+      // Get total revenue using aggregate query (to avoid row limits)
+      const { data: revenueData, error: revenueError } = await supabase
+        .rpc('get_total_revenue_for_period', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString()
+        })
+      
+      let totalRevenue = 0
+      if (revenueError) {
+        // Fallback: fetch sample data and estimate
+        logger.warn('Revenue RPC not available, using sample estimation')
+        const { data: sampleData, error: sampleError } = await supabase
+          .from('transactions')
+          .select('total_amount')
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString())
+          .limit(1000)
+        
+        if (!sampleError && sampleData) {
+          const sampleRevenue = sampleData.reduce((sum, transaction) => 
+            sum + (transaction.total_amount || 0), 0)
+          // Estimate total revenue based on sample
+          totalRevenue = sampleRevenue * ((totalTransactions || 0) / sampleData.length)
+        }
+      } else {
+        totalRevenue = revenueData || 0
+      }
       const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0
       
-      // Get all transaction items with transaction dates via join
+      // Get transaction items with transaction dates via join (limited for performance)
       const { data: transactionItems, error: itemsError } = await supabase
         .from('transaction_items')
         .select(`
@@ -165,6 +189,7 @@ export const dashboardService = {
         `)
         .gte('transactions.created_at', startDate.toISOString())
         .lte('transactions.created_at', endDate.toISOString())
+        .limit(5000) // Increase limit for better brand data
       
       if (itemsError) {
         logger.error('Error fetching transaction items:', itemsError)
