@@ -86,25 +86,49 @@ export const dashboardService = {
     logger.info('Fetching dashboard data', { timeRange })
     
     try {
-      // Use fixed end date that matches your data (May 30, 2025)
-      const endDate = new Date('2025-05-30T23:59:59Z')
-      let startDate = new Date(endDate)
+      let startDate: Date, endDate: Date
       
-      switch (timeRange) {
-        case '1d':
-          startDate.setDate(endDate.getDate() - 1)
-          break
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7)
-          break
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30)
-          break
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90)
-          break
-        default:
-          startDate.setDate(endDate.getDate() - 30)
+      if (timeRange === 'all') {
+        // Get actual min/max dates from data
+        const { data: dateRange, error: dateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          
+        const { data: maxDateRange, error: maxDateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        if (dateError || maxDateError) {
+          throw dateError || maxDateError
+        }
+        
+        startDate = new Date(dateRange?.[0]?.created_at || '2024-06-01T00:00:00Z')
+        endDate = new Date(maxDateRange?.[0]?.created_at || '2025-05-30T23:59:59Z')
+      } else {
+        // Use existing logic for relative date ranges
+        endDate = new Date('2025-05-30T23:59:59Z')
+        startDate = new Date(endDate)
+        
+        switch (timeRange) {
+          case '1d':
+            startDate.setDate(endDate.getDate() - 1)
+            break
+          case '7d':
+            startDate.setDate(endDate.getDate() - 7)
+            break
+          case '30d':
+            startDate.setDate(endDate.getDate() - 30)
+            break
+          case '90d':
+            startDate.setDate(endDate.getDate() - 90)
+            break
+          default:
+            startDate.setDate(endDate.getDate() - 30)
+        }
       }
 
       console.log('📅 Using date range:', {
@@ -241,30 +265,55 @@ export const dashboardService = {
     logger.info('Fetching time series data', { timeRange })
     
     try {
-      // Use fixed end date that matches your data (May 30, 2025)
-      const endDate = new Date('2025-05-30T23:59:59Z')
-      let startDate = new Date(endDate)
+      let startDate: Date, endDate: Date
       let groupBy = 'day' // Default grouping
       
-      switch (timeRange) {
-        case '1d':
-          startDate.setDate(endDate.getDate() - 1)
-          groupBy = 'hour'
-          break
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7)
-          groupBy = 'day'
-          break
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30)
-          groupBy = 'day'
-          break
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90)
-          groupBy = 'week'
-          break
-        default:
-          startDate.setDate(endDate.getDate() - 30)
+      if (timeRange === 'all') {
+        // Get actual min/max dates from data for time series
+        const { data: dateRange, error: dateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          
+        const { data: maxDateRange, error: maxDateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        if (dateError || maxDateError) {
+          throw dateError || maxDateError
+        }
+        
+        startDate = new Date(dateRange?.[0]?.created_at || '2024-06-01T00:00:00Z')
+        endDate = new Date(maxDateRange?.[0]?.created_at || '2025-05-30T23:59:59Z')
+        groupBy = 'week' // Use weekly grouping for full data range
+      } else {
+        // Use existing logic for relative date ranges
+        endDate = new Date('2025-05-30T23:59:59Z')
+        startDate = new Date(endDate)
+        
+        switch (timeRange) {
+          case '1d':
+            startDate.setDate(endDate.getDate() - 1)
+            groupBy = 'hour'
+            break
+          case '7d':
+            startDate.setDate(endDate.getDate() - 7)
+            groupBy = 'day'
+            break
+          case '30d':
+            startDate.setDate(endDate.getDate() - 30)
+            groupBy = 'day'
+            break
+          case '90d':
+            startDate.setDate(endDate.getDate() - 90)
+            groupBy = 'week'
+            break
+          default:
+            startDate.setDate(endDate.getDate() - 30)
+        }
       }
 
       // Get transactions directly for time series

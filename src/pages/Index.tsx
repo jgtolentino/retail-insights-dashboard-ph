@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client'
 // import { AIPanel } from '@/components/AIPanel'
 // import { type DashboardData } from '@/services/aiService'
 
-type DateRange = '1d' | '7d' | '30d' | '90d' | 'custom'
+type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom'
 type ChartMetric = 'transactions' | 'revenue' | 'both'
 
 export default function Index() {
@@ -25,7 +25,7 @@ export default function Index() {
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [dateRange, setDateRange] = useState<DateRange>('30d')
+  const [dateRange, setDateRange] = useState<DateRange>('all')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
   
   // Custom date range state
@@ -185,6 +185,7 @@ export default function Index() {
   }
 
   const dateRangeOptions = [
+    { value: 'all' as DateRange, label: 'All Time' },
     { value: '1d' as DateRange, label: 'Today' },
     { value: '7d' as DateRange, label: '7 Days' },
     { value: '30d' as DateRange, label: '30 Days' },
@@ -238,8 +239,8 @@ export default function Index() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh Data
             </Button>
-            <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('30d')}>
-              Reset to 30 Days
+            <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('all')}>
+              Reset to All Time
             </Button>
           </div>
         </div>
@@ -612,8 +613,8 @@ export default function Index() {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh Data
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('30d')}>
-                  Reset to 30 Days
+                <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('all')}>
+                  Reset to All Time
                 </Button>
               </div>
             </div>
