@@ -1,28 +1,23 @@
 # Visual Documentation
 
-**Generated:** 2025-05-29T15:30:56.336Z
-**Commit:** `fc5c3ddc5f78a8ec4469dc5618547ede5be73805`
-**Message:** feat: ✅ Phase 1.6 - Final cleanup and Phase 1 completion
+**Generated:** 2025-05-29T15:40:52.342Z
+**Commit:** `09fe6bba94426c830c3bd6ba61f7a5d991c819f1`
+**Message:** fix: improve visual documentation capture reliability
 
-LEGACY CLEANUP:
-- Remove unused TimeSeriesData imports and state
-- Clean up timeSeriesData fetch calls from Overview page
-- Remove references to chart rendering functions
-- Streamline fetchData function to dashboard data only
+SIMPLIFIED APPROACH:
+- Remove complex visibility checks that were causing timeouts
+- Use simple domcontentloaded + fixed timeout (approach that worked before)
+- Force body visibility without complex selector checking
 
-PHASE 1 COMPLETION SUMMARY:
-✅ 1.1-1.3: Navigation reorganized with new page structure
-✅ 1.4: Duplicate line charts removed, centralized in Trends Explorer
-✅ 1.5: Shared components created (HeaderStatsBox, ExportButton, etc.)
-✅ 1.6: Legacy props and unused code cleaned up
+SERVER STARTUP IMPROVEMENTS:
+- Build app before starting preview server
+- Increase startup wait time to 15 seconds
+- Add retry logic with 10 attempts
+- Use npx vite preview directly instead of npm script
+- Better status checking with curl retries
 
-FOUNDATION ESTABLISHED:
-- Clean 6-tab navigation: Overview → Trends → Product Insights → Customer → Basket → AI Recs
-- Reusable component library for consistent UX
-- Proper information architecture with reduced redundancy
-- Ready for Phase 2 chart enhancements
-
-🚀 PHASE 1 COMPLETE - Ready for advanced visualizations and AI features!
+This returns to the simple approach that was working successfully before,
+while improving server startup reliability in CI environment.
 
 ## 📱 Screenshots
 
@@ -39,26 +34,6 @@ Main dashboard with KPIs and transaction trends
 ![kpi-metrics](./dashboard-overview-kpi-metrics.png)
 
 </details>
-
-### Consumer Insights
-
-Demographics and behavior analysis
-
-![Consumer Insights](./consumer-insights.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-![kpi-metrics](./consumer-insights-kpi-metrics.png)
-
-</details>
-
-### Product Mix Analysis
-
-Product performance and substitution patterns
-
-![Product Mix Analysis](./product-mix-analysis.png)
 
 ### Trends Explorer
 
