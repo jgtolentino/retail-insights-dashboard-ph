@@ -1,0 +1,42 @@
+{
+  "project": "retail-insights-dashboard-ph",
+  "rules": [
+    "NEVER ask user to run SQL manually in Supabase SQL Editor",
+    "ALWAYS create executable Node.js scripts for database operations",
+    "Service role key (SUPABASE_SERVICE_ROLE_KEY) is available in .env",
+    "Use supabase client with service role for all DB admin operations",
+    "Execute scripts directly using Bash tool",
+    "Create and run automation scripts instead of manual steps"
+  ],
+  "capabilities": {
+    "database_access": "Full admin via SUPABASE_SERVICE_ROLE_KEY",
+    "sql_execution": "Via Node.js scripts with service role",
+    "function_creation": "Direct execution, no manual steps",
+    "data_manipulation": "Full CRUD operations available"
+  },
+  "patterns": {
+    "sql_execution": "scripts/execute-sql-direct.js",
+    "function_creation": "scripts/create-functions-auto.js",
+    "data_operations": "scripts/data-operations.js"
+  },
+  "environment": {
+    "supabase_url": "VITE_SUPABASE_URL",
+    "service_key": "SUPABASE_SERVICE_ROLE_KEY",
+    "working_functions": ["get_brand_analysis_for_filters"],
+    "database_size": "18000 transactions, 89 brands, 4 stores"
+  },
+  "never_say": [
+    "Run this in Supabase SQL Editor",
+    "Copy and paste this SQL",
+    "Execute this manually",
+    "Open Supabase Dashboard",
+    "Manual SQL execution required"
+  ],
+  "always_do": [
+    "Create Node.js scripts",
+    "Execute them with Bash tool",
+    "Use service role for admin ops",
+    "Automate all database operations",
+    "Show script execution results"
+  ]
+}

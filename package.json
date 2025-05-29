@@ -26,7 +26,11 @@
     "test:all": "npm run validate:pre-deploy",
     "verify:env": "node scripts/verify-env.js",
     "verify:supabase": "node scripts/verify-supabase-config.js",
-    "fix:supabase-config": "echo 'Supabase client now uses environment variables only. Please ensure your .env file is configured.'"
+    "fix:supabase-config": "echo 'Supabase client now uses environment variables only. Please ensure your .env file is configured.'",
+    "sql": "node scripts/auto-execute-sql.js",
+    "sql:file": "node scripts/auto-execute-sql.js",
+    "sql:functions": "node scripts/auto-execute-sql.js scripts/implement-filter-sync-functions.sql",
+    "sql:test": "node scripts/auto-execute-sql.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
