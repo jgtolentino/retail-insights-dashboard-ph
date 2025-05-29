@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+// LineChart removed - now exclusively in Trends Explorer
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
@@ -18,7 +18,7 @@ import { SmartBrandFilter } from '@/components/charts/SmartBrandFilter'
 // import { type DashboardData } from '@/services/aiService'
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom'
-type ChartMetric = 'transactions' | 'revenue' | 'both'
+// ChartMetric type removed - charts moved to Trends Explorer
 
 export default function Index() {
   const [data, setData] = useState({
@@ -31,7 +31,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>('all')
-  const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
+  // chartMetric state removed - charts moved to Trends Explorer
   const [filteredBrands, setFilteredBrands] = useState<any[]>([])
   const [viewMode, setViewMode] = useState<'hierarchical' | 'filtered'>('hierarchical')
   
@@ -219,25 +219,7 @@ export default function Index() {
     { value: 'custom' as DateRange, label: 'Custom Range' }
   ]
 
-  const chartMetricOptions = [
-    { value: 'transactions' as ChartMetric, label: 'Transactions', icon: BarChart3 },
-    { value: 'revenue' as ChartMetric, label: 'Revenue', icon: TrendingUp },
-    { value: 'both' as ChartMetric, label: 'Both', icon: Calendar }
-  ]
-
-  const formatXAxisLabel = (tickItem: string) => {
-    if (dateRange === '1d') {
-      // For hourly data, show just the hour
-      return tickItem.split(' ')[1] || tickItem
-    } else if (dateRange === '90d') {
-      // For weekly data, show week of
-      return `Week of ${tickItem.split('-')[2]}/${tickItem.split('-')[1]}`
-    } else {
-      // For daily data, show day/month
-      const parts = tickItem.split('-')
-      return `${parts[2]}/${parts[1]}`
-    }
-  }
+  // Chart functions removed - charts moved to Trends Explorer
 
   const getDateRangeLabel = () => {
     if (dateRange === 'custom' && customStartDate && customEndDate) {
@@ -246,98 +228,7 @@ export default function Index() {
     return dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown'
   }
 
-  const renderChart = () => {
-    // Safety check for timeSeriesData
-    if (!timeSeriesData || !Array.isArray(timeSeriesData) || timeSeriesData.length === 0) {
-      return (
-        <div className="h-80 flex flex-col items-center justify-center text-gray-500 space-y-4">
-          <div className="text-center">
-            <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Available</h3>
-            <p className="text-sm">No transaction data found for the selected time period.</p>
-            <p className="text-sm mt-1">Try selecting a different date range or check your database connection.</p>
-            {error && (
-              <p className="text-sm mt-2 text-red-600">{error}</p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Data
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleDateRangeChange('all')}>
-              Reset to All Time
-            </Button>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div style={{ width: '100%', height: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={timeSeriesData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="date" 
-              tickFormatter={formatXAxisLabel}
-              tick={{ fontSize: 12 }}
-            />
-            {(chartMetric === 'transactions' || chartMetric === 'both') && (
-              <YAxis 
-                yAxisId="transactions"
-                orientation="left"
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-              />
-            )}
-            {(chartMetric === 'revenue' || chartMetric === 'both') && (
-              <YAxis 
-                yAxisId="revenue"
-                orientation={chartMetric === 'both' ? 'right' : 'left'}
-                tickFormatter={(value) => `₱${value.toLocaleString()}`}
-                tick={{ fontSize: 12 }}
-              />
-            )}
-            <Tooltip 
-              formatter={(value: any, name: string) => {
-                if (name === 'Revenue') return [`₱${value.toLocaleString()}`, name];
-                return [value.toLocaleString(), name];
-              }}
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-            />
-            {(chartMetric === 'revenue' || chartMetric === 'both') && (
-              <Line
-                yAxisId="revenue"
-                type="monotone"
-                dataKey="revenue"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                dot={false}
-                name="Revenue"
-              />
-            )}
-            {(chartMetric === 'transactions' || chartMetric === 'both') && (
-              <Line
-                yAxisId="transactions"
-                type="monotone"
-                dataKey="transactions"
-                stroke="#10B981"
-                strokeWidth={2}
-                dot={false}
-                name="Transactions"
-              />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    )
-  }
+  // renderChart function removed - charts moved to Trends Explorer
 
   // AI dashboard data - Disabled for production
   /*
@@ -573,47 +464,38 @@ export default function Index() {
       </div>
 
 
-      {/* Time Series Chart */}
-      <Card>
+      {/* Trends Explorer Call-to-Action */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Transaction Trends</CardTitle>
-              <p className="text-sm text-gray-500 mt-1">
-                {dateRange === 'custom' ? 
-                  `Custom range: ${getDateRangeLabel()}` : 
-                  `Showing data for: ${getDateRangeLabel()}`
-                }
+              <CardTitle className="text-blue-900">Explore Detailed Trends</CardTitle>
+              <p className="text-sm text-blue-700 mt-1">
+                View comprehensive time series analysis, heatmaps, and trend insights
               </p>
             </div>
-            <div className="flex gap-1">
-              {chartMetricOptions.map((option) => {
-                const Icon = option.icon
-                return (
-                  <Button
-                    key={option.value}
-                    variant={chartMetric === option.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setChartMetric(option.value)}
-                    disabled={loading}
-                    className="flex items-center gap-1"
-                  >
-                    <Icon className="h-3 w-3" />
-                    {option.label}
-                  </Button>
-                )
-              })}
-            </div>
+            <TrendingUp className="h-8 w-8 text-blue-600" />
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="h-80 flex items-center justify-center">
-              <div className="animate-pulse bg-gray-200 h-64 w-full rounded"></div>
+          <div className="flex items-center justify-between">
+            <div className="flex-1 space-y-2">
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Day of Week & Weekday vs Weekend analysis</li>
+                <li>• Transaction time heatmaps</li>
+                <li>• Regional and barangay-level trends</li>
+                <li>• Annotated insights and pattern detection</li>
+              </ul>
             </div>
-          ) : (
-            renderChart()
-          )}
+            <div className="ml-6">
+              <Button 
+                onClick={() => window.location.href = '/trends'}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Open Trends Explorer
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
