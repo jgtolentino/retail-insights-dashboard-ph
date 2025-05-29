@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Settings as SettingsIcon, 
   Calendar, 
-  Toggle, 
+  ToggleLeft, 
   Palette, 
   Key, 
   Database, 
@@ -300,7 +300,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Toggle className="h-5 w-5" />
+                  <ToggleLeft className="h-5 w-5" />
                   Feature Flags
                 </CardTitle>
               </CardHeader>
