@@ -131,6 +131,13 @@ export default function Index() {
       
       console.log('📊 Dashboard data received:', dashboardData)
       console.log('📈 Time series data received:', timeSeriesResult)
+      console.log('🔢 TRANSACTION COUNT DEBUG:', {
+        totalTransactions: dashboardData?.totalTransactions,
+        totalRevenue: dashboardData?.totalRevenue,
+        avgTransaction: dashboardData?.avgTransaction,
+        dateRange,
+        dateRangeUsed: dateRange
+      })
       
       // Ensure we have valid data with fallbacks
       setData(dashboardData || {
@@ -474,6 +481,11 @@ export default function Index() {
             <div className="text-2xl font-bold text-gray-900">
               {loading ? '...' : (data.totalTransactions || 0).toLocaleString()}
             </div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-gray-400 mt-1">
+                Raw: {data.totalTransactions}
+              </div>
+            )}
           </CardContent>
         </Card>
 
