@@ -1,28 +1,28 @@
 # Visual Documentation
 
-**Generated:** 2025-05-29T15:19:50.892Z
-**Commit:** `d65327dc07f0defff9c611042a1cc585c9556806`
-**Message:** feat: ✅ Phase 1.1-1.3 - Complete navigation reorganization
+**Generated:** 2025-05-29T15:30:56.336Z
+**Commit:** `fc5c3ddc5f78a8ec4469dc5618547ede5be73805`
+**Message:** feat: ✅ Phase 1.6 - Final cleanup and Phase 1 completion
 
-MAJOR RESTRUCTURE:
-- Merge Product Mix + Brands → unified Product Insights page
-- Add new Basket Behavior analysis page
-- Add AI Recommendations page with smart insights
-- Update navigation order: Overview → Trends Explorer → Product Insights → Customer Insights → Basket Behavior → AI Recs → Settings
-- Deprecate legacy /product-mix and /brands routes (kept for compatibility)
-- Update feature flags to reflect new structure
+LEGACY CLEANUP:
+- Remove unused TimeSeriesData imports and state
+- Clean up timeSeriesData fetch calls from Overview page
+- Remove references to chart rendering functions
+- Streamline fetchData function to dashboard data only
 
-NEW PAGES:
-- ProductInsights.tsx: Tabbed interface combining brand analytics + product mix
-- BasketBehavior.tsx: Basket size distribution and co-purchase analysis
-- AIRecommendations.tsx: AI-driven insights with actionable recommendations
+PHASE 1 COMPLETION SUMMARY:
+✅ 1.1-1.3: Navigation reorganized with new page structure
+✅ 1.4: Duplicate line charts removed, centralized in Trends Explorer
+✅ 1.5: Shared components created (HeaderStatsBox, ExportButton, etc.)
+✅ 1.6: Legacy props and unused code cleaned up
 
-NAVIGATION IMPROVEMENTS:
-- Cleaner tab structure reducing redundancy
-- Better information hierarchy
-- Icons updated for clarity (Brain, ShoppingCart, Package)
+FOUNDATION ESTABLISHED:
+- Clean 6-tab navigation: Overview → Trends → Product Insights → Customer → Basket → AI Recs
+- Reusable component library for consistent UX
+- Proper information architecture with reduced redundancy
+- Ready for Phase 2 chart enhancements
 
-This completes Phase 1 navigation reorganization per the build plan.
+🚀 PHASE 1 COMPLETE - Ready for advanced visualizations and AI features!
 
 ## 📱 Screenshots
 
@@ -37,34 +37,6 @@ Main dashboard with KPIs and transaction trends
 
 #### kpi metrics
 ![kpi-metrics](./dashboard-overview-kpi-metrics.png)
-
-</details>
-
-### Brand Revenue Analysis - Hierarchical View
-
-New hierarchical brand visualization with category drill-down
-
-![Brand Revenue Analysis - Hierarchical View](./brand-revenue-analysis---hierarchical-view.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-![kpi-metrics](./brand-revenue-analysis---hierarchical-view-kpi-metrics.png)
-
-</details>
-
-### Brand Revenue Analysis - Filtered View
-
-Smart filtering system with TBWA client highlighting
-
-![Brand Revenue Analysis - Filtered View](./brand-revenue-analysis---filtered-view.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
 
 </details>
 
@@ -99,20 +71,6 @@ Advanced trend analysis with multiple metrics
 
 #### kpi metrics
 ![kpi-metrics](./trends-explorer-kpi-metrics.png)
-
-</details>
-
-### Settings Configuration
-
-Dashboard settings and feature flags
-
-![Settings Configuration](./settings-configuration.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-![kpi-metrics](./settings-configuration-kpi-metrics.png)
 
 </details>
 
