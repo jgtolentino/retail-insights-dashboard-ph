@@ -30,7 +30,14 @@
     "sql": "node scripts/auto-execute-sql.js",
     "sql:file": "node scripts/auto-execute-sql.js",
     "sql:functions": "node scripts/auto-execute-sql.js scripts/implement-filter-sync-functions.sql",
-    "sql:test": "node scripts/auto-execute-sql.js"
+    "sql:test": "node scripts/auto-execute-sql.js",
+    "capture:visuals": "tsx scripts/capture-visuals.ts",
+    "capture:visuals:watch": "nodemon --watch src --exec 'npm run capture:visuals'",
+    "capture:current": "npm run capture:visuals",
+    "docs:visual": "npm run capture:visuals && echo 'Visual documentation generated in ./visual-docs'",
+    "docs:changelog": "tsx scripts/generate-visual-changelog.ts",
+    "commit:task": "npm run capture:visuals && git add visual-docs/* && git commit",
+    "setup:visual-hooks": "chmod +x scripts/setup-visual-hooks.sh && ./scripts/setup-visual-hooks.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -109,6 +116,11 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "@playwright/test": "^1.40.0",
+    "playwright": "^1.40.0",
+    "tsx": "^4.6.0",
+    "nodemon": "^3.0.0",
+    "wait-on": "^7.2.0"
   }
 }
