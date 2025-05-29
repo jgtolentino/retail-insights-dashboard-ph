@@ -47,18 +47,34 @@ jobs:
         
       - name: Start preview server and check status
         run: |
+          echo "Building application first..."
+          npm run build
+          
           echo "Starting preview server..."
-          npm run preview &
+          npx vite preview --port 4173 --host &
           SERVER_PID=$!
           echo "Server PID: $SERVER_PID"
           
-          echo "Waiting for server to be ready..."
-          npx wait-on http://localhost:4173 --timeout 60000
+          echo "Waiting for server to start..."
+          sleep 15
           
-          echo "Server is ready! Testing connection..."
+          echo "Checking server status with retries..."
+          max_attempts=10
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:4173 | grep -q "200"; then
+              echo "✅ Server is ready!"
+              break
+            fi
+            echo "Waiting for server... (attempt $attempt/$max_attempts)"
+            sleep 3
+            attempt=$((attempt + 1))
+          done
+          
+          echo "Testing server response..."
           curl -I http://localhost:4173 || echo "Server check failed"
           
-          echo "Checking if server is serving content..."
+          echo "Checking served content..."
           curl -s http://localhost:4173 | head -20
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://demo.supabase.co' }}
