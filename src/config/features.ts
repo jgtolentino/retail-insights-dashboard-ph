@@ -3,16 +3,20 @@ export const FEATURE_FLAGS = {
   // Production Ready Features
   DASHBOARD_OVERVIEW: true,
   CONSUMER_INSIGHTS: true,
-  PRODUCT_MIX: true,
-  BRANDS_PAGE: true,
+  PRODUCT_INSIGHTS: true,      // Merged Product Mix + Brands
+  BASKET_BEHAVIOR: true,       // New page for basket analysis
   BASIC_FILTERS: true,
   TRENDS_PAGE: true,
   SETTINGS_PAGE: true,
+  AI_RECOMMENDATIONS: true,    // Enable AI recommendations panel
+  
+  // Legacy pages (deprecated in Phase 1)
+  PRODUCT_MIX: false,          // Merged into Product Insights
+  BRANDS_PAGE: false,          // Merged into Product Insights
   
   // Disable for Production (Stage 2)
   ADVANCED_CONNECTORS: false,  // Parquet, PostgreSQL, MongoDB
   QUERY_BUILDER: false,        // Visual Query Builder
-  AI_RECOMMENDATIONS: false,   // AI Panel
   REALTIME_UPDATES: false,     // Supabase subscriptions
   ADVANCED_EXPORTS: false,     // PDF/Excel exports
   ENHANCED_FILTERS: false,     // Advanced filter combinations
@@ -43,5 +47,5 @@ if (PRODUCTION_MODE) {
   // Force disable development features in production
   (FEATURE_FLAGS as any).DEV_TOOLS = false;
   (FEATURE_FLAGS as any).ADVANCED_CONNECTORS = false;
-  (FEATURE_FLAGS as any).AI_RECOMMENDATIONS = false;
+  // Note: AI_RECOMMENDATIONS now enabled for production
 }

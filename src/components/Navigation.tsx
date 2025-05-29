@@ -2,20 +2,22 @@
 import { Link, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
-  Package,
-  BarChart3,
-  Users,
   TrendingUp,
+  Package,
+  Users,
+  ShoppingCart,
+  Brain,
   Settings
 } from "lucide-react"
 import { FEATURE_FLAGS } from "@/config/features"
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
-  { href: "/product-mix", label: "Products", icon: Package, feature: 'PRODUCT_MIX' },
-  { href: "/brands", label: "Brands", icon: BarChart3, feature: 'BRANDS_PAGE' },
-  { href: "/consumer-insights", label: "Consumers", icon: Users, feature: 'CONSUMER_INSIGHTS' },
-  { href: "/trends", label: "Trends", icon: TrendingUp, feature: 'TRENDS_PAGE' },
+  { href: "/", label: "Overview", icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
+  { href: "/trends", label: "Trends Explorer", icon: TrendingUp, feature: 'TRENDS_PAGE' },
+  { href: "/product-insights", label: "Product Insights", icon: Package, feature: 'PRODUCT_INSIGHTS' },
+  { href: "/consumer-insights", label: "Customer Insights", icon: Users, feature: 'CONSUMER_INSIGHTS' },
+  { href: "/basket-behavior", label: "Basket Behavior", icon: ShoppingCart, feature: 'BASKET_BEHAVIOR' },
+  { href: "/ai-recommendations", label: "AI Recs", icon: Brain, feature: 'AI_RECOMMENDATIONS' },
   { href: "/settings", label: "Settings", icon: Settings, feature: 'SETTINGS_PAGE' },
 ].filter(item => !item.feature || FEATURE_FLAGS[item.feature as keyof typeof FEATURE_FLAGS])
 
