@@ -251,12 +251,9 @@ export type Database = {
           insight: string
         }[]
       }
-      get_gender_distribution: {
-        Args: { start_date: string; end_date: string }
-        Returns: {
-          gender: string
-          customer_count: number
-        }[]
+      get_consumer_profile: {
+        Args: { p_start?: string; p_end?: string }
+        Returns: any
       }
       get_location_distribution: {
         Args:
