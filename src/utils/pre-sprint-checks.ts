@@ -153,7 +153,7 @@ export class PreSprintChecks {
       const rpcFunctions = [
         'get_daily_trends',
         'get_age_distribution', 
-        'get_gender_distribution'
+        'get_consumer_profile'
       ];
 
       for (const funcName of rpcFunctions) {

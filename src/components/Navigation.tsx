@@ -17,7 +17,7 @@ const navItems = [
   { href: "/consumer-insights", label: "Consumers", icon: Users, feature: 'CONSUMER_INSIGHTS' },
   { href: "/trends", label: "Trends", icon: TrendingUp, feature: 'TRENDS_PAGE' },
   { href: "/settings", label: "Settings", icon: Settings, feature: 'SETTINGS_PAGE' },
-].filter(item => FEATURE_FLAGS[item.feature as keyof typeof FEATURE_FLAGS])
+].filter(item => !item.feature || FEATURE_FLAGS[item.feature as keyof typeof FEATURE_FLAGS])
 
 export function Navigation() {
   const location = useLocation()

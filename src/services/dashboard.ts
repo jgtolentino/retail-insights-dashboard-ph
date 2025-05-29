@@ -449,20 +449,27 @@ export const dashboardService = {
     
     try {
       const { data, error } = await supabase
-        .rpc('get_gender_distribution', {
-          start_date: startDate + 'T00:00:00Z',
-          end_date: endDate + 'T23:59:59Z'
+        .rpc('get_consumer_profile' as any, {
+          p_start: startDate + 'T00:00:00Z',
+          p_end: endDate + 'T23:59:59Z'
         })
       
       if (error) {
-        logger.error('Error fetching gender distribution:', error)
+        logger.error('Error fetching consumer profile:', error)
         throw error
       }
       
-      // Add missing total_revenue field
-      return (data || []).map(item => ({
-        ...item,
-        total_revenue: 0 // Placeholder since the RPC doesn't return this
+      // Extract gender distribution from consumer profile
+      let genderDistribution: any[] = []
+      if (data && typeof data === 'object') {
+        genderDistribution = (data as any).gender_distribution || []
+      }
+      
+      // Convert to expected format
+      return genderDistribution.map(item => ({
+        gender: item.gender,
+        customer_count: item.customer_count || item.count || 0,
+        total_revenue: item.total_revenue || 0
       }))
     } catch (error) {
       logger.error('Failed to fetch gender distribution data', error)

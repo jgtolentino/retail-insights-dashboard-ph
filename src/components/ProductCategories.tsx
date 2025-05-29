@@ -2,26 +2,36 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, Coffee, Cigarette, Home, Pizza, Users, ShoppingCart } from "lucide-react";
+import { 
+  Package, 
+  Coffee, 
+  Cigarette, 
+  Baby, 
+  Pill, 
+  Home, 
+  Zap,
+  Pizza,
+  Users,
+  ShoppingCart
+} from "lucide-react";
+
+// Clean, professional styling - no background colors
+const getCategoryStyle = (): string => {
+  // All categories use the same clean styling
+  return 'border-gray-200';
+};
 
 const categoryIcons: Record<string, any> = {
   'tobacco': Cigarette,
   'beverages': Coffee,
-  'dairy': Package,
+  'personal care': Baby,
+  'snacks': Package,
+  'dairy': Baby,
   'household': Home,
+  'energy': Zap,
   'food': Pizza,
-  'personal care': Users,
-  'snacks': ShoppingCart,
-};
-
-const categoryColors: Record<string, string> = {
-  'tobacco': 'bg-orange-100 text-orange-800 border-orange-200',
-  'beverages': 'bg-blue-100 text-blue-800 border-blue-200',
-  'dairy': 'bg-green-100 text-green-800 border-green-200',
-  'household': 'bg-purple-100 text-purple-800 border-purple-200',
-  'food': 'bg-red-100 text-red-800 border-red-200',
-  'personal care': 'bg-pink-100 text-pink-800 border-pink-200',
-  'snacks': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'health': Pill,
+  'beauty': Users,
 };
 
 export function ProductCategories() {
@@ -74,21 +84,21 @@ export function ProductCategories() {
 
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-semibold mb-4">Product Categories</h2>
+      <h2 className="text-lg font-semibold mb-4 text-gray-900">Product Categories</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {categories?.map(({ category, count }) => {
           const Icon = categoryIcons[category.toLowerCase()] || Package;
-          const colorClass = categoryColors[category.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-200';
           
           return (
             <Card 
               key={category}
-              className={`p-4 hover:shadow-md transition-shadow cursor-pointer border ${colorClass}`}
+              className="p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer border-gray-200"
             >
               <div className="flex flex-col items-center text-center">
-                <Icon className="h-8 w-8 mb-2" />
-                <h3 className="font-medium text-sm capitalize">{category}</h3>
-                <p className="text-2xl font-bold">{count}</p>
+                <Icon className="h-6 w-6 sm:h-8 sm:w-8 mb-1 sm:mb-2 text-gray-600" />
+                <h3 className="font-medium text-xs sm:text-sm capitalize text-gray-700">{category}</h3>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{count}</p>
+                <p className="text-xs text-gray-500">products</p>
               </div>
             </Card>
           );

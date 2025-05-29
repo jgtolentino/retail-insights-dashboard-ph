@@ -1,17 +1,6 @@
--- Test the age distribution function
-SELECT * FROM get_age_distribution_simple();
+-- Fix age distribution function and add sample data if needed
 
--- Check if transactions have age data
-SELECT 
-  customer_age,
-  COUNT(*) as count
-FROM transactions
-WHERE customer_age IS NOT NULL
-GROUP BY customer_age
-ORDER BY customer_age;
-
--- If no age data exists, let's add some sample ages to existing transactions
--- This updates transactions with random ages for testing
+-- Add sample age data to transactions if customer_age is null
 UPDATE transactions
 SET customer_age = CASE 
   WHEN RANDOM() < 0.25 THEN FLOOR(RANDOM() * 12 + 18)  -- 18-29 (25%)
@@ -71,6 +60,3 @@ AS $$
       ELSE 5
     END;
 $$;
-
--- Test the function again
-SELECT * FROM get_age_distribution_simple();

@@ -31,19 +31,25 @@ export function DataTestComponent() {
         sampleData: ageData?.slice(0, 3)
       };
 
-      // Test 2: Gender Distribution
-      console.log('🧪 Testing gender distribution...');
-      const { data: genderData, error: genderError } = await supabase
-        .rpc('get_gender_distribution', {
-          start_date: '2025-04-30T00:00:00Z',
-          end_date: '2025-05-30T23:59:59Z'
+      // Test 2: Consumer Profile (includes gender distribution)
+      console.log('🧪 Testing consumer profile...');
+      const { data: consumerData, error: consumerError } = await supabase
+        .rpc('get_consumer_profile' as any, {
+          p_start: '2025-04-30T00:00:00Z',
+          p_end: '2025-05-30T23:59:59Z'
         });
       
+      // Extract gender distribution from consumer profile
+      let genderDistribution: any[] = [];
+      if (consumerData && typeof consumerData === 'object') {
+        genderDistribution = (consumerData as any).gender_distribution || [];
+      }
+      
       results.genderDistribution = {
-        success: !genderError,
-        error: genderError?.message,
-        dataCount: genderData?.length || 0,
-        sampleData: genderData
+        success: !consumerError,
+        error: consumerError?.message,
+        dataCount: genderDistribution?.length || 0,
+        sampleData: genderDistribution
       };
 
       // Test 3: Raw transaction sample
@@ -114,7 +120,7 @@ export function DataTestComponent() {
           {/* Gender Distribution Test */}
           <div className="p-4 border rounded-lg">
             <h3 className="font-semibold flex items-center gap-2">
-              {testResults.genderDistribution?.success ? '✅' : '❌'} Gender Distribution Function
+              {testResults.genderDistribution?.success ? '✅' : '❌'} Consumer Profile Function (Gender Data)
             </h3>
             <p className="text-sm text-muted-foreground">
               Records found: {testResults.genderDistribution?.dataCount || 0}
