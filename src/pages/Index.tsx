@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
 // LineChart removed - now exclusively in Trends Explorer
-import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
+import { dashboardService } from '@/services/dashboard'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { TransactionCounter } from '@/components/TransactionCounter'
@@ -27,7 +27,7 @@ export default function Index() {
     avgTransaction: 0,
     topBrands: []
   })
-  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([])
+  // timeSeriesData removed - charts moved to Trends Explorer
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>('all')
@@ -125,24 +125,14 @@ export default function Index() {
     setLoading(true)
     setError(null)
     try {
-      let dashboardData, timeSeriesResult
+      let dashboardData
       
       if (dateRange === 'custom' && customStartDate && customEndDate) {
-        // Use the new date-parametric method for custom ranges
-        const [dashboardDataResult, timeSeriesDataResult] = await Promise.all([
-          dashboardService.getDashboardData('30d'), // Fallback for dashboard data
-          dashboardService.getTimeSeriesDataByDateRange(customStartDate, customEndDate)
-        ])
-        dashboardData = dashboardDataResult
-        timeSeriesResult = timeSeriesDataResult
+        // Use fallback for dashboard data only
+        dashboardData = await dashboardService.getDashboardData('30d')
       } else if (dateRange !== 'custom') {
-        // Use existing preset methods
-        const [dashboardDataResult, timeSeriesDataResult] = await Promise.all([
-          dashboardService.getDashboardData(dateRange),
-          dashboardService.getTimeSeriesData(dateRange)
-        ])
-        dashboardData = dashboardDataResult
-        timeSeriesResult = timeSeriesDataResult
+        // Use existing preset methods for dashboard data only
+        dashboardData = await dashboardService.getDashboardData(dateRange)
       } else {
         // Custom range selected but dates not set yet
         return
@@ -166,8 +156,7 @@ export default function Index() {
         topBrands: []
       })
       
-      // Ensure timeSeriesResult is an array
-      setTimeSeriesData(Array.isArray(timeSeriesResult) ? timeSeriesResult : [])
+      // timeSeriesData removed - charts moved to Trends Explorer
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
       setError('Failed to load dashboard data. Please check your connection.')
@@ -178,7 +167,7 @@ export default function Index() {
         avgTransaction: 0,
         topBrands: []
       })
-      setTimeSeriesData([])
+      // timeSeriesData cleanup removed
     } finally {
       setLoading(false)
     }
