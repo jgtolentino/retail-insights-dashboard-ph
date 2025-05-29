@@ -86,25 +86,49 @@ export const dashboardService = {
     logger.info('Fetching dashboard data', { timeRange })
     
     try {
-      // Use fixed end date that matches your data (May 30, 2025)
-      const endDate = new Date('2025-05-30T23:59:59Z')
-      let startDate = new Date(endDate)
+      let startDate: Date, endDate: Date
       
-      switch (timeRange) {
-        case '1d':
-          startDate.setDate(endDate.getDate() - 1)
-          break
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7)
-          break
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30)
-          break
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90)
-          break
-        default:
-          startDate.setDate(endDate.getDate() - 30)
+      if (timeRange === 'all') {
+        // Get actual min/max dates from data
+        const { data: dateRange, error: dateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          
+        const { data: maxDateRange, error: maxDateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        if (dateError || maxDateError) {
+          throw dateError || maxDateError
+        }
+        
+        startDate = new Date(dateRange?.[0]?.created_at || '2024-06-01T00:00:00Z')
+        endDate = new Date(maxDateRange?.[0]?.created_at || '2025-05-30T23:59:59Z')
+      } else {
+        // Use existing logic for relative date ranges
+        endDate = new Date('2025-05-30T23:59:59Z')
+        startDate = new Date(endDate)
+        
+        switch (timeRange) {
+          case '1d':
+            startDate.setDate(endDate.getDate() - 1)
+            break
+          case '7d':
+            startDate.setDate(endDate.getDate() - 7)
+            break
+          case '30d':
+            startDate.setDate(endDate.getDate() - 30)
+            break
+          case '90d':
+            startDate.setDate(endDate.getDate() - 90)
+            break
+          default:
+            startDate.setDate(endDate.getDate() - 30)
+        }
       }
 
       console.log('📅 Using date range:', {
@@ -113,24 +137,48 @@ export const dashboardService = {
         timeRange
       })
 
-      // Get total revenue and transaction count from transactions table
-      const { data: transactionData, error: transactionError } = await supabase
+      // Get total transaction count using count query (no 1000 row limit)
+      const { count: totalTransactions, error: countError } = await supabase
         .from('transactions')
-        .select('total_amount, created_at')
+        .select('*', { count: 'exact', head: true })
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
       
-      if (transactionError) {
-        logger.error('Error fetching transactions:', transactionError)
-        throw transactionError
+      if (countError) {
+        logger.error('Error counting transactions:', countError)
+        throw countError
       }
       
-      const totalRevenue = transactionData?.reduce((sum, transaction) => 
-        sum + (transaction.total_amount || 0), 0) || 0
-      const totalTransactions = transactionData?.length || 0
+      // Get total revenue using aggregate query (to avoid row limits)
+      const { data: revenueData, error: revenueError } = await supabase
+        .rpc('get_total_revenue_for_period', {
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString()
+        })
+      
+      let totalRevenue = 0
+      if (revenueError) {
+        // Fallback: fetch sample data and estimate
+        logger.warn('Revenue RPC not available, using sample estimation')
+        const { data: sampleData, error: sampleError } = await supabase
+          .from('transactions')
+          .select('total_amount')
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString())
+          .limit(1000)
+        
+        if (!sampleError && sampleData) {
+          const sampleRevenue = sampleData.reduce((sum, transaction) => 
+            sum + (transaction.total_amount || 0), 0)
+          // Estimate total revenue based on sample
+          totalRevenue = sampleRevenue * ((totalTransactions || 0) / sampleData.length)
+        }
+      } else {
+        totalRevenue = revenueData || 0
+      }
       const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0
       
-      // Get all transaction items with transaction dates via join
+      // Get transaction items with transaction dates via join (limited for performance)
       const { data: transactionItems, error: itemsError } = await supabase
         .from('transaction_items')
         .select(`
@@ -141,6 +189,7 @@ export const dashboardService = {
         `)
         .gte('transactions.created_at', startDate.toISOString())
         .lte('transactions.created_at', endDate.toISOString())
+        .limit(5000) // Increase limit for better brand data
       
       if (itemsError) {
         logger.error('Error fetching transaction items:', itemsError)
@@ -241,30 +290,55 @@ export const dashboardService = {
     logger.info('Fetching time series data', { timeRange })
     
     try {
-      // Use fixed end date that matches your data (May 30, 2025)
-      const endDate = new Date('2025-05-30T23:59:59Z')
-      let startDate = new Date(endDate)
+      let startDate: Date, endDate: Date
       let groupBy = 'day' // Default grouping
       
-      switch (timeRange) {
-        case '1d':
-          startDate.setDate(endDate.getDate() - 1)
-          groupBy = 'hour'
-          break
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7)
-          groupBy = 'day'
-          break
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30)
-          groupBy = 'day'
-          break
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90)
-          groupBy = 'week'
-          break
-        default:
-          startDate.setDate(endDate.getDate() - 30)
+      if (timeRange === 'all') {
+        // Get actual min/max dates from data for time series
+        const { data: dateRange, error: dateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          
+        const { data: maxDateRange, error: maxDateError } = await supabase
+          .from('transactions')
+          .select('created_at')
+          .order('created_at', { ascending: false })
+          .limit(1)
+        
+        if (dateError || maxDateError) {
+          throw dateError || maxDateError
+        }
+        
+        startDate = new Date(dateRange?.[0]?.created_at || '2024-06-01T00:00:00Z')
+        endDate = new Date(maxDateRange?.[0]?.created_at || '2025-05-30T23:59:59Z')
+        groupBy = 'week' // Use weekly grouping for full data range
+      } else {
+        // Use existing logic for relative date ranges
+        endDate = new Date('2025-05-30T23:59:59Z')
+        startDate = new Date(endDate)
+        
+        switch (timeRange) {
+          case '1d':
+            startDate.setDate(endDate.getDate() - 1)
+            groupBy = 'hour'
+            break
+          case '7d':
+            startDate.setDate(endDate.getDate() - 7)
+            groupBy = 'day'
+            break
+          case '30d':
+            startDate.setDate(endDate.getDate() - 30)
+            groupBy = 'day'
+            break
+          case '90d':
+            startDate.setDate(endDate.getDate() - 90)
+            groupBy = 'week'
+            break
+          default:
+            startDate.setDate(endDate.getDate() - 30)
+        }
       }
 
       // Get transactions directly for time series
