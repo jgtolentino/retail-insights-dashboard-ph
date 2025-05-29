@@ -209,14 +209,84 @@ class VisualDocumentationGenerator {
         timeout: 30000 
       });
       
-      // Wait for React to render
-      await page.waitForSelector('body', { timeout: 10000 });
-      await page.waitForTimeout(3000); // Extra time for data loading
+      // Wait for the page to load completely
+      await page.waitForLoadState('networkidle');
       
-      console.log('✅ Application loaded successfully');
+      // Force body to be visible in case CSS is hiding it
+      await page.evaluate(() => {
+        document.body.style.display = 'block';
+        document.body.style.visibility = 'visible';
+        document.body.style.opacity = '1';
+      });
+      
+      // Try multiple selectors to find main content
+      const selectors = [
+        '[data-testid="dashboard"], .dashboard, main', // Dashboard content
+        'div[id="root"], div[class*="app"]', // React root
+        '.container, .main-content', // Layout containers
+        'h1, h2, .title', // Any heading content
+        'button, .btn' // Interactive elements
+      ];
+      
+      let contentFound = false;
+      for (const selector of selectors) {
+        try {
+          await page.waitForSelector(selector, { timeout: 5000, state: 'visible' });
+          console.log(`✅ Found content with selector: ${selector}`);
+          contentFound = true;
+          break;
+        } catch {
+          continue;
+        }
+      }
+      
+      if (!contentFound) {
+        console.log('⚠️ No specific content selectors found, checking page state...');
+        
+        // Debug: Log what's actually on the page
+        const pageInfo = await page.evaluate(() => {
+          return {
+            title: document.title,
+            bodyText: document.body.innerText.substring(0, 200),
+            bodyHTML: document.body.innerHTML.substring(0, 300),
+            bodyStyle: {
+              display: window.getComputedStyle(document.body).display,
+              visibility: window.getComputedStyle(document.body).visibility,
+              opacity: window.getComputedStyle(document.body).opacity
+            }
+          };
+        });
+        console.log('📄 Page info:', pageInfo);
+        
+        // Take debug screenshot
+        await page.screenshot({ 
+          path: path.join(this.outputDir, 'debug-initial-load.png'),
+          fullPage: true 
+        });
+        console.log('📸 Debug screenshot saved as debug-initial-load.png');
+      }
+      
+      // Additional wait for any animations or lazy loading
+      await page.waitForTimeout(3000);
+      
+      console.log('✅ Application wait completed');
+      
     } catch (error) {
-      console.error('❌ Failed to load application:', error);
-      throw error;
+      console.error('❌ Error during application wait:', error);
+      
+      // Take error screenshot for debugging
+      try {
+        await page.screenshot({ 
+          path: path.join(this.outputDir, 'debug-error-state.png'),
+          fullPage: true 
+        });
+        console.log('📸 Error state screenshot saved');
+      } catch (screenshotError) {
+        console.error('Failed to take error screenshot:', screenshotError);
+      }
+      
+      // Don't throw error, continue with capture attempt
+      console.log('⚠️ Continuing with capture despite wait failure...');
     }
   }
 
