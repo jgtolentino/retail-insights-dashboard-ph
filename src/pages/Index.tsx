@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { dashboardService, type TimeSeriesData } from '@/services/dashboard'
@@ -10,6 +11,8 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { TransactionCounter } from '@/components/TransactionCounter'
 import { DashboardErrorBoundary } from '@/components/DashboardErrorBoundary'
+import { HierarchicalBrandView } from '@/components/charts/HierarchicalBrandView'
+import { SmartBrandFilter } from '@/components/charts/SmartBrandFilter'
 // AI Panel disabled for production
 // import { AIPanel } from '@/components/AIPanel'
 // import { type DashboardData } from '@/services/aiService'
@@ -29,6 +32,8 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState<DateRange>('all')
   const [chartMetric, setChartMetric] = useState<ChartMetric>('both')
+  const [filteredBrands, setFilteredBrands] = useState<any[]>([])
+  const [viewMode, setViewMode] = useState<'hierarchical' | 'filtered'>('hierarchical')
   
   // Custom date range state
   const [customStartDate, setCustomStartDate] = useState('')
@@ -612,13 +617,37 @@ export default function Index() {
         </CardContent>
       </Card>
 
-      {/* Bar Chart */}
+      {/* Enhanced Brand Analysis */}
       <Card>
         <CardHeader>
-          <CardTitle>Top Brands by Revenue</CardTitle>
-          <p className="text-sm text-gray-500">
-            Based on {getDateRangeLabel()}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Brand Revenue Analysis</CardTitle>
+              <p className="text-sm text-gray-500">
+                Interactive drill-down view • Based on {getDateRangeLabel()}
+              </p>
+            </div>
+            
+            {/* View Mode Toggle */}
+            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'hierarchical' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('hierarchical')}
+                className="text-xs"
+              >
+                Hierarchical
+              </Button>
+              <Button
+                variant={viewMode === 'filtered' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('filtered')}
+                className="text-xs"
+              >
+                Filtered
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -653,37 +682,65 @@ export default function Index() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="text-sm text-gray-500">
-                Showing top {data.topBrands.length} brands
-              </div>
-              
-              {/* CSS-based horizontal bar chart */}
-              <div className="space-y-2">
-                {data.topBrands.slice(0, 15).map((brand, index) => {
-                  const maxSales = Math.max(...data.topBrands.map(b => b.sales))
-                  const percentage = (brand.sales / maxSales) * 100
+            <div className="space-y-6">
+              {viewMode === 'hierarchical' ? (
+                <HierarchicalBrandView 
+                  brands={data.topBrands.map((brand, index) => ({
+                    id: index.toString(),
+                    name: brand.name,
+                    sales: brand.sales,
+                    category: brand.category || 'Other',
+                    is_tbwa: brand.is_tbwa || false
+                  }))}
+                />
+              ) : (
+                <div className="space-y-4">
+                  <SmartBrandFilter
+                    brands={data.topBrands.map((brand, index) => ({
+                      id: index.toString(),
+                      name: brand.name,
+                      sales: brand.sales,
+                      category: brand.category || 'Other',
+                      is_tbwa: brand.is_tbwa || false
+                    }))}
+                    onFilteredDataChange={setFilteredBrands}
+                  />
                   
-                  return (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="w-32 text-sm font-medium text-right">{brand.name}</div>
-                      <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
-                        <div 
-                          className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        >
-                          <span className="text-xs text-white font-medium">
-                            ₱{brand.sales.toLocaleString()}
-                          </span>
+                  {/* Filtered Results */}
+                  <div className="space-y-2">
+                    {filteredBrands.slice(0, 15).map((brand, index) => {
+                      const maxSales = Math.max(...filteredBrands.map(b => b.sales))
+                      const percentage = (brand.sales / maxSales) * 100
+                      
+                      return (
+                        <div key={brand.id} className="flex items-center gap-4">
+                          <div className="w-32 text-sm font-medium text-right flex items-center justify-end gap-1">
+                            {brand.name}
+                            {brand.is_tbwa && (
+                              <div className="w-2 h-2 bg-green-500 rounded-full" title="TBWA Client" />
+                            )}
+                          </div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                            <div 
+                              className={`h-6 rounded-full flex items-center justify-end pr-2 transition-all duration-300 ${
+                                brand.is_tbwa ? 'bg-green-500' : 'bg-blue-500'
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            >
+                              <span className="text-xs text-white font-medium">
+                                ₱{brand.sales.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-16 text-sm text-gray-600 text-right">
+                            {((brand.sales / (data.totalRevenue || 1)) * 100).toFixed(1)}%
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-16 text-sm text-gray-600 text-right">
-                        {((brand.sales / (data.totalRevenue || 1)) * 100).toFixed(1)}%
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
