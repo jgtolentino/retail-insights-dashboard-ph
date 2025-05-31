@@ -17,6 +17,7 @@ import BasketBehavior from "./pages/BasketBehavior";
 import AIRecommendations from "./pages/AIRecommendations";
 import Trends from "./pages/Trends";
 import Settings from "./pages/Settings";
+import Sprint4Dashboard from "./pages/Sprint4Dashboard";
 import { FEATURE_FLAGS } from "@/config/features";
 // import EnvTest from "./pages/EnvTest";
 
@@ -47,6 +48,10 @@ const App = () => (
                 {FEATURE_FLAGS.BASKET_BEHAVIOR && <Route path="/basket-behavior" element={<BasketBehavior />} />}
                 {FEATURE_FLAGS.AI_RECOMMENDATIONS && <Route path="/ai-recommendations" element={<AIRecommendations />} />}
                 {FEATURE_FLAGS.SETTINGS_PAGE && <Route path="/settings" element={<Settings />} />}
+                
+                {/* Sprint 4: Advanced Analytics Dashboard */}
+                <Route path="/sprint4" element={<Sprint4Dashboard />} />
+                <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
                 
                 {/* Legacy routes (deprecated but kept for compatibility) */}
                 {FEATURE_FLAGS.PRODUCT_MIX && <Route path="/product-mix" element={<ProductMix />} />}

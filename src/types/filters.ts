@@ -21,14 +21,14 @@ export interface GlobalFilters {
 }
 
 export const defaultGlobalFilters: GlobalFilters = {
-  dateRange:    { start: '2025-04-30', end: '2025-05-30' },
+  dateRange:    { start: '2024-06-01', end: '2025-05-31' },
   categories:   [],
   brands:       [],
   products:     [],
   locations:    [],
   incomeRanges: [],
-  startDate:    '2025-04-30',
-  endDate:      '2025-05-30',
+  startDate:    '2024-06-01',
+  endDate:      '2025-05-31',
   genders:      [],
   ageGroups:    [],
 }
