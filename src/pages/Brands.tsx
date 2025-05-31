@@ -52,7 +52,8 @@ export default function Brands() {
           transactions!inner(
             created_at
           )
-        `);
+        `)
+        .limit(1000);
 
       // Apply date filter
       const daysAgo = parseInt(dateRange);

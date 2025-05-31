@@ -33,7 +33,189 @@ export interface PurchaseBehaviorData {
   preferred_categories: string[]
 }
 
+// Enhanced dashboard data interface
+export interface DashboardDataResult {
+  totalRevenue: number;
+  totalTransactions: number;
+  avgTransaction: number;
+  topBrands: Array<{ name: string; sales: number; count?: number }>;
+  timeSeriesData: TimeSeriesData[];
+  isError?: boolean;
+  errorMessage?: string;
+  lastUpdated?: string;
+}
+
 export const dashboardService = {
+  async getDashboardData(timeRange: string = '30d'): Promise<DashboardDataResult> {
+    const maxAttempts = 3;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        logger.info('Fetching dashboard data', { timeRange, attempt: attempts });
+
+        const { data, error } = await supabase
+          .from('transactions')
+          .select(`
+            *,
+            transaction_items (
+              *,
+              products (
+                *,
+                brands (name)
+              )
+            )
+          `)
+          .order('created_at', { ascending: false })
+          .limit(1000);
+
+        if (error) {
+          logger.error('Supabase query error', error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          logger.warn('No transaction data found');
+          return this.getEmptyDashboardData();
+        }
+
+        logger.info('Successfully fetched dashboard data', { recordCount: data.length });
+        return this.processTransactionData(data);
+
+      } catch (error) {
+        logger.error(`Dashboard data fetch attempt ${attempts} failed`, error);
+        
+        if (attempts === maxAttempts) {
+          return {
+            ...this.getEmptyDashboardData(),
+            isError: true,
+            errorMessage: error instanceof Error ? error.message : 'Unknown error occurred'
+          };
+        }
+
+        // Wait before retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
+      }
+    }
+
+    return this.getEmptyDashboardData();
+  },
+
+  getEmptyDashboardData(): DashboardDataResult {
+    return {
+      totalRevenue: 0,
+      totalTransactions: 0,
+      avgTransaction: 0,
+      topBrands: [],
+      timeSeriesData: [],
+      lastUpdated: new Date().toISOString()
+    };
+  },
+
+  processTransactionData(transactions: any[]): DashboardDataResult {
+    try {
+      if (!Array.isArray(transactions)) {
+        logger.warn('Invalid transactions data format');
+        return this.getEmptyDashboardData();
+      }
+
+      // Safe data processing with validation
+      const totalRevenue = transactions.reduce((sum, t) => {
+        const amount = Number(t.total_amount) || 0;
+        return sum + amount;
+      }, 0);
+
+      const brandSales = new Map<string, { sales: number; count: number }>();
+      
+      transactions.forEach(transaction => {
+        if (!transaction.transaction_items || !Array.isArray(transaction.transaction_items)) {
+          return;
+        }
+
+        transaction.transaction_items.forEach((item: any) => {
+          const brandName = item.products?.brands?.name || 'Unknown';
+          const itemAmount = (Number(item.quantity) || 0) * (Number(item.price) || 0);
+          
+          const existing = brandSales.get(brandName) || { sales: 0, count: 0 };
+          brandSales.set(brandName, {
+            sales: existing.sales + itemAmount,
+            count: existing.count + 1
+          });
+        });
+      });
+
+      const topBrands = Array.from(brandSales.entries())
+        .map(([name, data]) => ({ 
+          name, 
+          sales: data.sales,
+          count: data.count 
+        }))
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 10);
+
+      const result: DashboardDataResult = {
+        totalRevenue,
+        totalTransactions: transactions.length,
+        avgTransaction: transactions.length > 0 ? totalRevenue / transactions.length : 0,
+        topBrands,
+        timeSeriesData: this.generateTimeSeriesData(transactions),
+        lastUpdated: new Date().toISOString()
+      };
+
+      logger.info('Successfully processed transaction data', {
+        totalRevenue,
+        transactionCount: transactions.length,
+        brandCount: topBrands.length
+      });
+
+      return result;
+
+    } catch (error) {
+      logger.error('Error processing transaction data', error);
+      return {
+        ...this.getEmptyDashboardData(),
+        isError: true,
+        errorMessage: 'Failed to process transaction data'
+      };
+    }
+  },
+
+  generateTimeSeriesData(transactions: any[]): TimeSeriesData[] {
+    try {
+      if (!Array.isArray(transactions) || transactions.length === 0) {
+        return [];
+      }
+
+      const dailyData = new Map<string, { transactions: number; revenue: number }>();
+
+      transactions.forEach(transaction => {
+        if (!transaction.created_at) return;
+
+        const date = new Date(transaction.created_at).toISOString().split('T')[0];
+        const amount = Number(transaction.total_amount) || 0;
+
+        const existing = dailyData.get(date) || { transactions: 0, revenue: 0 };
+        dailyData.set(date, {
+          transactions: existing.transactions + 1,
+          revenue: existing.revenue + amount
+        });
+      });
+
+      return Array.from(dailyData.entries())
+        .map(([date, data]) => ({
+          date,
+          transactions: data.transactions,
+          revenue: data.revenue
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    } catch (error) {
+      logger.error('Error generating time series data', error);
+      return [];
+    }
+  },
+
   async getConsumerInsights(
     startDate:    string,
     endDate:      string,
