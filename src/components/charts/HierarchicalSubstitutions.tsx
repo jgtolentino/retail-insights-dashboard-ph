@@ -1,116 +1,119 @@
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ChevronDown, ChevronRight, ArrowRight, Package, Tag, ShoppingBag } from "lucide-react"
-import { supabase } from '@/integrations/supabase/client'
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ChevronDown, ChevronRight, ArrowRight, Package, Tag, ShoppingBag } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SubstitutionData {
-  level: 'CATEGORY' | 'BRAND' | 'PRODUCT'
-  originalCategory: string
-  substituteCategory: string
-  originalBrand?: string
-  substituteBrand?: string
-  originalProduct?: string
-  substituteProduct?: string
-  reason: string
-  frequency: number
-  substitutionRate: number
+  level: 'CATEGORY' | 'BRAND' | 'PRODUCT';
+  originalCategory: string;
+  substituteCategory: string;
+  originalBrand?: string;
+  substituteBrand?: string;
+  originalProduct?: string;
+  substituteProduct?: string;
+  reason: string;
+  frequency: number;
+  substitutionRate: number;
 }
 
 interface HierarchicalSubstitutionsProps {
-  startDate?: string
-  endDate?: string
-  storeId?: number
-  className?: string
+  startDate?: string;
+  endDate?: string;
+  storeId?: number;
+  className?: string;
 }
 
-export function HierarchicalSubstitutions({ 
-  startDate, 
-  endDate, 
-  storeId, 
-  className = "" 
+export function HierarchicalSubstitutions({
+  startDate,
+  endDate,
+  storeId,
+  className = '',
 }: HierarchicalSubstitutionsProps) {
-  const [data, setData] = useState<SubstitutionData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set())
-  const [currentLevel, setCurrentLevel] = useState<'CATEGORY' | 'BRAND' | 'PRODUCT'>('CATEGORY')
+  const [data, setData] = useState<SubstitutionData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
+  const [currentLevel, setCurrentLevel] = useState<'CATEGORY' | 'BRAND' | 'PRODUCT'>('CATEGORY');
 
   useEffect(() => {
-    fetchSubstitutionData()
-  }, [startDate, endDate, storeId])
+    fetchSubstitutionData();
+  }, [startDate, endDate, storeId]);
 
   const fetchSubstitutionData = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       const { data: substitutions, error } = await supabase.rpc('get_hierarchical_substitutions', {
         p_start_date: startDate,
         p_end_date: endDate,
-        p_store_id: storeId
-      })
+        p_store_id: storeId,
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
-      setData(substitutions || [])
+      setData(substitutions || []);
     } catch (err) {
-      console.error('Error fetching substitution data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load substitution data')
+      console.error('Error fetching substitution data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load substitution data');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const categoryData = data.filter(d => d.level === 'CATEGORY')
-  const brandData = data.filter(d => d.level === 'BRAND')
-  const productData = data.filter(d => d.level === 'PRODUCT')
+  const categoryData = data.filter(d => d.level === 'CATEGORY');
+  const brandData = data.filter(d => d.level === 'BRAND');
+  const productData = data.filter(d => d.level === 'PRODUCT');
 
   const toggleCategoryExpansion = (categoryKey: string) => {
-    const newExpanded = new Set(expandedCategories)
+    const newExpanded = new Set(expandedCategories);
     if (newExpanded.has(categoryKey)) {
-      newExpanded.delete(categoryKey)
+      newExpanded.delete(categoryKey);
     } else {
-      newExpanded.add(categoryKey)
+      newExpanded.add(categoryKey);
     }
-    setExpandedCategories(newExpanded)
-  }
+    setExpandedCategories(newExpanded);
+  };
 
   const toggleBrandExpansion = (brandKey: string) => {
-    const newExpanded = new Set(expandedBrands)
+    const newExpanded = new Set(expandedBrands);
     if (newExpanded.has(brandKey)) {
-      newExpanded.delete(brandKey)
+      newExpanded.delete(brandKey);
     } else {
-      newExpanded.add(brandKey)
+      newExpanded.add(brandKey);
     }
-    setExpandedBrands(newExpanded)
-  }
+    setExpandedBrands(newExpanded);
+  };
 
   const getCategorySubstitutions = (originalCategory: string, substituteCategory: string) => {
-    return brandData.filter(d => 
-      d.originalCategory === originalCategory && 
-      d.substituteCategory === substituteCategory
-    )
-  }
+    return brandData.filter(
+      d => d.originalCategory === originalCategory && d.substituteCategory === substituteCategory
+    );
+  };
 
   const getBrandSubstitutions = (originalBrand: string, substituteBrand: string) => {
-    return productData.filter(d => 
-      d.originalBrand === originalBrand && 
-      d.substituteBrand === substituteBrand
-    )
-  }
+    return productData.filter(
+      d => d.originalBrand === originalBrand && d.substituteBrand === substituteBrand
+    );
+  };
 
   const getSubstitutionColor = (reason: string) => {
     switch (reason?.toLowerCase()) {
-      case 'out of stock': return 'bg-red-100 text-red-800 border-red-200'
-      case 'price preference': return 'bg-green-100 text-green-800 border-green-200'
-      case 'customer preference': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'promotion': return 'bg-purple-100 text-purple-800 border-purple-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'out of stock':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'price preference':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'customer preference':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'promotion':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -126,17 +129,17 @@ export function HierarchicalSubstitutions({
             {[...Array(5)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="flex items-center gap-4">
-                  <div className="h-4 w-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-8 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                  <div className="h-4 w-4 rounded bg-gray-200"></div>
+                  <div className="h-4 w-32 rounded bg-gray-200"></div>
+                  <div className="h-4 w-8 rounded bg-gray-200"></div>
+                  <div className="h-4 w-20 rounded bg-gray-200"></div>
                 </div>
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -149,7 +152,7 @@ export function HierarchicalSubstitutions({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-red-600">
+          <div className="py-8 text-center text-red-600">
             <p>{error}</p>
             <Button onClick={fetchSubstitutionData} variant="outline" size="sm" className="mt-4">
               Retry
@@ -157,7 +160,7 @@ export function HierarchicalSubstitutions({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -168,14 +171,14 @@ export function HierarchicalSubstitutions({
             <Package className="h-5 w-5" />
             Product Substitution Analysis
           </CardTitle>
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
             <Button
               variant={currentLevel === 'CATEGORY' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setCurrentLevel('CATEGORY')}
               className="text-xs"
             >
-              <Tag className="h-3 w-3 mr-1" />
+              <Tag className="mr-1 h-3 w-3" />
               Categories
             </Button>
             <Button
@@ -184,7 +187,7 @@ export function HierarchicalSubstitutions({
               onClick={() => setCurrentLevel('BRAND')}
               className="text-xs"
             >
-              <ShoppingBag className="h-3 w-3 mr-1" />
+              <ShoppingBag className="mr-1 h-3 w-3" />
               Brands
             </Button>
             <Button
@@ -193,38 +196,46 @@ export function HierarchicalSubstitutions({
               onClick={() => setCurrentLevel('PRODUCT')}
               className="text-xs"
             >
-              <Package className="h-3 w-3 mr-1" />
+              <Package className="mr-1 h-3 w-3" />
               Products
             </Button>
           </div>
         </div>
         <p className="text-sm text-gray-500">
-          Hierarchical view of product substitutions • Drill down from categories to specific products
+          Hierarchical view of product substitutions • Drill down from categories to specific
+          products
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {currentLevel === 'CATEGORY' && (
           <div className="space-y-3">
             {categoryData.map((item, index) => {
-              const categoryKey = `${item.originalCategory}-${item.substituteCategory}-${item.reason}`
-              const isExpanded = expandedCategories.has(categoryKey)
-              const relatedBrands = getCategorySubstitutions(item.originalCategory, item.substituteCategory)
-              
+              const categoryKey = `${item.originalCategory}-${item.substituteCategory}-${item.reason}`;
+              const isExpanded = expandedCategories.has(categoryKey);
+              const relatedBrands = getCategorySubstitutions(
+                item.originalCategory,
+                item.substituteCategory
+              );
+
               return (
-                <div key={index} className="border rounded-lg p-4">
+                <div key={index} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex flex-1 items-center gap-3">
                       {relatedBrands.length > 0 && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleCategoryExpansion(categoryKey)}
-                          className="p-0 h-6 w-6"
+                          className="h-6 w-6 p-0"
                         >
-                          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
                         </Button>
                       )}
-                      
+
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="font-medium">
                           {item.originalCategory}
@@ -234,12 +245,10 @@ export function HierarchicalSubstitutions({
                           {item.substituteCategory}
                         </Badge>
                       </div>
-                      
-                      <Badge className={getSubstitutionColor(item.reason)}>
-                        {item.reason}
-                      </Badge>
+
+                      <Badge className={getSubstitutionColor(item.reason)}>{item.reason}</Badge>
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-sm">
                       <span className="font-semibold">{item.frequency} substitutions</span>
                       <span className="text-gray-500">{item.substitutionRate}%</span>
@@ -247,9 +256,12 @@ export function HierarchicalSubstitutions({
                   </div>
 
                   {isExpanded && relatedBrands.length > 0 && (
-                    <div className="mt-4 ml-8 space-y-2">
+                    <div className="ml-8 mt-4 space-y-2">
                       {relatedBrands.slice(0, 10).map((brand, brandIndex) => (
-                        <div key={brandIndex} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                        <div
+                          key={brandIndex}
+                          className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                        >
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="text-xs">
                               {brand.originalBrand}
@@ -268,7 +280,7 @@ export function HierarchicalSubstitutions({
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -276,25 +288,32 @@ export function HierarchicalSubstitutions({
         {currentLevel === 'BRAND' && (
           <div className="space-y-3">
             {brandData.slice(0, 20).map((item, index) => {
-              const brandKey = `${item.originalBrand}-${item.substituteBrand}-${item.reason}`
-              const isExpanded = expandedBrands.has(brandKey)
-              const relatedProducts = getBrandSubstitutions(item.originalBrand!, item.substituteBrand!)
-              
+              const brandKey = `${item.originalBrand}-${item.substituteBrand}-${item.reason}`;
+              const isExpanded = expandedBrands.has(brandKey);
+              const relatedProducts = getBrandSubstitutions(
+                item.originalBrand!,
+                item.substituteBrand!
+              );
+
               return (
-                <div key={index} className="border rounded-lg p-4">
+                <div key={index} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex flex-1 items-center gap-3">
                       {relatedProducts.length > 0 && (
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleBrandExpansion(brandKey)}
-                          className="p-0 h-6 w-6"
+                          className="h-6 w-6 p-0"
                         >
-                          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
                         </Button>
                       )}
-                      
+
                       <div className="flex items-center gap-2">
                         <div className="text-xs text-gray-500">{item.originalCategory}</div>
                         <Badge variant="outline" className="font-medium">
@@ -305,12 +324,10 @@ export function HierarchicalSubstitutions({
                           {item.substituteBrand}
                         </Badge>
                       </div>
-                      
-                      <Badge className={getSubstitutionColor(item.reason)}>
-                        {item.reason}
-                      </Badge>
+
+                      <Badge className={getSubstitutionColor(item.reason)}>{item.reason}</Badge>
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-sm">
                       <span className="font-semibold">{item.frequency} substitutions</span>
                       <span className="text-gray-500">{item.substitutionRate}%</span>
@@ -318,9 +335,12 @@ export function HierarchicalSubstitutions({
                   </div>
 
                   {isExpanded && relatedProducts.length > 0 && (
-                    <div className="mt-4 ml-8 space-y-2">
+                    <div className="ml-8 mt-4 space-y-2">
                       {relatedProducts.slice(0, 10).map((product, productIndex) => (
-                        <div key={productIndex} className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                        <div
+                          key={productIndex}
+                          className="flex items-center justify-between rounded-lg bg-gray-50 p-2"
+                        >
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-gray-600">{product.originalProduct}</span>
                             <ArrowRight className="h-3 w-3 text-gray-400" />
@@ -334,7 +354,7 @@ export function HierarchicalSubstitutions({
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -342,32 +362,30 @@ export function HierarchicalSubstitutions({
         {currentLevel === 'PRODUCT' && (
           <div className="space-y-3">
             {productData.slice(0, 30).map((item, index) => (
-              <div key={index} className="border rounded-lg p-4">
+              <div key={index} className="rounded-lg border p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex flex-1 items-center gap-3">
                     <div className="flex items-center gap-2">
-                      <div className="text-xs text-gray-500 space-x-1">
+                      <div className="space-x-1 text-xs text-gray-500">
                         <span>{item.originalCategory}</span>
                         <span>•</span>
                         <span>{item.originalBrand}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="font-medium text-xs">
+                      <Badge variant="outline" className="text-xs font-medium">
                         {item.originalProduct}
                       </Badge>
                       <ArrowRight className="h-3 w-3 text-gray-400" />
-                      <Badge variant="outline" className="font-medium text-xs">
+                      <Badge variant="outline" className="text-xs font-medium">
                         {item.substituteProduct}
                       </Badge>
                     </div>
-                    
-                    <Badge className={getSubstitutionColor(item.reason)}>
-                      {item.reason}
-                    </Badge>
+
+                    <Badge className={getSubstitutionColor(item.reason)}>{item.reason}</Badge>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm">
                     <span className="font-semibold">{item.frequency}x</span>
                     <span className="text-gray-500">{item.substitutionRate}%</span>
@@ -379,12 +397,12 @@ export function HierarchicalSubstitutions({
         )}
 
         {data.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <div className="py-8 text-center text-gray-500">
+            <Package className="mx-auto mb-4 h-12 w-12 text-gray-300" />
             <p>No substitution data available for the selected period.</p>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

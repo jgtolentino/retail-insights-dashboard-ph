@@ -5,4 +5,4 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Run the task runner with all arguments passed through
-exec node "$SCRIPT_DIR/pulser-task-runner-v2.js" "$@"
+exec node "$SCRIPT_DIR/pulser-simple.js" "$@"

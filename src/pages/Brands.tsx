@@ -5,11 +5,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { BarChart3, TrendingUp, Target, Award, Filter, Download } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = [
+  '#3b82f6',
+  '#ef4444',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#84cc16',
+];
 
 interface BrandData {
   brand_id: number;
@@ -33,11 +62,12 @@ export default function Brands() {
     queryKey: ['brand-performance', selectedCategory, dateRange],
     queryFn: async () => {
       console.log('Fetching brand performance data...');
-      
+
       // Get comprehensive brand data
       let query = supabase
         .from('transaction_items')
-        .select(`
+        .select(
+          `
           quantity,
           price,
           products!inner(
@@ -52,14 +82,15 @@ export default function Brands() {
           transactions!inner(
             created_at
           )
-        `)
+        `
+        )
         .limit(1000);
 
       // Apply date filter
       const daysAgo = parseInt(dateRange);
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
-      
+
       query = query.gte('transactions.created_at', startDate.toISOString());
 
       const { data, error } = await query;
@@ -71,11 +102,11 @@ export default function Brands() {
 
       // Process brand data
       const brandMap = new Map<number, BrandData>();
-      
+
       data?.forEach((item: any) => {
         const brand = item.products.brands;
         const revenue = item.quantity * item.price;
-        
+
         // Skip if category filter is applied and doesn't match
         if (selectedCategory !== 'all' && brand.category !== selectedCategory) {
           return;
@@ -96,14 +127,14 @@ export default function Brands() {
             total_transactions: 1,
             total_quantity: item.quantity,
             avg_price: item.price,
-            market_share: 0 // Will calculate after
+            market_share: 0, // Will calculate after
           });
         }
       });
 
       const brands = Array.from(brandMap.values());
       const totalRevenue = brands.reduce((sum, brand) => sum + brand.total_revenue, 0);
-      
+
       // Calculate market share and average price
       brands.forEach(brand => {
         brand.market_share = totalRevenue > 0 ? (brand.total_revenue / totalRevenue) * 100 : 0;
@@ -111,35 +142,32 @@ export default function Brands() {
       });
 
       return brands.sort((a, b) => b.total_revenue - a.total_revenue);
-    }
+    },
   });
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('category')
-        .not('category', 'is', null);
-      
+      const { data } = await supabase.from('brands').select('category').not('category', 'is', null);
+
       const uniqueCategories = [...new Set(data?.map(b => b.category) || [])];
       return uniqueCategories.sort();
-    }
+    },
   });
 
   // Calculate growth trends (simulated)
   const brandTrends = useMemo(() => {
     if (!brandData) return [];
-    
+
     return brandData.slice(0, 10).map(brand => {
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
       return {
         brand: brand.brand_name,
         data: months.map(month => ({
           month,
-          revenue: brand.total_revenue * (0.8 + Math.random() * 0.4) / 5
-        }))
+          revenue: (brand.total_revenue * (0.8 + Math.random() * 0.4)) / 5,
+        })),
       };
     });
   }, [brandData]);
@@ -147,7 +175,7 @@ export default function Brands() {
   // Category share data
   const categoryShareData = useMemo(() => {
     if (!brandData) return [];
-    
+
     const categoryMap = new Map<string, number>();
     brandData.forEach(brand => {
       const existing = categoryMap.get(brand.category) || 0;
@@ -157,24 +185,29 @@ export default function Brands() {
     return Array.from(categoryMap.entries()).map(([category, revenue]) => ({
       name: category,
       value: revenue,
-      percentage: brandData.length > 0 ? (revenue / brandData.reduce((sum, b) => sum + b.total_revenue, 0)) * 100 : 0
+      percentage:
+        brandData.length > 0
+          ? (revenue / brandData.reduce((sum, b) => sum + b.total_revenue, 0)) * 100
+          : 0,
     }));
   }, [brandData]);
 
   // Export functionality
   const handleExport = (type: string) => {
     if (!brandData) return;
-    
+
     const csvContent = [
       ['Brand', 'Category', 'TBWA Client', 'Revenue', 'Transactions', 'Market Share %'].join(','),
-      ...brandData.map(brand => [
-        brand.brand_name,
-        brand.category,
-        brand.is_tbwa ? 'Yes' : 'No',
-        brand.total_revenue.toFixed(2),
-        brand.total_transactions,
-        brand.market_share.toFixed(2)
-      ].join(','))
+      ...brandData.map(brand =>
+        [
+          brand.brand_name,
+          brand.category,
+          brand.is_tbwa ? 'Yes' : 'No',
+          brand.total_revenue.toFixed(2),
+          brand.total_transactions,
+          brand.market_share.toFixed(2),
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -189,8 +222,8 @@ export default function Brands() {
   if (brandLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="h-64 flex items-center justify-center">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex h-64 items-center justify-center">
             <div className="animate-pulse text-gray-500">Loading brand analytics...</div>
           </div>
         </div>
@@ -200,7 +233,7 @@ export default function Brands() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div>
@@ -250,14 +283,14 @@ export default function Brands() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="flex items-center p-6">
               <Award className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Total Brands</p>
                 <p className="text-2xl font-bold">{brandData?.length || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Active brands</p>
+                <p className="mt-1 text-xs text-muted-foreground">Active brands</p>
               </div>
             </CardContent>
           </Card>
@@ -267,8 +300,10 @@ export default function Brands() {
               <Target className="h-8 w-8 text-green-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">TBWA Brands</p>
-                <p className="text-2xl font-bold">{brandData?.filter(b => b.is_tbwa).length || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Client brands</p>
+                <p className="text-2xl font-bold">
+                  {brandData?.filter(b => b.is_tbwa).length || 0}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Client brands</p>
               </div>
             </CardContent>
           </Card>
@@ -278,8 +313,10 @@ export default function Brands() {
               <TrendingUp className="h-8 w-8 text-purple-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Top Brand</p>
-                <p className="text-2xl font-bold">{brandData?.[0]?.brand_name?.slice(0, 8) || 'N/A'}</p>
-                <p className="text-xs text-muted-foreground mt-1">By revenue</p>
+                <p className="text-2xl font-bold">
+                  {brandData?.[0]?.brand_name?.slice(0, 8) || 'N/A'}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">By revenue</p>
               </div>
             </CardContent>
           </Card>
@@ -290,7 +327,7 @@ export default function Brands() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Categories</p>
                 <p className="text-2xl font-bold">{categories?.length || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Product types</p>
+                <p className="mt-1 text-xs text-muted-foreground">Product types</p>
               </div>
             </CardContent>
           </Card>
@@ -314,21 +351,26 @@ export default function Brands() {
               <CardContent>
                 <div className="space-y-4">
                   {brandData?.slice(0, 15).map((brand, index) => (
-                    <div key={brand.brand_id} className="flex items-center gap-4 p-3 rounded-lg border">
-                      <div className="flex-shrink-0 w-8 text-center">
+                    <div
+                      key={brand.brand_id}
+                      className="flex items-center gap-4 rounded-lg border p-3"
+                    >
+                      <div className="w-8 flex-shrink-0 text-center">
                         <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
                       </div>
-                      
-                      <div className="flex-1 min-w-0">
+
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-medium text-gray-900">{brand.brand_name}</h4>
                           {brand.is_tbwa && (
-                            <Badge variant="default" className="text-xs">TBWA</Badge>
+                            <Badge variant="default" className="text-xs">
+                              TBWA
+                            </Badge>
                           )}
                         </div>
                         <p className="text-xs text-gray-500">{brand.category}</p>
                       </div>
-                      
+
                       <div className="flex-shrink-0 text-right">
                         <div className="text-sm font-medium text-gray-900">
                           ₱{brand.total_revenue.toLocaleString()}
@@ -355,8 +397,10 @@ export default function Brands() {
                   <LineChart data={brandTrends[0]?.data || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `₱${(value/1000).toFixed(0)}K`} />
-                    <Tooltip formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']} />
+                    <YAxis tickFormatter={value => `₱${(value / 1000).toFixed(0)}K`} />
+                    <Tooltip
+                      formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
+                    />
                     {brandTrends.slice(0, 5).map((brand, index) => (
                       <Line
                         key={brand.brand}
@@ -376,7 +420,7 @@ export default function Brands() {
 
           {/* Category Share Tab */}
           <TabsContent value="categories" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle>Revenue by Category</CardTitle>
@@ -392,7 +436,7 @@ export default function Brands() {
                         outerRadius={120}
                         paddingAngle={2}
                         dataKey="value"
-                        label={({ name, percentage }) => 
+                        label={({ name, percentage }) =>
                           percentage > 5 ? `${name} ${percentage.toFixed(0)}%` : ''
                         }
                       >
@@ -400,7 +444,9 @@ export default function Brands() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']} />
+                      <Tooltip
+                        formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
+                      />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -415,8 +461,8 @@ export default function Brands() {
                   <div className="space-y-4">
                     {categoryShareData.map((category, index) => (
                       <div key={category.name} className="flex items-center gap-4">
-                        <div 
-                          className="w-4 h-4 rounded"
+                        <div
+                          className="h-4 w-4 rounded"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         />
                         <div className="flex-1">
@@ -426,12 +472,12 @@ export default function Brands() {
                               ₱{category.value.toLocaleString()}
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                          <div className="mt-1 h-2 w-full rounded-full bg-gray-200">
                             <div
                               className="h-2 rounded-full"
-                              style={{ 
+                              style={{
                                 width: `${category.percentage}%`,
-                                backgroundColor: COLORS[index % COLORS.length]
+                                backgroundColor: COLORS[index % COLORS.length],
                               }}
                             />
                           </div>
@@ -446,14 +492,14 @@ export default function Brands() {
 
           {/* Competitive Analysis Tab */}
           <TabsContent value="competitive" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle>TBWA vs Competitors</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
                       <div>
                         <h4 className="font-medium text-blue-900">TBWA Clients</h4>
                         <p className="text-sm text-blue-700">
@@ -462,13 +508,18 @@ export default function Brands() {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-blue-900">
-                          ₱{(brandData?.filter(b => b.is_tbwa).reduce((sum, b) => sum + b.total_revenue, 0) || 0).toLocaleString()}
+                          ₱
+                          {(
+                            brandData
+                              ?.filter(b => b.is_tbwa)
+                              .reduce((sum, b) => sum + b.total_revenue, 0) || 0
+                          ).toLocaleString()}
                         </div>
                         <p className="text-sm text-blue-700">Total revenue</p>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                       <div>
                         <h4 className="font-medium text-gray-900">Competitors</h4>
                         <p className="text-sm text-gray-700">
@@ -477,7 +528,12 @@ export default function Brands() {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-gray-900">
-                          ₱{(brandData?.filter(b => !b.is_tbwa).reduce((sum, b) => sum + b.total_revenue, 0) || 0).toLocaleString()}
+                          ₱
+                          {(
+                            brandData
+                              ?.filter(b => !b.is_tbwa)
+                              .reduce((sum, b) => sum + b.total_revenue, 0) || 0
+                          ).toLocaleString()}
                         </div>
                         <p className="text-sm text-gray-700">Total revenue</p>
                       </div>
@@ -495,11 +551,14 @@ export default function Brands() {
                     {categories?.map(category => {
                       const categoryBrands = brandData?.filter(b => b.category === category) || [];
                       const leader = categoryBrands[0];
-                      
+
                       if (!leader) return null;
-                      
+
                       return (
-                        <div key={category} className="flex justify-between items-center p-3 border rounded-lg">
+                        <div
+                          key={category}
+                          className="flex items-center justify-between rounded-lg border p-3"
+                        >
                           <div>
                             <h4 className="font-medium">{category}</h4>
                             <p className="text-sm text-gray-500">{leader.brand_name}</p>
@@ -509,7 +568,9 @@ export default function Brands() {
                               ₱{leader.total_revenue.toLocaleString()}
                             </div>
                             {leader.is_tbwa && (
-                              <Badge variant="default" className="text-xs mt-1">TBWA</Badge>
+                              <Badge variant="default" className="mt-1 text-xs">
+                                TBWA
+                              </Badge>
                             )}
                           </div>
                         </div>

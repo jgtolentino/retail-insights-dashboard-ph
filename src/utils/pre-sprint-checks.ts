@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface CheckResult {
@@ -18,15 +17,15 @@ export class PreSprintChecks {
 
   async runAllChecks(): Promise<CheckResult[]> {
     this.results = [];
-    
+
     console.log('🔍 Starting pre-sprint checks...');
-    
+
     await this.checkDatabaseConnection();
     await this.checkTablesExist();
     await this.checkDataAvailability();
     await this.checkRLSPolicies();
     await this.checkFunctions();
-    
+
     console.log('✅ Pre-sprint checks completed');
     return this.results;
   }
@@ -40,7 +39,7 @@ export class PreSprintChecks {
   private async checkDatabaseConnection(): Promise<void> {
     try {
       const { data, error } = await supabase.from('brands').select('count').limit(1);
-      
+
       if (error) {
         this.addResult('fail', 'Database connection failed', error.message);
       } else {
@@ -53,14 +52,14 @@ export class PreSprintChecks {
 
   private async checkTablesExist(): Promise<void> {
     const tables = ['brands', 'products', 'transactions', 'transaction_items'];
-    
+
     for (const table of tables) {
       try {
         const { data, error } = await supabase
           .from(table as any)
           .select('*')
           .limit(1);
-        
+
         if (error) {
           this.addResult('fail', `Table '${table}' check failed`, error.message);
         } else {
@@ -79,7 +78,7 @@ export class PreSprintChecks {
         .from('transactions')
         .select('id')
         .limit(10);
-      
+
       if (txError) {
         this.addResult('fail', 'Transactions data check failed', txError.message);
       } else if (!transactions || transactions.length === 0) {
@@ -93,7 +92,7 @@ export class PreSprintChecks {
         .from('brands')
         .select('id, name')
         .limit(10);
-      
+
       if (brandError) {
         this.addResult('fail', 'Brands data check failed', brandError.message);
       } else if (!brands || brands.length === 0) {
@@ -107,7 +106,7 @@ export class PreSprintChecks {
         .from('products')
         .select('id, name')
         .limit(10);
-      
+
       if (productError) {
         this.addResult('fail', 'Products data check failed', productError.message);
       } else if (!products || products.length === 0) {
@@ -115,7 +114,6 @@ export class PreSprintChecks {
       } else {
         this.addResult('pass', `Found ${products.length} products (sample)`);
       }
-
     } catch (error) {
       this.addResult('fail', 'Data availability check error', String(error));
     }
@@ -125,14 +123,14 @@ export class PreSprintChecks {
     try {
       // Test basic table access - if we can read data, RLS is properly configured or disabled
       const tables = ['brands', 'products', 'transactions', 'transaction_items'];
-      
+
       for (const table of tables) {
         try {
           const { data, error } = await supabase
             .from(table as any)
             .select('*')
             .limit(1);
-          
+
           if (error) {
             this.addResult('warning', `RLS may be blocking access to '${table}'`, error.message);
           } else {
@@ -150,19 +148,15 @@ export class PreSprintChecks {
   private async checkFunctions(): Promise<void> {
     try {
       // Test if key functions exist by calling them
-      const rpcFunctions = [
-        'get_daily_trends',
-        'get_age_distribution', 
-        'get_consumer_profile'
-      ];
+      const rpcFunctions = ['get_daily_trends', 'get_age_distribution', 'get_consumer_profile'];
 
       for (const funcName of rpcFunctions) {
         try {
           const { data, error } = await supabase.rpc(funcName as any, {
             start_date: '2025-05-01T00:00:00Z',
-            end_date: '2025-05-02T00:00:00Z'
+            end_date: '2025-05-02T00:00:00Z',
           });
-          
+
           if (error) {
             this.addResult('warning', `Function '${funcName}' may not exist`, error.message);
           } else {
@@ -181,12 +175,14 @@ export class PreSprintChecks {
   async isReadyForSprint(sprintNumber: number): Promise<boolean> {
     const results = await this.runAllChecks();
     const failures = results.filter(r => r.status === 'fail');
-    
+
     if (failures.length > 0) {
-      console.log(`❌ Not ready for Sprint ${sprintNumber}. ${failures.length} critical issues found.`);
+      console.log(
+        `❌ Not ready for Sprint ${sprintNumber}. ${failures.length} critical issues found.`
+      );
       return false;
     }
-    
+
     console.log(`✅ Ready for Sprint ${sprintNumber}!`);
     return true;
   }
@@ -196,12 +192,12 @@ export class PreSprintChecks {
     const passed = this.results.filter(r => r.status === 'pass').length;
     const warnings = this.results.filter(r => r.status === 'warning').length;
     const failed = this.results.filter(r => r.status === 'fail').length;
-    
+
     return {
       passed,
       warnings,
       failed,
-      total: this.results.length
+      total: this.results.length,
     };
   }
 }
@@ -214,14 +210,14 @@ export async function runPreSprintChecks(sprintNumber: number): Promise<Validati
   const checks = new PreSprintChecks();
   const results = await checks.runAllChecks();
   const summary = checks.getSummary();
-  
+
   const errors = results.filter(r => r.status === 'fail').map(r => r.message);
   const warnings = results.filter(r => r.status === 'warning').map(r => r.message);
-  
+
   return {
     passed: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -230,12 +226,12 @@ export function displayValidationResults(results: ValidationResult): void {
   console.log(`   Passed: ${results.passed}`);
   console.log(`   Errors: ${results.errors.length}`);
   console.log(`   Warnings: ${results.warnings.length}\n`);
-  
+
   if (results.errors.length > 0) {
     console.log('❌ Errors:');
     results.errors.forEach(error => console.log(`   - ${error}`));
   }
-  
+
   if (results.warnings.length > 0) {
     console.log('⚠️ Warnings:');
     results.warnings.forEach(warning => console.log(`   - ${warning}`));
@@ -247,7 +243,7 @@ export async function runQuickCheck(): Promise<void> {
   const checks = new PreSprintChecks();
   await checks.runAllChecks();
   const summary = checks.getSummary();
-  
+
   console.log(`\n📊 Check Summary:`);
   console.log(`   Passed: ${summary.passed}`);
   console.log(`   Warnings: ${summary.warnings}`);

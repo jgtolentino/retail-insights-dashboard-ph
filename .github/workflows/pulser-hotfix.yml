@@ -1,0 +1,323 @@
+name: Pulser Emergency Hotfix
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_description:
+        description: 'Brief description of the critical issue'
+        required: true
+        type: string
+      target_environment:
+        description: 'Target environment for hotfix'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+      skip_tests:
+        description: 'Skip non-critical tests (USE WITH CAUTION)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PULSER_VERSION: "2.1.0"
+  NODE_VERSION: "18"
+  HOTFIX_MODE: "true"
+
+jobs:
+  # Stage 1: Emergency Assessment
+  emergency-assessment:
+    name: Assess Emergency Situation
+    runs-on: ubuntu-latest
+    outputs:
+      severity: ${{ steps.assess.outputs.severity }}
+      fix_strategy: ${{ steps.assess.outputs.strategy }}
+      rollback_required: ${{ steps.assess.outputs.rollback }}
+      
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --mode=emergency
+          
+      - name: 🚨 Assess Emergency
+        id: assess
+        run: |
+          pulser invoke MayaPlan assess-emergency \
+            --description="${{ github.event.inputs.issue_description }}" \
+            --environment="${{ github.event.inputs.target_environment }}" \
+            --output=json > emergency-assessment.json
+            
+          SEVERITY=$(jq -r '.severity' emergency-assessment.json)
+          STRATEGY=$(jq -r '.fix_strategy' emergency-assessment.json)
+          ROLLBACK=$(jq -r '.requires_rollback' emergency-assessment.json)
+          
+          echo "severity=$SEVERITY" >> $GITHUB_OUTPUT
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          echo "rollback=$ROLLBACK" >> $GITHUB_OUTPUT
+          
+      - name: 📊 Log Emergency Details
+        run: |
+          echo "🚨 EMERGENCY HOTFIX INITIATED"
+          echo "Issue: ${{ github.event.inputs.issue_description }}"
+          echo "Severity: ${{ steps.assess.outputs.severity }}"
+          echo "Strategy: ${{ steps.assess.outputs.strategy }}"
+          echo "Rollback Required: ${{ steps.assess.outputs.rollback }}"
+
+  # Stage 2: Create Hotfix Branch
+  create-hotfix-branch:
+    name: Create Hotfix Branch
+    needs: emergency-assessment
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.branch.outputs.name }}
+      
+    steps:
+      - name: 📥 Checkout Production Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔧 Setup Git
+        run: |
+          git config user.name "Pulser Hotfix Bot"
+          git config user.email "pulser-hotfix@example.com"
+          
+      - name: 🌿 Create Hotfix Branch
+        id: branch
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BRANCH_NAME="hotfix/emergency-${TIMESTAMP}"
+          
+          git checkout -b "$BRANCH_NAME"
+          git push -u origin "$BRANCH_NAME"
+          
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Created hotfix branch: $BRANCH_NAME"
+
+  # Stage 3: Rapid Fix Development
+  rapid-fix-development:
+    name: Rapid Fix Development
+    needs: [emergency-assessment, create-hotfix-branch]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Hotfix Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-hotfix-branch.outputs.branch_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser Emergency Mode
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --mode=emergency --branch="${{ needs.create-hotfix-branch.outputs.branch_name }}"
+          
+      - name: 🔍 Analyze Issue
+        run: |
+          pulser invoke Caca emergency-analysis \
+            --issue="${{ github.event.inputs.issue_description }}" \
+            --severity="${{ needs.emergency-assessment.outputs.severity }}"
+            
+      - name: 💊 Apply Emergency Fix
+        run: |
+          pulser invoke Patcha emergency-fix \
+            --strategy="${{ needs.emergency-assessment.outputs.fix_strategy }}" \
+            --auto-commit=false
+            
+      - name: 🧪 Critical Tests Only
+        if: github.event.inputs.skip_tests != 'true'
+        run: |
+          pulser invoke BasherExec test:critical-only
+          
+      - name: ⚡ Quick Validation
+        run: |
+          pulser invoke Claudia validate-hotfix \
+            --mode=rapid \
+            --skip-non-critical=true
+            
+      - name: 💾 Commit Hotfix
+        run: |
+          git add .
+          git commit -m "🚨 HOTFIX: ${{ github.event.inputs.issue_description }}
+
+          Emergency fix applied via Pulser
+          Severity: ${{ needs.emergency-assessment.outputs.severity }}
+          Skip Tests: ${{ github.event.inputs.skip_tests }}"
+          
+          git push origin ${{ needs.create-hotfix-branch.outputs.branch_name }}
+
+  # Stage 4: Emergency Deployment
+  emergency-deployment:
+    name: Emergency Deployment
+    needs: [emergency-assessment, create-hotfix-branch, rapid-fix-development]
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target_environment }}-hotfix
+    
+    steps:
+      - name: 📥 Checkout Hotfix Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-hotfix-branch.outputs.branch_name }}
+          
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --mode=emergency
+          
+      - name: 📦 Emergency Build
+        run: |
+          pulser invoke BasherExec install --production
+          pulser invoke BasherExec build:emergency
+          
+      - name: 🔄 Backup Current Version
+        if: needs.emergency-assessment.outputs.rollback_required == 'true'
+        run: |
+          pulser invoke MayaPlan create-rollback-point \
+            --environment="${{ github.event.inputs.target_environment }}"
+            
+      - name: 🚀 Deploy Hotfix
+        run: |
+          pulser invoke BasherExec deploy:emergency \
+            --environment="${{ github.event.inputs.target_environment }}" \
+            --skip-health-check=${{ github.event.inputs.skip_tests }}
+        env:
+          DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}
+          EMERGENCY_OVERRIDE: "true"
+          
+      - name: ✅ Rapid Validation
+        run: |
+          pulser invoke Claudia validate-emergency-deployment \
+            --url="${{ secrets[format('{0}_URL', github.event.inputs.target_environment)] }}" \
+            --critical-paths-only=true
+            
+      - name: 📊 Monitor Initial Metrics
+        run: |
+          pulser invoke MayaPlan monitor-hotfix \
+            --duration=300 \
+            --alert-threshold=error
+
+  # Stage 5: Merge Back to Main
+  merge-hotfix:
+    name: Merge Hotfix to Main
+    needs: [create-hotfix-branch, emergency-deployment]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Main Branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔧 Setup Git
+        run: |
+          git config user.name "Pulser Hotfix Bot"
+          git config user.email "pulser-hotfix@example.com"
+          
+      - name: 🔀 Merge Hotfix
+        run: |
+          git fetch origin ${{ needs.create-hotfix-branch.outputs.branch_name }}
+          git merge origin/${{ needs.create-hotfix-branch.outputs.branch_name }} \
+            -m "Merge emergency hotfix: ${{ github.event.inputs.issue_description }}"
+          git push origin main
+          
+      - name: 🏷️ Tag Hotfix
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          HOTFIX_TAG="v${VERSION}-hotfix-$(date +%Y%m%d-%H%M%S)"
+          
+          git tag -a "$HOTFIX_TAG" \
+            -m "Emergency hotfix: ${{ github.event.inputs.issue_description }}"
+          git push origin "$HOTFIX_TAG"
+
+  # Stage 6: Post-Hotfix Tasks
+  post-hotfix:
+    name: Post-Hotfix Tasks
+    needs: [emergency-deployment, merge-hotfix]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 📊 Generate Incident Report
+        run: |
+          pulser invoke MayaPlan generate-incident-report \
+            --issue="${{ github.event.inputs.issue_description }}" \
+            --environment="${{ github.event.inputs.target_environment }}" \
+            --outcome="${{ job.status }}"
+            
+      - name: 🧪 Schedule Full Test Suite
+        if: github.event.inputs.skip_tests == 'true'
+        run: |
+          pulser invoke MayaPlan schedule-deferred-tests \
+            --priority=high \
+            --deadline=24h
+            
+      - name: 📢 Send Notifications
+        run: |
+          pulser invoke Claudia send-hotfix-notifications \
+            --status="${{ job.status }}" \
+            --issue="${{ github.event.inputs.issue_description }}" \
+            --channels="slack,email,pagerduty"
+            
+      - name: 📋 Create Follow-up Tasks
+        run: |
+          pulser invoke MayaPlan create-post-mortem-tasks \
+            --incident="${{ github.event.inputs.issue_description }}"
+
+  # Emergency Rollback (if deployment fails)
+  emergency-rollback:
+    name: Emergency Rollback
+    needs: [emergency-assessment, emergency-deployment]
+    if: failure() && needs.emergency-assessment.outputs.rollback_required == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --mode=emergency
+          
+      - name: 🔙 Execute Rollback
+        run: |
+          pulser invoke MayaPlan execute-emergency-rollback \
+            --environment="${{ github.event.inputs.target_environment }}" \
+            --reason="Hotfix deployment failed"
+            
+      - name: 🚨 Critical Alerts
+        run: |
+          pulser invoke Claudia send-critical-alerts \
+            --message="HOTFIX FAILED - Rollback executed" \
+            --severity=critical \
+            --escalate=true

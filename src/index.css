@@ -114,7 +114,11 @@
   margin-left: 5px;
   margin-top: 5px;
   text-align: center;
-  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font:
+    12px 'Helvetica Neue',
+    Arial,
+    Helvetica,
+    sans-serif;
   color: #fff;
   display: flex;
   align-items: center;
@@ -134,7 +138,11 @@
   margin-left: 5px;
   margin-top: 5px;
   text-align: center;
-  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font:
+    12px 'Helvetica Neue',
+    Arial,
+    Helvetica,
+    sans-serif;
   color: #fff;
   display: flex;
   align-items: center;
@@ -154,7 +162,11 @@
   margin-left: 5px;
   margin-top: 5px;
   text-align: center;
-  font: 14px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font:
+    14px 'Helvetica Neue',
+    Arial,
+    Helvetica,
+    sans-serif;
   color: #fff;
   display: flex;
   align-items: center;

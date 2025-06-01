@@ -1,15 +1,14 @@
-
 import React, { Suspense } from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { FilterProvider } from "@/contexts/FilterContext";
-import { Layout } from "@/components/Layout";
-import { FEATURE_FLAGS } from "@/config/features";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { FilterProvider } from '@/contexts/FilterContext';
+import { Layout } from '@/components/Layout';
+import { FEATURE_FLAGS } from '@/config/features';
 
 // Import shared components
 // import { ToastContainer } from "@/components/shared/ToastSystem";
@@ -21,18 +20,18 @@ import { FEATURE_FLAGS } from "@/config/features";
 // import "@/styles/theme.css";
 
 // Lazy loaded pages for better performance
-const Index = React.lazy(() => import("./pages/Index"));
-const NotFound = React.lazy(() => import("./pages/NotFound"));
-const ProductMix = React.lazy(() => import("./pages/ProductMix"));
-const ConsumerInsights = React.lazy(() => import("./pages/ConsumerInsights"));
-const Brands = React.lazy(() => import("./pages/Brands"));
-const ProductInsights = React.lazy(() => import("./pages/ProductInsights"));
-const BasketBehavior = React.lazy(() => import("./pages/BasketBehavior"));
-const AIRecommendations = React.lazy(() => import("./pages/AIRecommendations"));
-const Trends = React.lazy(() => import("./pages/Trends"));
-const Settings = React.lazy(() => import("./pages/Settings"));
-const Sprint4Dashboard = React.lazy(() => import("./pages/Sprint4Dashboard"));
-const DashboardPreview = React.lazy(() => import("./pages/DashboardPreview"));
+const Index = React.lazy(() => import('./pages/Index'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+const ProductMix = React.lazy(() => import('./pages/ProductMix'));
+const ConsumerInsights = React.lazy(() => import('./pages/ConsumerInsights'));
+const Brands = React.lazy(() => import('./pages/Brands'));
+const ProductInsights = React.lazy(() => import('./pages/ProductInsights'));
+const BasketBehavior = React.lazy(() => import('./pages/BasketBehavior'));
+const AIRecommendations = React.lazy(() => import('./pages/AIRecommendations'));
+const Trends = React.lazy(() => import('./pages/Trends'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
+const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
 
 // Enhanced Query Client with better defaults
 const queryClient = new QueryClient({
@@ -79,24 +78,20 @@ const App = () => {
             <BrowserRouter>
               {/* Accessibility: Skip to content link */}
               {/* <SkipToContent /> */}
-              
+
               {/* Toast notifications */}
               {/* <ToastContainer /> */}
-              
+
               {/* Existing toasters */}
               <Toaster />
               <Sonner />
-              
+
               <Layout>
                 <main id="main-content" className="focus:outline-none">
                   <Suspense fallback={<div>Loading...</div>}>
                     <Routes>
-                      {FEATURE_FLAGS.DASHBOARD_OVERVIEW && (
-                        <Route path="/" element={<Index />} />
-                      )}
-                      {FEATURE_FLAGS.TRENDS_PAGE && (
-                        <Route path="/trends" element={<Trends />} />
-                      )}
+                      {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
+                      {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
                       {FEATURE_FLAGS.PRODUCT_INSIGHTS && (
                         <Route path="/product-insights" element={<ProductInsights />} />
                       )}
@@ -112,30 +107,28 @@ const App = () => {
                       {FEATURE_FLAGS.SETTINGS_PAGE && (
                         <Route path="/settings" element={<Settings />} />
                       )}
-                      
+
                       {/* New Filter System Preview */}
                       <Route path="/dashboard-preview" element={<DashboardPreview />} />
                       <Route path="/filter-preview" element={<DashboardPreview />} />
-                      
+
                       {/* Sprint 4: Advanced Analytics Dashboard */}
                       <Route path="/sprint4" element={<Sprint4Dashboard />} />
                       <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
-                      
+
                       {/* Legacy routes (deprecated but kept for compatibility) */}
                       {FEATURE_FLAGS.PRODUCT_MIX && (
                         <Route path="/product-mix" element={<ProductMix />} />
                       )}
-                      {FEATURE_FLAGS.BRANDS_PAGE && (
-                        <Route path="/brands" element={<Brands />} />
-                      )}
-                      
+                      {FEATURE_FLAGS.BRANDS_PAGE && <Route path="/brands" element={<Brands />} />}
+
                       {/* Catch-all route must be last */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </main>
               </Layout>
-              
+
               {/* React Query DevTools (only in development) */}
               {/* {process.env.NODE_ENV === 'development' && (
                 <ReactQueryDevtools initialIsOpen={false} />

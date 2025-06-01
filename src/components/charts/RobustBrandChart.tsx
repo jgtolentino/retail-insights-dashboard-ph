@@ -1,5 +1,14 @@
 import { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -26,8 +35,16 @@ interface RobustBrandChartProps {
 }
 
 const CHART_COLORS = [
-  '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', 
-  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+  '#3b82f6',
+  '#ef4444',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#84cc16',
+  '#f97316',
+  '#6366f1',
 ];
 
 export function RobustBrandChart({
@@ -39,16 +56,15 @@ export function RobustBrandChart({
   subtitle = 'Revenue by brand',
   height = 400,
   showCount = false,
-  maxBrands = 10
+  maxBrands = 10,
 }: RobustBrandChartProps) {
-  
   // Validate and prepare chart data
   const chartData = useMemo(() => {
     if (!data || !Array.isArray(data)) {
       console.warn('RobustBrandChart: Invalid data format', data);
       return [];
     }
-    
+
     return data
       .filter(item => {
         // Validate each item
@@ -64,23 +80,23 @@ export function RobustBrandChart({
         sales: Number(item.sales) || 0,
         count: item.count || 0,
         displayValue: `₱${(item.sales || 0).toLocaleString('en-PH')}`,
-        color: CHART_COLORS[index % CHART_COLORS.length]
+        color: CHART_COLORS[index % CHART_COLORS.length],
       }));
   }, [data, maxBrands]);
 
   // Calculate summary stats
   const stats = useMemo(() => {
     if (chartData.length === 0) return null;
-    
+
     const totalRevenue = chartData.reduce((sum, item) => sum + item.sales, 0);
     const avgRevenue = totalRevenue / chartData.length;
     const topBrand = chartData[0];
-    
+
     return {
       totalRevenue,
       avgRevenue,
       topBrand,
-      brandCount: chartData.length
+      brandCount: chartData.length,
     };
   }, [chartData]);
 
@@ -95,7 +111,7 @@ export function RobustBrandChart({
                 <BarChart3 className="h-5 w-5" />
                 {title}
               </CardTitle>
-              {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+              {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             <div className="animate-spin">
               <RefreshCw className="h-4 w-4" />
@@ -132,7 +148,7 @@ export function RobustBrandChart({
               <span>Failed to load chart data: {error.message}</span>
               {onRefresh && (
                 <Button variant="outline" size="sm" onClick={onRefresh}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Retry
                 </Button>
               )}
@@ -152,17 +168,19 @@ export function RobustBrandChart({
             <BarChart3 className="h-5 w-5" />
             {title}
           </CardTitle>
-          {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
         </CardHeader>
         <CardContent>
-          <div className={`h-[${height}px] flex flex-col items-center justify-center text-muted-foreground space-y-3`}>
+          <div
+            className={`h-[${height}px] flex flex-col items-center justify-center space-y-3 text-muted-foreground`}
+          >
             <BarChart3 className="h-12 w-12 text-gray-300" />
             <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Data Available</h3>
+              <h3 className="mb-2 text-lg font-medium text-gray-900">No Data Available</h3>
               <p className="text-sm">No brand data found for the selected period.</p>
               {onRefresh && (
                 <Button variant="outline" className="mt-3" onClick={onRefresh}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Refresh Data
                 </Button>
               )}
@@ -183,7 +201,7 @@ export function RobustBrandChart({
               <BarChart3 className="h-5 w-5" />
               {title}
             </CardTitle>
-            {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+            {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
           </div>
           {onRefresh && (
             <Button variant="ghost" size="sm" onClick={onRefresh}>
@@ -191,49 +209,41 @@ export function RobustBrandChart({
             </Button>
           )}
         </div>
-        
+
         {/* Summary stats */}
         {stats && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Badge variant="secondary">
-              {stats.brandCount} brands
-            </Badge>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge variant="secondary">{stats.brandCount} brands</Badge>
             <Badge variant="outline">
-              Total: {stats.totalRevenue.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
+              Total:{' '}
+              {stats.totalRevenue.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })}
             </Badge>
-            {stats.topBrand && (
-              <Badge variant="outline">
-                Top: {stats.topBrand.fullName}
-              </Badge>
-            )}
+            {stats.topBrand && <Badge variant="outline">Top: {stats.topBrand.fullName}</Badge>}
           </div>
         )}
       </CardHeader>
-      
+
       <CardContent>
         <div className={`h-[${height}px] w-full`}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart 
-              data={chartData} 
-              margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-            >
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45} 
+              <XAxis
+                dataKey="name"
+                angle={-45}
                 textAnchor="end"
                 height={100}
                 interval={0}
                 tick={{ fontSize: 12 }}
               />
-              <YAxis 
-                tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
+              <YAxis
+                tickFormatter={value => `₱${(value / 1000).toFixed(0)}k`}
                 tick={{ fontSize: 12 }}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value: number, name: string, props: any) => [
                   `₱${value.toLocaleString('en-PH')}`,
-                  'Revenue'
+                  'Revenue',
                 ]}
                 labelFormatter={(label: string, payload: any) => {
                   const item = payload?.[0]?.payload;
@@ -252,15 +262,10 @@ export function RobustBrandChart({
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                 }}
               />
-              <Bar 
-                dataKey="sales" 
-                radius={[4, 4, 0, 0]}
-                stroke="#e5e7eb"
-                strokeWidth={1}
-              >
+              <Bar dataKey="sales" radius={[4, 4, 0, 0]} stroke="#e5e7eb" strokeWidth={1}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}

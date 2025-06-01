@@ -1,8 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Filter } from 'lucide-react';
@@ -40,26 +45,20 @@ export function ProductMixDashboard() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('category')
-        .not('category', 'is', null);
-      
+      const { data } = await supabase.from('brands').select('category').not('category', 'is', null);
+
       const uniqueCategories = [...new Set(data?.map(b => b.category) || [])];
       return uniqueCategories.sort();
-    }
+    },
   });
 
   // Fetch brands
   const { data: brands } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('id, name')
-        .order('name');
+      const { data } = await supabase.from('brands').select('id, name').order('name');
       return data || [];
-    }
+    },
   });
 
   // Update filters when selections change
@@ -67,7 +66,7 @@ export function ProductMixDashboard() {
     setFilters(prev => ({
       ...prev,
       category: selectedCategory === 'all' ? undefined : selectedCategory,
-      brandId: selectedBrand === 'all' ? undefined : selectedBrand
+      brandId: selectedBrand === 'all' ? undefined : selectedBrand,
     }));
   }, [selectedCategory, selectedBrand]);
 
@@ -75,21 +74,21 @@ export function ProductMixDashboard() {
   const { data: substitutionData, isLoading: substitutionLoading } = useQuery({
     queryKey: ['substitutions', filters],
     queryFn: () => productMixService.getProductSubstitutions(filters),
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch Pareto data
   const { data: paretoData, isLoading: paretoLoading } = useQuery({
     queryKey: ['pareto', filters, paretoGroupBy],
     queryFn: () => productMixService.getParetoAnalysis(filters, paretoGroupBy),
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch category breakdown
   const { data: categoryBreakdown, isLoading: categoryLoading } = useQuery({
     queryKey: ['categoryBreakdown', filters],
     queryFn: () => productMixService.getCategoryBreakdown(filters),
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
   });
 
   // Export functionality
@@ -117,9 +116,9 @@ export function ProductMixDashboard() {
     // Convert to CSV
     const csv = [
       Object.keys(data[0]).join(','),
-      ...data.map((row: any) => Object.values(row).join(','))
+      ...data.map((row: any) => Object.values(row).join(',')),
     ].join('\n');
-    
+
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -129,10 +128,11 @@ export function ProductMixDashboard() {
     URL.revokeObjectURL(url);
   };
 
-  const pieData = categoryBreakdown?.map(item => ({
-    name: item.category,
-    value: item.revenue
-  })) || [];
+  const pieData =
+    categoryBreakdown?.map(item => ({
+      name: item.category,
+      value: item.revenue,
+    })) || [];
 
   return (
     <SprintDashboard sprint={2}>
@@ -149,7 +149,7 @@ export function ProductMixDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select category" />
@@ -178,7 +178,7 @@ export function ProductMixDashboard() {
                 </SelectContent>
               </Select>
 
-              <Select value={paretoGroupBy} onValueChange={(v) => setParetoGroupBy(v as any)}>
+              <Select value={paretoGroupBy} onValueChange={v => setParetoGroupBy(v as any)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Group by" />
                 </SelectTrigger>
@@ -208,7 +208,7 @@ export function ProductMixDashboard() {
                 onClick={() => handleExport('substitutions')}
                 disabled={!substitutionData}
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export Data
               </Button>
             </div>
@@ -228,7 +228,7 @@ export function ProductMixDashboard() {
                 onClick={() => handleExport('pareto')}
                 disabled={!paretoData}
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export CSV
               </Button>
             </div>
@@ -248,12 +248,12 @@ export function ProductMixDashboard() {
                 onClick={() => handleExport('categories')}
                 disabled={!categoryBreakdown}
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export CSV
               </Button>
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Category Revenue Pie Chart */}
               <Card>
                 <CardHeader>
@@ -261,8 +261,8 @@ export function ProductMixDashboard() {
                 </CardHeader>
                 <CardContent>
                   {categoryLoading ? (
-                    <div className="h-[400px] flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div className="flex h-[400px] items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height={400}>
@@ -275,7 +275,7 @@ export function ProductMixDashboard() {
                           outerRadius={120}
                           paddingAngle={2}
                           labelLine={false}
-                          label={({ name, percent }) => 
+                          label={({ name, percent }) =>
                             percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
                           }
                           fill="#8884d8"
@@ -285,20 +285,20 @@ export function ProductMixDashboard() {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value: number) => formatCurrency(value)}
-                          contentStyle={{ 
+                          contentStyle={{
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
                             border: '1px solid #e5e7eb',
                             borderRadius: '6px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           }}
                         />
-                        <Legend 
-                          verticalAlign="bottom" 
+                        <Legend
+                          verticalAlign="bottom"
                           height={36}
                           wrapperStyle={{
-                            paddingTop: '20px'
+                            paddingTop: '20px',
                           }}
                           iconType="rect"
                         />
@@ -318,11 +318,11 @@ export function ProductMixDashboard() {
                     {categoryBreakdown?.map((category, index) => (
                       <div
                         key={category.category}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
                       >
                         <div className="flex items-center gap-3">
                           <div
-                            className="w-4 h-4 rounded"
+                            className="h-4 w-4 rounded"
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                           />
                           <span className="font-medium">{category.category}</span>

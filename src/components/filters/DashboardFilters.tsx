@@ -32,13 +32,10 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
   const { data: brandOptions = [], isLoading: brandsLoading } = useQuery({
     queryKey: ['filter-brands'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('brands')
-        .select('id, name')
-        .order('name');
-      
+      const { data, error } = await supabase.from('brands').select('id, name').order('name');
+
       if (error) throw error;
-      
+
       return data.map(brand => ({
         value: brand.id.toString(),
         label: brand.name,
@@ -54,12 +51,12 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
         .select('category')
         .not('category', 'is', null)
         .order('category');
-      
+
       if (error) throw error;
-      
+
       // Get unique categories
       const uniqueCategories = [...new Set(data.map(item => item.category))];
-      
+
       return uniqueCategories.map(category => ({
         value: category,
         label: category.charAt(0).toUpperCase() + category.slice(1),
@@ -75,12 +72,12 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
         .select('region')
         .not('region', 'is', null)
         .order('region');
-      
+
       if (error) throw error;
-      
+
       // Get unique regions
       const uniqueRegions = [...new Set(data.map(item => item.region))];
-      
+
       return uniqueRegions.map(region => ({
         value: region,
         label: region,
@@ -91,13 +88,10 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
   const { data: storeOptions = [], isLoading: storesLoading } = useQuery({
     queryKey: ['filter-stores'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('stores')
-        .select('id, name, city')
-        .order('name');
-      
+      const { data, error } = await supabase.from('stores').select('id, name, city').order('name');
+
       if (error) throw error;
-      
+
       return data.map(store => ({
         value: store.id.toString(),
         label: `${store.name} (${store.city})`,
@@ -133,76 +127,68 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
   ]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4">
+    <div className="rounded-lg border bg-white p-4 shadow-sm">
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
             <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
             Filters
           </h3>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
-              <DatePickerWithRange
-                date={dateRange}
-                onDateChange={handleDateRangeChange}
-              />
+              <DatePickerWithRange date={dateRange} onDateChange={handleDateRangeChange} />
             </div>
             {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs">
+                <RefreshCw className="mr-1 h-3 w-3" />
                 Clear filters
               </Button>
             )}
           </div>
         </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <FilterWidget
-          title="Brands"
-          options={brandOptions}
-          selectedValues={filters.brands.value}
-          onSelectionChange={filters.brands.setValue}
-          placeholder="All brands"
-          searchPlaceholder="Search brands..."
-          loading={brandsLoading}
-        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+          <FilterWidget
+            title="Brands"
+            options={brandOptions}
+            selectedValues={filters.brands.value}
+            onSelectionChange={filters.brands.setValue}
+            placeholder="All brands"
+            searchPlaceholder="Search brands..."
+            loading={brandsLoading}
+          />
 
-        <FilterWidget
-          title="Categories"
-          options={categoryOptions}
-          selectedValues={filters.categories.value}
-          onSelectionChange={filters.categories.setValue}
-          placeholder="All categories"
-          searchPlaceholder="Search categories..."
-          loading={categoriesLoading}
-        />
+          <FilterWidget
+            title="Categories"
+            options={categoryOptions}
+            selectedValues={filters.categories.value}
+            onSelectionChange={filters.categories.setValue}
+            placeholder="All categories"
+            searchPlaceholder="Search categories..."
+            loading={categoriesLoading}
+          />
 
-        <FilterWidget
-          title="Regions"
-          options={regionOptions}
-          selectedValues={filters.regions.value}
-          onSelectionChange={filters.regions.setValue}
-          placeholder="All regions"
-          searchPlaceholder="Search regions..."
-          loading={regionsLoading}
-        />
+          <FilterWidget
+            title="Regions"
+            options={regionOptions}
+            selectedValues={filters.regions.value}
+            onSelectionChange={filters.regions.setValue}
+            placeholder="All regions"
+            searchPlaceholder="Search regions..."
+            loading={regionsLoading}
+          />
 
-        <FilterWidget
-          title="Stores"
-          options={storeOptions}
-          selectedValues={filters.stores.value}
-          onSelectionChange={filters.stores.setValue}
-          placeholder="All stores"
-          searchPlaceholder="Search stores..."
-          loading={storesLoading}
-        />
-      </div>
+          <FilterWidget
+            title="Stores"
+            options={storeOptions}
+            selectedValues={filters.stores.value}
+            onSelectionChange={filters.stores.setValue}
+            placeholder="All stores"
+            searchPlaceholder="Search stores..."
+            loading={storesLoading}
+          />
+        </div>
       </div>
     </div>
   );

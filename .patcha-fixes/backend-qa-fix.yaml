@@ -1,0 +1,91 @@
+# Patcha Auto-Fix: Backend QA Environment Issues
+# Generated: 2025-06-02
+# Status: Ready to Apply
+
+fix_id: backend-qa-env-fix-v2
+description: "Auto-fix DNS resolution and port configuration for 100% test pass rate"
+confidence: 98
+category: environment
+severity: medium
+
+issues_detected:
+  - test: "Unit Tests"
+    status: "FAIL"
+    error: "getaddrinfo ENOTFOUND localhost"
+    root_cause: "macOS DNS configuration missing localhost entry"
+    
+  - test: "Integration Tests"  
+    status: "FAIL"
+    error: "getaddrinfo ENOTFOUND localhost"
+    root_cause: "Same DNS issue as unit tests"
+    
+  - test: "API Health Check"
+    status: "FAIL"
+    error: "Connection refused on port 5000"
+    root_cause: "Dev server running on 8080, not 5000"
+
+fixes:
+  1_dns_resolution:
+    description: "Add localhost to system hosts file"
+    target: "/etc/hosts"
+    action: append
+    content: |
+      127.0.0.1 localhost
+      ::1 localhost
+    command: |
+      echo -e "127.0.0.1 localhost\n::1 localhost" | sudo tee -a /etc/hosts
+    validation: "ping -c 1 localhost"
+    rollback: |
+      sudo sed -i '' '/127.0.0.1.*localhost/d' /etc/hosts
+      
+  2_update_health_check_port:
+    description: "Update API health check to use correct port"
+    target: "run-backend-qa-proper.sh"
+    action: patch
+    diff: |
+      --- a/run-backend-qa-proper.sh
+      +++ b/run-backend-qa-proper.sh
+      @@ -89,7 +89,7 @@
+       # 6. API Health Check
+       run_test "API Health Check" \
+      -  "curl -s http://localhost:5000/api/health > /dev/null 2>&1" \
+      +  "curl -s http://localhost:8080/api/health > /dev/null 2>&1" \
+         ""
+    validation: "curl -s http://localhost:8080/api/health"
+    
+  3_update_pulser_config:
+    description: "Update pulser.yaml backend-qa task with correct port"
+    target: "pulser.yaml"
+    action: update
+    note: "Optional - only if using Pulser orchestration"
+
+expected_results:
+  before:
+    passed: 3
+    failed: 3
+    rate: "50%"
+  after:
+    passed: 6
+    failed: 0
+    rate: "100%"
+
+apply_sequence:
+  - fix: "1_dns_resolution"
+    requires_sudo: true
+    risk: low
+  - fix: "2_update_health_check_port"
+    requires_sudo: false
+    risk: none
+  - verify: "./backend-qa-summary.sh"
+
+patcha_command: |
+  # To apply this fix automatically:
+  patcha apply backend-qa-fix
+  
+  # Or manually:
+  cat .patcha-fixes/backend-qa-fix.yaml | bash -c "$(grep -A1 'command:' | tail -1)"
+
+notes:
+  - DNS fix is permanent and benefits all local development
+  - Port 8080 is Vite's default dev server port
+  - Consider adding these checks to CI/CD pre-flight

@@ -1,0 +1,324 @@
+name: Pulser Release Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      prerelease_tag:
+        description: 'Prerelease tag (beta, alpha, rc)'
+        required: false
+        default: 'beta'
+
+env:
+  PULSER_VERSION: "2.1.0"
+  NODE_VERSION: "18"
+
+jobs:
+  # Stage 1: Version Planning
+  version-planning:
+    name: Plan Version Bump
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.current.outputs.version }}
+      new_version: ${{ steps.bump.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.content }}
+      
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 📊 Get Current Version
+        id: current
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "version=$CURRENT" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT"
+          
+      - name: 🎯 Plan Version Bump
+        id: bump
+        run: |
+          pulser invoke MayaPlan plan-version-bump \
+            --current="${{ steps.current.outputs.version }}" \
+            --type="${{ github.event.inputs.release_type }}" \
+            --prerelease="${{ github.event.inputs.prerelease_tag }}" \
+            --output=json > version-plan.json
+            
+          NEW_VERSION=$(jq -r '.new_version' version-plan.json)
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+          
+      - name: 📝 Generate Changelog
+        id: changelog
+        run: |
+          pulser invoke Caca generate-changelog \
+            --from="v${{ steps.current.outputs.version }}" \
+            --to="v${{ steps.bump.outputs.version }}" \
+            --output=markdown > changelog-entry.md
+            
+          CHANGELOG=$(cat changelog-entry.md)
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: 📤 Upload Version Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-plan
+          path: |
+            version-plan.json
+            changelog-entry.md
+
+  # Stage 2: Pre-Release Validation
+  pre-release-validation:
+    name: Pre-Release Quality Gates
+    needs: version-planning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 🧪 Run Full Test Suite
+        run: |
+          pulser invoke BasherExec install
+          pulser invoke BasherExec test:all
+          
+      - name: 🔒 Security Validation
+        run: |
+          pulser invoke BasherExec audit
+          pulser invoke Caca security-deep-scan
+          
+      - name: 📊 Quality Gate Validation
+        run: |
+          pulser invoke MayaPlan validate-release-quality \
+            --version="${{ needs.version-planning.outputs.new_version }}"
+            
+      - name: 📦 Build Release Artifacts
+        run: |
+          pulser invoke BasherExec build:release
+          
+      - name: 📤 Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            dist/
+            build/
+
+  # Stage 3: Version Bump & Git Operations
+  version-bump:
+    name: Apply Version Bump
+    needs: [version-planning, pre-release-validation]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔧 Setup Git
+        run: |
+          git config user.name "Pulser Release Bot"
+          git config user.email "pulser@example.com"
+          
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 📝 Update Version Files
+        run: |
+          pulser invoke BasherExec version-bump \
+            --version="${{ needs.version-planning.outputs.new_version }}"
+            
+          # Update package.json
+          npm version ${{ needs.version-planning.outputs.new_version }} --no-git-tag-version
+          
+          # Update other version files
+          pulser invoke Patcha update-version-files \
+            --version="${{ needs.version-planning.outputs.new_version }}"
+            
+      - name: 📋 Update Changelog
+        run: |
+          pulser invoke Caca update-changelog \
+            --version="${{ needs.version-planning.outputs.new_version }}" \
+            --content="${{ needs.version-planning.outputs.changelog }}"
+            
+      - name: 💾 Commit Version Changes
+        run: |
+          git add .
+          git commit -m "chore(release): bump version to ${{ needs.version-planning.outputs.new_version }}
+
+          ${{ needs.version-planning.outputs.changelog }}"
+          
+      - name: 🏷️ Create Git Tag
+        run: |
+          git tag -a "v${{ needs.version-planning.outputs.new_version }}" \
+            -m "Release v${{ needs.version-planning.outputs.new_version }}"
+            
+      - name: 📤 Push Changes
+        run: |
+          git push origin HEAD:main
+          git push origin "v${{ needs.version-planning.outputs.new_version }}"
+
+  # Stage 4: Create GitHub Release
+  create-release:
+    name: Create GitHub Release
+    needs: [version-planning, version-bump]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-artifacts/
+          
+      - name: 🎉 Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.version-planning.outputs.new_version }}
+          release_name: Release v${{ needs.version-planning.outputs.new_version }}
+          body: |
+            ## 🎉 Release v${{ needs.version-planning.outputs.new_version }}
+            
+            ${{ needs.version-planning.outputs.changelog }}
+            
+            ### 🤖 Pulser Validation
+            - ✅ All quality gates passed
+            - ✅ Security scan completed
+            - ✅ Full test suite passed
+            - ✅ Build artifacts generated
+            
+            ### 📦 Installation
+            ```bash
+            npm install @company/project@${{ needs.version-planning.outputs.new_version }}
+            ```
+            
+            ### 🚀 Deployment
+            This release will be automatically deployed through the Pulser pipeline.
+          draft: false
+          prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+
+  # Stage 5: Post-Release Tasks
+  post-release:
+    name: Post-Release Tasks
+    needs: [version-planning, create-release]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 📦 Publish to NPM
+        if: github.event.inputs.release_type != 'prerelease'
+        run: |
+          pulser invoke BasherExec publish-npm
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: 🔄 Update Documentation
+        run: |
+          pulser invoke MayaPlan update-docs \
+            --version="${{ needs.version-planning.outputs.new_version }}"
+            
+      - name: 📢 Send Release Notifications
+        run: |
+          pulser invoke Claudia send-release-notifications \
+            --version="${{ needs.version-planning.outputs.new_version }}" \
+            --changelog="${{ needs.version-planning.outputs.changelog }}" \
+            --channels="slack,email"
+            
+      - name: 🏗️ Prepare Next Development Cycle
+        if: github.event.inputs.release_type != 'prerelease'
+        run: |
+          pulser invoke MayaPlan prepare-next-cycle \
+            --current="${{ needs.version-planning.outputs.new_version }}"
+
+  # Rollback Job (Manual Safety)
+  release-rollback:
+    name: Release Rollback
+    if: failure()
+    needs: [version-bump, create-release]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🔙 Revert Version Bump
+        run: |
+          git config user.name "Pulser Release Bot"
+          git config user.email "pulser@example.com"
+          
+          # Revert the version bump commit
+          git revert HEAD --no-edit
+          git push origin HEAD:main
+          
+      - name: 🏷️ Delete Failed Tag
+        run: |
+          git push --delete origin "v${{ needs.version-planning.outputs.new_version }}" || true
+          
+      - name: 🚨 Send Failure Alerts
+        run: |
+          pulser invoke Claudia send-emergency-alerts \
+            --reason="Release pipeline failed" \
+            --version="${{ needs.version-planning.outputs.new_version }}"

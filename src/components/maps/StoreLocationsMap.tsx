@@ -13,7 +13,7 @@ const createStoreIcon = (performance: 'high' | 'medium' | 'low') => {
   const colors = {
     high: '#10b981', // green-500
     medium: '#f59e0b', // amber-500
-    low: '#ef4444' // red-500
+    low: '#ef4444', // red-500
   };
 
   return L.divIcon({
@@ -38,7 +38,7 @@ const createStoreIcon = (performance: 'high' | 'medium' | 'low') => {
     className: 'custom-store-marker',
     iconSize: [32, 40],
     iconAnchor: [16, 40],
-    popupAnchor: [0, -40]
+    popupAnchor: [0, -40],
   });
 };
 
@@ -48,9 +48,7 @@ function MapBounds({ stores }: { stores: any[] }) {
 
   useEffect(() => {
     if (stores.length > 0) {
-      const bounds = L.latLngBounds(
-        stores.map(store => [store.latitude, store.longitude])
-      );
+      const bounds = L.latLngBounds(stores.map(store => [store.latitude, store.longitude]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [stores, map]);
@@ -67,11 +65,11 @@ interface StoreLocationsMapProps {
 }
 
 function StoreLocationsMapComponent({
-  height = "500px",
+  height = '500px',
   showClusters = true,
   showRevenue = true,
   enableDrillDown = true,
-  onStoreClick
+  onStoreClick,
 }: StoreLocationsMapProps) {
   const { data: storeData, isLoading, error } = useStorePerformance();
 
@@ -86,22 +84,22 @@ function StoreLocationsMapComponent({
 
     return storeData.map(store => {
       let performance: 'high' | 'medium' | 'low' = 'medium';
-      
-      if (store.total_revenue >= minRevenue + (range * 0.66)) {
+
+      if (store.total_revenue >= minRevenue + range * 0.66) {
         performance = 'high';
-      } else if (store.total_revenue <= minRevenue + (range * 0.33)) {
+      } else if (store.total_revenue <= minRevenue + range * 0.33) {
         performance = 'low';
       }
 
       // Generate realistic coordinates for demo (Philippines bounds)
-      const latitude = store.latitude || (9.5 + Math.random() * (19.5 - 9.5));
-      const longitude = store.longitude || (117.0 + Math.random() * (126.0 - 117.0));
+      const latitude = store.latitude || 9.5 + Math.random() * (19.5 - 9.5);
+      const longitude = store.longitude || 117.0 + Math.random() * (126.0 - 117.0);
 
       return {
         ...store,
         performance,
         latitude,
-        longitude
+        longitude,
       };
     });
   }, [storeData]);
@@ -110,9 +108,7 @@ function StoreLocationsMapComponent({
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-red-500">
-            Error loading store locations
-          </div>
+          <div className="text-center text-red-500">Error loading store locations</div>
         </CardContent>
       </Card>
     );
@@ -123,20 +119,20 @@ function StoreLocationsMapComponent({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-sm">
           <span className="flex items-center gap-2">
-            <Store className="w-4 h-4" />
+            <Store className="h-4 w-4" />
             Store Locations & Performance
           </span>
           {isLoading && (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-900"></div>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div style={{ height, position: 'relative' }}>
           <MapContainer
-            center={[12.8797, 121.7740]} // Center of Philippines
+            center={[12.8797, 121.774]} // Center of Philippines
             zoom={6}
             style={{ height: '100%', width: '100%' }}
             scrollWheelZoom={true}
@@ -145,11 +141,11 @@ function StoreLocationsMapComponent({
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            
+
             <MapBounds stores={storesWithPerformance} />
-            
+
             <MarkerContent>
-              {storesWithPerformance.map((store) => (
+              {storesWithPerformance.map(store => (
                 <Marker
                   key={store.id}
                   position={[store.latitude, store.longitude]}
@@ -159,24 +155,26 @@ function StoreLocationsMapComponent({
                       if (enableDrillDown && onStoreClick) {
                         onStoreClick(store.id);
                       }
-                    }
+                    },
                   }}
                 >
                   <Popup className="custom-popup">
-                    <div className="p-2 min-w-[200px]">
-                      <h3 className="font-bold text-sm mb-2">{store.name}</h3>
-                      
+                    <div className="min-w-[200px] p-2">
+                      <h3 className="mb-2 text-sm font-bold">{store.name}</h3>
+
                       <div className="space-y-1 text-xs">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Location:</span>
                           <span>{store.location}</span>
                         </div>
-                        
+
                         {showRevenue && (
                           <>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Revenue:</span>
-                              <span className="font-medium">₱{store.total_revenue.toLocaleString()}</span>
+                              <span className="font-medium">
+                                ₱{store.total_revenue.toLocaleString()}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Transactions:</span>
@@ -190,13 +188,15 @@ function StoreLocationsMapComponent({
                         )}
                       </div>
 
-                      <div className="mt-2 pt-2 border-t">
+                      <div className="mt-2 border-t pt-2">
                         <div className="flex items-center justify-between">
-                          <Badge 
+                          <Badge
                             variant={
-                              store.performance === 'high' ? 'default' : 
-                              store.performance === 'low' ? 'destructive' : 
-                              'secondary'
+                              store.performance === 'high'
+                                ? 'default'
+                                : store.performance === 'low'
+                                  ? 'destructive'
+                                  : 'secondary'
                             }
                             className="text-xs"
                           >
@@ -205,17 +205,21 @@ function StoreLocationsMapComponent({
                           {store.growth_rate !== undefined && (
                             <div className="flex items-center gap-1">
                               {store.growth_rate > 0 ? (
-                                <TrendingUp className="w-3 h-3 text-green-500" />
+                                <TrendingUp className="h-3 w-3 text-green-500" />
                               ) : store.growth_rate < 0 ? (
-                                <TrendingDown className="w-3 h-3 text-red-500" />
+                                <TrendingDown className="h-3 w-3 text-red-500" />
                               ) : (
-                                <Minus className="w-3 h-3 text-gray-500" />
+                                <Minus className="h-3 w-3 text-gray-500" />
                               )}
-                              <span className={`text-xs ${
-                                store.growth_rate > 0 ? 'text-green-600' : 
-                                store.growth_rate < 0 ? 'text-red-600' : 
-                                'text-gray-600'
-                              }`}>
+                              <span
+                                className={`text-xs ${
+                                  store.growth_rate > 0
+                                    ? 'text-green-600'
+                                    : store.growth_rate < 0
+                                      ? 'text-red-600'
+                                      : 'text-gray-600'
+                                }`}
+                              >
                                 {Math.abs(store.growth_rate).toFixed(1)}%
                               </span>
                             </div>
@@ -238,19 +242,19 @@ function StoreLocationsMapComponent({
           </MapContainer>
 
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-md z-[1000]">
-            <h4 className="text-xs font-semibold mb-2">Store Performance</h4>
+          <div className="absolute bottom-4 left-4 z-[1000] rounded-lg bg-white p-3 shadow-md">
+            <h4 className="mb-2 text-xs font-semibold">Store Performance</h4>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <div className="h-4 w-4 rounded-full bg-green-500"></div>
                 <span className="text-xs">High Revenue</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-amber-500"></div>
+                <div className="h-4 w-4 rounded-full bg-amber-500"></div>
                 <span className="text-xs">Medium Revenue</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                <div className="h-4 w-4 rounded-full bg-red-500"></div>
                 <span className="text-xs">Low Revenue</span>
               </div>
             </div>

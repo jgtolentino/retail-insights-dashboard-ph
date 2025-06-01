@@ -9,22 +9,27 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Target, 
-  AlertCircle, 
-  TrendingUp, 
-  Lightbulb, 
-  CheckCircle, 
-  Clock, 
+import {
+  Target,
+  AlertCircle,
+  TrendingUp,
+  Lightbulb,
+  CheckCircle,
+  Clock,
   DollarSign,
   Users,
   ShoppingCart,
   MessageSquare,
   Brain,
   Loader2,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
-import { enhancedAnalyticsService, AIRecommendation, TranscriptionInsight, DateRange } from '@/services/enhanced-analytics';
+import {
+  enhancedAnalyticsService,
+  AIRecommendation,
+  TranscriptionInsight,
+  DateRange,
+} from '@/services/enhanced-analytics';
 
 interface AIRecommendationsProps {
   dateRange?: DateRange;
@@ -54,7 +59,7 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
   const [nlpInsights, setNlpInsights] = useState<NLPInsights>({
     sentimentAnalysis: { positive: 0, neutral: 0, negative: 0 },
     topPhrases: [],
-    communicationPatterns: []
+    communicationPatterns: [],
   });
   const [transcriptionInsights, setTranscriptionInsights] = useState<TranscriptionInsight[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +82,7 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
       // Load AI recommendations and transcription insights
       const [recommendations, transcriptions] = await Promise.all([
         enhancedAnalyticsService.generateAIRecommendations(dateRange),
-        enhancedAnalyticsService.getTranscriptionInsights(dateRange)
+        enhancedAnalyticsService.getTranscriptionInsights(dateRange),
       ]);
 
       setRecommendations(recommendations);
@@ -86,7 +91,6 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
       // Process NLP insights
       const nlpData = processNLPInsights(transcriptions);
       setNlpInsights(nlpData);
-
     } catch (err) {
       console.error('Error loading AI recommendations:', err);
       setError('Failed to load AI recommendations');
@@ -106,14 +110,14 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
     const sentimentAnalysis = {
       positive: totalInsights > 0 ? (positive / totalInsights) * 100 : 0,
       neutral: totalInsights > 0 ? (neutral / totalInsights) * 100 : 0,
-      negative: totalInsights > 0 ? (negative / totalInsights) * 100 : 0
+      negative: totalInsights > 0 ? (negative / totalInsights) * 100 : 0,
     };
 
     // Extract top phrases
     const topPhrases = insights.slice(0, 8).map(insight => ({
       phrase: insight.common_phrase,
       frequency: insight.frequency,
-      sentiment: insight.sentiment_score
+      sentiment: insight.sentiment_score,
     }));
 
     // Generate communication patterns
@@ -122,52 +126,55 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
     return {
       sentimentAnalysis,
       topPhrases,
-      communicationPatterns
+      communicationPatterns,
     };
   };
 
   const generateCommunicationPatterns = (insights: TranscriptionInsight[]) => {
     const patterns = [];
-    
+
     // Analyze out of stock responses
-    const outOfStockInsights = insights.filter(i => 
-      i.common_phrase.toLowerCase().includes('out of stock') ||
-      i.common_phrase.toLowerCase().includes('wala po')
+    const outOfStockInsights = insights.filter(
+      i =>
+        i.common_phrase.toLowerCase().includes('out of stock') ||
+        i.common_phrase.toLowerCase().includes('wala po')
     );
-    
+
     if (outOfStockInsights.length > 0) {
       patterns.push({
         pattern: 'High Out-of-Stock Responses',
         impact: `${outOfStockInsights.reduce((sum, i) => sum + i.frequency, 0)} customer interactions`,
-        recommendation: 'Improve inventory management and implement stock alerts'
+        recommendation: 'Improve inventory management and implement stock alerts',
       });
     }
 
     // Analyze gesture-based requests
-    const gestureRequests = insights.filter(i => 
-      i.common_phrase.toLowerCase().includes('gesture') ||
-      i.common_phrase.toLowerCase().includes('points')
+    const gestureRequests = insights.filter(
+      i =>
+        i.common_phrase.toLowerCase().includes('gesture') ||
+        i.common_phrase.toLowerCase().includes('points')
     );
-    
+
     if (gestureRequests.length > 0) {
       patterns.push({
         pattern: 'Gesture-Based Communication',
         impact: `${gestureRequests.reduce((sum, i) => sum + i.frequency, 0)} pointing interactions`,
-        recommendation: 'Enhance product labeling and visual merchandising'
+        recommendation: 'Enhance product labeling and visual merchandising',
       });
     }
 
     // Analyze brand clarifications
-    const brandClarifications = insights.filter(i => 
-      i.common_phrase.toLowerCase().includes('brand clarification') ||
-      i.common_phrase.toLowerCase().includes('anong brand')
+    const brandClarifications = insights.filter(
+      i =>
+        i.common_phrase.toLowerCase().includes('brand clarification') ||
+        i.common_phrase.toLowerCase().includes('anong brand')
     );
-    
+
     if (brandClarifications.length > 0) {
       patterns.push({
         pattern: 'Brand Clarification Requests',
         impact: `${brandClarifications.reduce((sum, i) => sum + i.frequency, 0)} clarification requests`,
-        recommendation: 'Train staff on brand knowledge and create quick reference guides'
+        recommendation: 'Train staff on brand knowledge and create quick reference guides',
       });
     }
 
@@ -176,21 +183,31 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'high': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'medium': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'low': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      default: return <Target className="h-4 w-4" />;
+      case 'high':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      case 'medium':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'low':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      default:
+        return <Target className="h-4 w-4" />;
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'inventory': return <ShoppingCart className="h-4 w-4" />;
-      case 'operations': return <Clock className="h-4 w-4" />;
-      case 'merchandising': return <TrendingUp className="h-4 w-4" />;
-      case 'customer_service': return <Users className="h-4 w-4" />;
-      case 'pricing': return <DollarSign className="h-4 w-4" />;
-      default: return <Lightbulb className="h-4 w-4" />;
+      case 'inventory':
+        return <ShoppingCart className="h-4 w-4" />;
+      case 'operations':
+        return <Clock className="h-4 w-4" />;
+      case 'merchandising':
+        return <TrendingUp className="h-4 w-4" />;
+      case 'customer_service':
+        return <Users className="h-4 w-4" />;
+      case 'pricing':
+        return <DollarSign className="h-4 w-4" />;
+      default:
+        return <Lightbulb className="h-4 w-4" />;
     }
   };
 
@@ -204,7 +221,7 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-96">
+          <div className="flex h-96 items-center justify-center">
             <div className="flex items-center gap-2">
               <Loader2 className="h-6 w-6 animate-spin" />
               <span>Generating AI insights...</span>
@@ -225,14 +242,11 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-96">
+          <div className="flex h-96 items-center justify-center">
             <div className="text-center">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <p className="text-red-600 mb-4">{error}</p>
-              <Button 
-                onClick={() => loadAIRecommendations(true)} 
-                variant="outline"
-              >
+              <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+              <p className="mb-4 text-red-600">{error}</p>
+              <Button onClick={() => loadAIRecommendations(true)} variant="outline">
                 Try Again
               </Button>
             </div>
@@ -274,45 +288,51 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
 
           <TabsContent value="recommendations" className="space-y-4">
             {recommendations.length === 0 ? (
-              <div className="text-center py-8">
-                <Lightbulb className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="py-8 text-center">
+                <Lightbulb className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <p className="text-gray-600">No recommendations available for this period</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {recommendations.map((rec) => (
-                  <div key={rec.id} className="border rounded-lg p-4 space-y-3">
+                {recommendations.map(rec => (
+                  <div key={rec.id} className="space-y-3 rounded-lg border p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="mb-2 flex items-center gap-2">
                           {getPriorityIcon(rec.priority)}
                           <h4 className="font-medium">{rec.title}</h4>
                           <Badge variant="outline" className="text-xs">
                             {rec.category.replace('_', ' ')}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-3">{rec.description}</p>
-                        
+                        <p className="mb-3 text-sm text-gray-600">{rec.description}</p>
+
                         <div className="space-y-2">
                           <h5 className="text-xs font-medium text-gray-800">Action Items:</h5>
-                          <ul className="text-xs space-y-1">
+                          <ul className="space-y-1 text-xs">
                             {rec.actionItems.map((item, idx) => (
                               <li key={idx} className="flex items-start gap-2">
-                                <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                <CheckCircle className="mt-0.5 h-3 w-3 flex-shrink-0 text-green-500" />
                                 <span>{item}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                       </div>
-                      
-                      <div className="text-right ml-4">
+
+                      <div className="ml-4 text-right">
                         <div className="text-2xl font-bold text-green-600">
                           +{rec.potentialIncrease}%
                         </div>
                         <div className="text-xs text-gray-500">potential lift</div>
-                        <Badge 
-                          variant={rec.impact === 'high' ? 'destructive' : rec.impact === 'medium' ? 'default' : 'secondary'}
+                        <Badge
+                          variant={
+                            rec.impact === 'high'
+                              ? 'destructive'
+                              : rec.impact === 'medium'
+                                ? 'default'
+                                : 'secondary'
+                          }
                           className="mt-2"
                         >
                           {rec.impact} impact
@@ -366,17 +386,27 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
               <CardContent>
                 <div className="space-y-2">
                   {nlpInsights.topPhrases.map((phrase, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 border rounded">
+                    <div key={idx} className="flex items-center justify-between rounded border p-2">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-gray-400" />
                         <span className="text-sm">{phrase.phrase}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge 
-                          variant={phrase.sentiment >= 0.7 ? 'default' : phrase.sentiment >= 0.5 ? 'secondary' : 'destructive'}
+                        <Badge
+                          variant={
+                            phrase.sentiment >= 0.7
+                              ? 'default'
+                              : phrase.sentiment >= 0.5
+                                ? 'secondary'
+                                : 'destructive'
+                          }
                           className="text-xs"
                         >
-                          {phrase.sentiment >= 0.7 ? 'Positive' : phrase.sentiment >= 0.5 ? 'Neutral' : 'Negative'}
+                          {phrase.sentiment >= 0.7
+                            ? 'Positive'
+                            : phrase.sentiment >= 0.5
+                              ? 'Neutral'
+                              : 'Negative'}
                         </Badge>
                         <span className="text-xs text-gray-500">{phrase.frequency}x</span>
                       </div>
@@ -389,8 +419,8 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
 
           <TabsContent value="patterns" className="space-y-4">
             {nlpInsights.communicationPatterns.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="py-8 text-center">
+                <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                 <p className="text-gray-600">No communication patterns detected</p>
               </div>
             ) : (
@@ -399,12 +429,12 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
                   <Card key={idx}>
                     <CardContent className="pt-4">
                       <div className="flex items-start gap-3">
-                        <MessageSquare className="h-5 w-5 text-blue-500 mt-0.5" />
+                        <MessageSquare className="mt-0.5 h-5 w-5 text-blue-500" />
                         <div className="flex-1">
-                          <h4 className="font-medium mb-1">{pattern.pattern}</h4>
-                          <p className="text-sm text-gray-600 mb-2">{pattern.impact}</p>
+                          <h4 className="mb-1 font-medium">{pattern.pattern}</h4>
+                          <p className="mb-2 text-sm text-gray-600">{pattern.impact}</p>
                           <div className="flex items-start gap-2">
-                            <Lightbulb className="h-4 w-4 text-yellow-500 mt-0.5" />
+                            <Lightbulb className="mt-0.5 h-4 w-4 text-yellow-500" />
                             <p className="text-sm text-gray-800">{pattern.recommendation}</p>
                           </div>
                         </div>

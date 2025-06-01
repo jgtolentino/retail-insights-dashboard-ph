@@ -1,0 +1,375 @@
+name: Pulser CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, release/*, hotfix/*]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  PULSER_VERSION: "2.1.0"
+  NODE_VERSION: "18"
+  PULSER_DEBUG: ${{ secrets.PULSER_DEBUG || 'false' }}
+
+jobs:
+  # Stage 1: Code Quality Analysis
+  pulser-analysis:
+    name: Code Analysis & Quality Gates
+    runs-on: ubuntu-latest
+    outputs:
+      quality_score: ${{ steps.quality.outputs.score }}
+      requires_patcha: ${{ steps.quality.outputs.needs_healing }}
+      
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+          
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Install Pulser CLI
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser --version
+          
+      - name: 🚀 Initialize Pulser
+        run: |
+          pulser init --project="${{ github.repository }}"
+          pulser status --agents
+          
+      - name: 📊 Run Caca Analysis
+        id: quality
+        run: |
+          pulser invoke Caca full-analysis --output=json > analysis.json
+          SCORE=$(jq -r '.quality_score' analysis.json)
+          ISSUES=$(jq -r '.issues_found' analysis.json)
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "needs_healing=$([[ $ISSUES -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          
+      - name: 💊 Self-Healing with Patcha
+        if: steps.quality.outputs.needs_healing == 'true'
+        run: |
+          pulser invoke Patcha auto-fix-safe --max-attempts=3
+          git diff --name-only
+          
+      - name: 📤 Upload Analysis Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulser-analysis-reports
+          path: |
+            .pulser/reports/
+            analysis.json
+            
+      - name: 💬 Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.quality.outputs.quality_score }}';
+            const healed = '${{ steps.quality.outputs.needs_healing }}' === 'true';
+            
+            const body = `## 🤖 Pulser Analysis Results
+            
+            **Quality Score**: ${score}/10
+            **Self-Healing Applied**: ${healed ? '✅ Yes' : '❌ No'}
+            
+            <details>
+            <summary>View Full Report</summary>
+            
+            \`\`\`json
+            ${require('fs').readFileSync('analysis.json', 'utf8')}
+            \`\`\`
+            </details>`;
+            
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+  # Stage 2: Build & Test
+  pulser-build-test:
+    name: Build & Test Suite
+    needs: pulser-analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-suite: [unit, integration, e2e]
+        
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 📦 Install Dependencies
+        run: pulser invoke BasherExec install
+        
+      - name: 🏗️ Build Application
+        if: matrix.test-suite != 'unit'
+        run: pulser invoke BasherExec build
+        
+      - name: 🧪 Run ${{ matrix.test-suite }} Tests
+        run: |
+          case "${{ matrix.test-suite }}" in
+            unit)
+              pulser invoke BasherExec test:unit
+              ;;
+            integration)
+              pulser invoke BasherExec test:integration
+              ;;
+            e2e)
+              pulser invoke BasherExec test:e2e
+              ;;
+          esac
+          
+      - name: 📊 Generate Coverage Report
+        if: matrix.test-suite == 'unit'
+        run: pulser invoke BasherExec coverage
+        
+      - name: 📤 Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-suite }}
+          path: |
+            coverage/
+            test-results/
+            playwright-report/
+
+  # Stage 3: Security & Performance
+  pulser-security-perf:
+    name: Security & Performance Checks
+    needs: pulser-build-test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 🔒 Security Audit
+        run: |
+          pulser invoke BasherExec audit
+          pulser invoke Caca security-scan
+          
+      - name: 🚀 Performance Analysis
+        run: |
+          pulser invoke BasherExec build:production
+          pulser invoke Claudia performance-analysis
+          
+      - name: 📊 Bundle Size Check
+        run: |
+          pulser invoke BasherExec analyze:bundle
+          
+      - name: 🎯 Quality Gate Check
+        id: gates
+        run: |
+          pulser invoke MayaPlan validate-quality-gates
+          echo "gates_passed=$?" >> $GITHUB_OUTPUT
+
+  # Stage 4: Deployment Planning
+  pulser-deployment-plan:
+    name: Deployment Strategy
+    needs: [pulser-analysis, pulser-build-test, pulser-security-perf]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_plan: ${{ steps.plan.outputs.strategy }}
+      
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init
+          
+      - name: 🗺️ Generate Deployment Plan
+        id: plan
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          ENV="${{ github.event.inputs.environment || 'staging' }}"
+          
+          pulser invoke MayaPlan plan-deployment \
+            --branch="$BRANCH" \
+            --environment="$ENV" \
+            --output=json > deployment-plan.json
+            
+          STRATEGY=$(jq -r '.strategy' deployment-plan.json)
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          
+      - name: 📤 Upload Deployment Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-plan
+          path: deployment-plan.json
+
+  # Stage 5: Staging Deployment
+  pulser-deploy-staging:
+    name: Deploy to Staging
+    needs: pulser-deployment-plan
+    if: contains(needs.pulser-deployment-plan.outputs.deployment_plan, 'staging')
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --environment=staging
+          
+      - name: 📦 Prepare Deployment
+        run: |
+          pulser invoke BasherExec install --production
+          pulser invoke BasherExec build:staging
+          
+      - name: 🚀 Deploy to Staging
+        run: |
+          pulser invoke BasherExec deploy:staging
+        env:
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+          STAGING_API_KEY: ${{ secrets.STAGING_API_KEY }}
+          
+      - name: ✅ Validate Deployment
+        run: |
+          pulser invoke Claudia validate-deployment --url="${{ secrets.STAGING_URL }}"
+          
+      - name: 🧪 Run Smoke Tests
+        run: |
+          pulser invoke BasherExec test:smoke --url="${{ secrets.STAGING_URL }}"
+
+  # Stage 6: Production Deployment
+  pulser-deploy-production:
+    name: Deploy to Production
+    needs: [pulser-deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 🤖 Setup Pulser
+        run: |
+          npm install -g pulser-cli@${{ env.PULSER_VERSION }}
+          pulser init --environment=production
+          
+      - name: 📦 Prepare Production Build
+        run: |
+          pulser invoke BasherExec install --production
+          pulser invoke BasherExec build:production
+          
+      - name: 🎯 Final Quality Check
+        run: |
+          pulser invoke MayaPlan final-quality-check
+          pulser invoke Caca production-readiness
+          
+      - name: 🚀 Deploy to Production
+        run: |
+          pulser invoke BasherExec deploy:production
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+          PRODUCTION_API_KEY: ${{ secrets.PRODUCTION_API_KEY }}
+          
+      - name: ✅ Post-Deployment Validation
+        run: |
+          pulser invoke Claudia validate-deployment --url="${{ secrets.PRODUCTION_URL }}"
+          pulser invoke BasherExec test:production-smoke
+          
+      - name: 📊 Update Deployment Metrics
+        run: |
+          pulser invoke MayaPlan record-deployment \
+            --version="${{ github.sha }}" \
+            --environment="production" \
+            --status="success"
+
+  # Rollback Job (Manual Trigger)
+  pulser-rollback:
+    name: Emergency Rollback
+    if: failure() && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: [pulser-deploy-production]
+    
+    steps:
+      - name: 🔙 Execute Rollback
+        run: |
+          pulser invoke MayaPlan execute-rollback \
+            --environment="${{ github.event.inputs.environment }}" \
+            --reason="Pipeline failure"
+            
+      - name: 🚨 Send Alerts
+        run: |
+          pulser invoke Claudia send-emergency-alerts \
+            --channel="slack" \
+            --severity="critical"
+
+# Notification Job
+notifications:
+  name: Send Notifications
+  runs-on: ubuntu-latest
+  if: always()
+  needs: [pulser-deploy-production, pulser-deploy-staging]
+  
+  steps:
+    - name: 📢 Notify Team
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const jobStatus = '${{ job.status }}';
+          const environment = '${{ github.event.inputs.environment || 'staging' }}';
+          
+          // Send appropriate notifications based on status
+          console.log(`Pipeline ${jobStatus} for ${environment}`);

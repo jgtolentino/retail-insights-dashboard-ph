@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Filter, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useFilterStore, useFilterSelectors, loadFiltersFromURL, persistFiltersToURL } from '@/stores/filterStore';
+import {
+  useFilterStore,
+  useFilterSelectors,
+  loadFiltersFromURL,
+  persistFiltersToURL,
+} from '@/stores/filterStore';
 import { getFilterOptions } from '@/lib/filterQueryHelper';
 import MultiSelect from './MultiSelect';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
@@ -16,13 +21,13 @@ interface FilterBarProps {
   sticky?: boolean;
 }
 
-export default function FilterBar({ 
-  className = '', 
-  compact = false, 
-  sticky = true 
+export default function FilterBar({
+  className = '',
+  compact = false,
+  sticky = true,
 }: FilterBarProps) {
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Get filter state and actions
   const filters = useFilterSelectors.allFilters();
   const actions = useFilterSelectors.actions();
@@ -86,14 +91,11 @@ export default function FilterBar({
       {/* Date Range */}
       <div className="flex items-center gap-2">
         <Calendar className="h-4 w-4 text-gray-500" />
-        <DatePickerWithRange
-          date={getDateRange()}
-          onDateChange={handleDateRangeChange}
-        />
+        <DatePickerWithRange date={getDateRange()} onDateChange={handleDateRangeChange} />
       </div>
 
       {/* Filter Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MultiSelect
           label="Brands"
           options={filterOptions?.brandOptions || []}
@@ -137,7 +139,7 @@ export default function FilterBar({
 
       {/* Active Filters Summary */}
       {activeFiltersCount > 0 && (
-        <div className="flex items-center gap-2 pt-2 border-t">
+        <div className="flex items-center gap-2 border-t pt-2">
           <span className="text-sm text-gray-600">Active filters:</span>
           <div className="flex flex-wrap gap-1">
             {filterSummary.map((summary, index) => (
@@ -146,13 +148,8 @@ export default function FilterBar({
               </Badge>
             ))}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="ml-auto text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
+          <Button variant="ghost" size="sm" onClick={handleReset} className="ml-auto text-xs">
+            <RefreshCw className="mr-1 h-3 w-3" />
             Reset All
           </Button>
         </div>
@@ -164,12 +161,10 @@ export default function FilterBar({
     return (
       <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
             <Filter className="h-4 w-4" />
             Filters
-            {activeFiltersCount > 0 && (
-              <Badge variant="default">{activeFiltersCount}</Badge>
-            )}
+            {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -182,12 +177,10 @@ export default function FilterBar({
   return (
     <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
           <Filter className="h-4 w-4" />
           Filters
-          {activeFiltersCount > 0 && (
-            <Badge variant="default">{activeFiltersCount}</Badge>
-          )}
+          {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
         </CardTitle>
       </CardHeader>
       <CardContent>

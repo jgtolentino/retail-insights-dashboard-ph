@@ -5,12 +5,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, TrendingUp, Target, Award, Filter, Download, Package, Layers } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  BarChart3,
+  TrendingUp,
+  Target,
+  Award,
+  Filter,
+  Download,
+  Package,
+  Layers,
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 import { ProductMixDashboard } from '@/components/ProductMixDashboard';
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = [
+  '#3b82f6',
+  '#ef4444',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#84cc16',
+];
 
 interface BrandData {
   brand_id: number;
@@ -30,7 +68,11 @@ export default function ProductInsights() {
   const [dateRange, setDateRange] = useState<string>('30');
 
   // Fetch brand analytics data
-  const { data: brandData, isLoading: brandLoading, error: brandError } = useQuery({
+  const {
+    data: brandData,
+    isLoading: brandLoading,
+    error: brandError,
+  } = useQuery({
     queryKey: ['brand-analytics', selectedCategory, dateRange],
     queryFn: async () => {
       let query = supabase
@@ -45,20 +87,17 @@ export default function ProductInsights() {
       const { data, error } = await query;
       if (error) throw error;
       return data as BrandData[];
-    }
+    },
   });
 
   // Fetch categories for filter
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('brand_analytics')
-        .select('category')
-        .distinct();
+      const { data, error } = await supabase.from('brand_analytics').select('category').distinct();
       if (error) throw error;
       return data.map(item => item.category);
-    }
+    },
   });
 
   const brandMetrics = useMemo(() => {
@@ -74,45 +113,51 @@ export default function ProductInsights() {
       totalRevenue,
       totalTransactions,
       tbwaBrands: tbwaBrands.length,
-      tbwaShare: (tbwaRevenue / totalRevenue * 100).toFixed(1),
-      avgTransactionValue: totalRevenue / totalTransactions
+      tbwaShare: ((tbwaRevenue / totalRevenue) * 100).toFixed(1),
+      avgTransactionValue: totalRevenue / totalTransactions,
     };
   }, [brandData]);
 
   const chartData = useMemo(() => {
     if (!brandData) return [];
     return brandData.slice(0, 10).map(brand => ({
-      name: brand.brand_name.length > 15 ? brand.brand_name.substring(0, 15) + '...' : brand.brand_name,
+      name:
+        brand.brand_name.length > 15 ? brand.brand_name.substring(0, 15) + '...' : brand.brand_name,
       revenue: brand.total_revenue,
       transactions: brand.total_transactions,
       marketShare: brand.market_share,
-      isTbwa: brand.is_tbwa
+      isTbwa: brand.is_tbwa,
     }));
   }, [brandData]);
 
   const categoryData = useMemo(() => {
     if (!brandData) return [];
-    const categoryMap = brandData.reduce((acc, brand) => {
-      if (!acc[brand.category]) {
-        acc[brand.category] = { revenue: 0, transactions: 0, brands: 0 };
-      }
-      acc[brand.category].revenue += brand.total_revenue;
-      acc[brand.category].transactions += brand.total_transactions;
-      acc[brand.category].brands += 1;
-      return acc;
-    }, {} as Record<string, { revenue: number; transactions: number; brands: number }>);
+    const categoryMap = brandData.reduce(
+      (acc, brand) => {
+        if (!acc[brand.category]) {
+          acc[brand.category] = { revenue: 0, transactions: 0, brands: 0 };
+        }
+        acc[brand.category].revenue += brand.total_revenue;
+        acc[brand.category].transactions += brand.total_transactions;
+        acc[brand.category].brands += 1;
+        return acc;
+      },
+      {} as Record<string, { revenue: number; transactions: number; brands: number }>
+    );
 
-    return Object.entries(categoryMap).map(([category, data]) => ({
-      category,
-      ...data
-    })).sort((a, b) => b.revenue - a.revenue);
+    return Object.entries(categoryMap)
+      .map(([category, data]) => ({
+        category,
+        ...data,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
   }, [brandData]);
 
   if (brandLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="mt-2 text-gray-600">Loading product insights...</p>
         </div>
       </div>
@@ -121,7 +166,7 @@ export default function ProductInsights() {
 
   if (brandError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-red-600">Error loading data: {brandError.message}</p>
         </div>
@@ -131,11 +176,12 @@ export default function ProductInsights() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 px-4">
+      <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Product Insights</h1>
-          <p className="text-muted-foreground mt-2">
-            Comprehensive analysis of product performance, brand analytics, and market share insights
+          <p className="mt-2 text-muted-foreground">
+            Comprehensive analysis of product performance, brand analytics, and market share
+            insights
           </p>
         </div>
 
@@ -172,14 +218,14 @@ export default function ProductInsights() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {categories?.map((category) => (
+                      {categories?.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  
+
                   <Select value={dateRange} onValueChange={setDateRange}>
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Date range" />
@@ -201,7 +247,7 @@ export default function ProductInsights() {
 
             {/* Metrics Cards */}
             {brandMetrics && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total Brands</CardTitle>
@@ -221,7 +267,9 @@ export default function ProductInsights() {
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">₱{brandMetrics.totalRevenue.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">
+                      ₱{brandMetrics.totalRevenue.toLocaleString()}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       TBWA Share: {brandMetrics.tbwaShare}%
                     </p>
@@ -234,7 +282,9 @@ export default function ProductInsights() {
                     <Target className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{brandMetrics.totalTransactions.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">
+                      {brandMetrics.totalTransactions.toLocaleString()}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Avg: ₱{brandMetrics.avgTransactionValue.toFixed(2)}
                     </p>
@@ -248,16 +298,14 @@ export default function ProductInsights() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{categoryData.length}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Active categories
-                    </p>
+                    <p className="text-xs text-muted-foreground">Active categories</p>
                   </CardContent>
                 </Card>
               </div>
             )}
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <Card>
                 <CardHeader>
                   <CardTitle>Top Brands by Revenue</CardTitle>
@@ -266,24 +314,26 @@ export default function ProductInsights() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="name" 
+                      <XAxis
+                        dataKey="name"
                         tick={{ fontSize: 12 }}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
                       <YAxis />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value: any, name: string) => [
-                          name === 'revenue' ? `₱${value.toLocaleString()}` : value.toLocaleString(),
-                          name === 'revenue' ? 'Revenue' : 'Transactions'
+                          name === 'revenue'
+                            ? `₱${value.toLocaleString()}`
+                            : value.toLocaleString(),
+                          name === 'revenue' ? 'Revenue' : 'Transactions',
                         ]}
                         labelStyle={{ color: '#000' }}
                       />
-                      <Bar 
-                        dataKey="revenue" 
-                        fill={(entry: any) => entry?.isTbwa ? '#3b82f6' : '#94a3b8'}
+                      <Bar
+                        dataKey="revenue"
+                        fill={(entry: any) => (entry?.isTbwa ? '#3b82f6' : '#94a3b8')}
                         name="revenue"
                       />
                     </BarChart>
@@ -312,9 +362,7 @@ export default function ProductInsights() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip 
-                        formatter={(value: any) => [`${value}%`, 'Market Share']}
-                      />
+                      <Tooltip formatter={(value: any) => [`${value}%`, 'Market Share']} />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
@@ -338,10 +386,14 @@ export default function ProductInsights() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="category" tick={{ fontSize: 12 }} />
                     <YAxis />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value: any, name: string) => [
                         name === 'revenue' ? `₱${value.toLocaleString()}` : value.toLocaleString(),
-                        name === 'revenue' ? 'Revenue' : name === 'transactions' ? 'Transactions' : 'Brands'
+                        name === 'revenue'
+                          ? 'Revenue'
+                          : name === 'transactions'
+                            ? 'Transactions'
+                            : 'Brands',
                       ]}
                     />
                     <Bar dataKey="revenue" fill="#3b82f6" name="revenue" />

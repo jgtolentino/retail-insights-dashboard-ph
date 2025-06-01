@@ -16,7 +16,7 @@ export function useFilterState({
   debounceMs = 300,
 }: UseFilterStateOptions) {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Initialize from URL params first, then localStorage, then default
   const getInitialValue = (): string[] => {
     // 1. Check URL params
@@ -24,7 +24,7 @@ export function useFilterState({
     if (urlValue) {
       return urlValue.split(',').filter(Boolean);
     }
-    
+
     // 2. Check localStorage
     if (useLocalStorage) {
       try {
@@ -36,7 +36,7 @@ export function useFilterState({
         console.warn(`Failed to parse localStorage filter_${key}:`, error);
       }
     }
-    
+
     // 3. Use default
     return defaultValue;
   };
@@ -47,13 +47,13 @@ export function useFilterState({
   // Sync to URL params
   useEffect(() => {
     const currentParams = new URLSearchParams(searchParams);
-    
+
     if (debouncedValue.length === 0) {
       currentParams.delete(key);
     } else {
       currentParams.set(key, debouncedValue.join(','));
     }
-    
+
     setSearchParams(currentParams, { replace: true });
   }, [debouncedValue, key, searchParams, setSearchParams]);
 
@@ -102,7 +102,7 @@ export function useFilterState({
 // Hook for managing multiple filters
 export function useFilters(filterConfigs: Record<string, UseFilterStateOptions>) {
   const filters: Record<string, ReturnType<typeof useFilterState>> = {};
-  
+
   Object.entries(filterConfigs).forEach(([key, config]) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     filters[key] = useFilterState({ ...config, key });
@@ -112,9 +112,7 @@ export function useFilters(filterConfigs: Record<string, UseFilterStateOptions>)
     Object.values(filters).forEach(filter => filter.clearFilter());
   }, [filters]);
 
-  const hasActiveFilters = Object.values(filters).some(
-    filter => filter.value.length > 0
-  );
+  const hasActiveFilters = Object.values(filters).some(filter => filter.value.length > 0);
 
   return {
     filters,

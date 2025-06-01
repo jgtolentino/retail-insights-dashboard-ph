@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useFilterSelectors } from '@/stores/filterStore';
+import { useFilterStore } from '@/stores/filterStore';
+import { shallow } from 'zustand/shallow';
 
 export interface SalesTrendData {
   date: string;
@@ -12,18 +14,41 @@ export interface SalesTrendData {
 export type GroupBy = 'hour' | 'day' | 'week' | 'month';
 
 export function useSalesTrend(groupBy: GroupBy = 'day') {
-  const filters = useFilterSelectors.allFilters();
-  
+  // Subscribe to individual filter properties to avoid object creation
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
+
+  // Create stable filters object only when needed
+  const filters = useMemo(
+    () => ({
+      dateRange,
+      selectedBrands,
+      selectedCategories,
+      selectedRegions,
+      selectedStores,
+    }),
+    [dateRange, selectedBrands, selectedCategories, selectedRegions, selectedStores]
+  );
+
+  // Stabilize the query key to prevent unnecessary re-renders
+  const stableQueryKey = useMemo(
+    () => ['salesTrend', JSON.stringify(filters), groupBy],
+    [filters, groupBy]
+  );
+
   return useQuery({
-    queryKey: ['salesTrend', filters, groupBy],
+    queryKey: stableQueryKey,
     queryFn: async (): Promise<SalesTrendData[]> => {
-      // Build the complete filtered query
-      const filteredQuery = await buildCompleteFilterQuery();
-      
+      // Build the complete filtered query using current filters
+      const filteredQuery = await buildCompleteFilterQuery(filters);
+
       const { data: transactions, error } = await filteredQuery
         .select('id, total_amount, created_at')
         .order('created_at', { ascending: true });
-      
+
       if (error) {
         throw error;
       }
@@ -33,17 +58,20 @@ export function useSalesTrend(groupBy: GroupBy = 'day') {
       }
 
       // Group data by time period
-      const timeSeriesMap = new Map<string, { 
-        total_revenue: number; 
-        transaction_count: number; 
-      }>();
+      const timeSeriesMap = new Map<
+        string,
+        {
+          total_revenue: number;
+          transaction_count: number;
+        }
+      >();
 
       transactions.forEach(transaction => {
         if (!transaction.created_at) return;
-        
+
         const date = new Date(transaction.created_at);
         let key: string;
-        
+
         switch (groupBy) {
           case 'hour':
             key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
@@ -62,7 +90,7 @@ export function useSalesTrend(groupBy: GroupBy = 'day') {
           default:
             key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
-        
+
         const existing = timeSeriesMap.get(key) || { total_revenue: 0, transaction_count: 0 };
         existing.transaction_count += 1;
         existing.total_revenue += transaction.total_amount || 0;
@@ -75,9 +103,10 @@ export function useSalesTrend(groupBy: GroupBy = 'day') {
           date,
           total_revenue: Math.round(data.total_revenue * 100) / 100,
           transaction_count: data.transaction_count,
-          avg_transaction_value: data.transaction_count > 0 
-            ? Math.round((data.total_revenue / data.transaction_count) * 100) / 100 
-            : 0,
+          avg_transaction_value:
+            data.transaction_count > 0
+              ? Math.round((data.total_revenue / data.transaction_count) * 100) / 100
+              : 0,
         }))
         .sort((a, b) => a.date.localeCompare(b.date));
 

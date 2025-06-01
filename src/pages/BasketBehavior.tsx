@@ -3,11 +3,37 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ShoppingCart, Users, Target, TrendingUp } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+  Cell,
+} from 'recharts';
 
-const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const COLORS = [
+  '#3b82f6',
+  '#ef4444',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#84cc16',
+];
 
 interface BasketData {
   basket_size: number;
@@ -27,14 +53,14 @@ export default function BasketBehavior() {
       // For now, return mock data until we implement proper basket analysis
       // This would query transaction_items grouped by transaction_id to get basket sizes
       return [
-        { basket_size: 1, transaction_count: 1200, avg_value: 45.50, total_revenue: 54600 },
+        { basket_size: 1, transaction_count: 1200, avg_value: 45.5, total_revenue: 54600 },
         { basket_size: 2, transaction_count: 850, avg_value: 89.25, total_revenue: 75862 },
         { basket_size: 3, transaction_count: 420, avg_value: 135.75, total_revenue: 57015 },
-        { basket_size: 4, transaction_count: 180, avg_value: 178.90, total_revenue: 32202 },
-        { basket_size: 5, transaction_count: 85, avg_value: 225.40, total_revenue: 19159 },
-        { basket_size: '6+', transaction_count: 45, avg_value: 295.80, total_revenue: 13311 }
+        { basket_size: 4, transaction_count: 180, avg_value: 178.9, total_revenue: 32202 },
+        { basket_size: 5, transaction_count: 85, avg_value: 225.4, total_revenue: 19159 },
+        { basket_size: '6+', transaction_count: 45, avg_value: 295.8, total_revenue: 13311 },
       ] as BasketData[];
-    }
+    },
   });
 
   // Mock co-purchase data (would come from market basket analysis)
@@ -43,7 +69,7 @@ export default function BasketBehavior() {
     { product1: 'Coca Cola', product2: 'Pepsi', frequency: 72, lift: 1.8 },
     { product1: 'Red Horse', product2: 'San Miguel', frequency: 68, lift: 2.1 },
     { product1: 'Yosi Brand A', product2: 'Max Energy', frequency: 45, lift: 3.2 },
-    { product1: 'Coffee Brand X', product2: 'Sugar', frequency: 38, lift: 1.9 }
+    { product1: 'Coffee Brand X', product2: 'Sugar', frequency: 38, lift: 1.9 },
   ];
 
   const basketMetrics = useMemo(() => {
@@ -51,25 +77,30 @@ export default function BasketBehavior() {
 
     const totalTransactions = basketData.reduce((sum, item) => sum + item.transaction_count, 0);
     const totalRevenue = basketData.reduce((sum, item) => sum + item.total_revenue, 0);
-    const weightedAvgBasketSize = basketData.reduce((sum, item) => {
-      const size = typeof item.basket_size === 'number' ? item.basket_size : 6;
-      return sum + (size * item.transaction_count);
-    }, 0) / totalTransactions;
+    const weightedAvgBasketSize =
+      basketData.reduce((sum, item) => {
+        const size = typeof item.basket_size === 'number' ? item.basket_size : 6;
+        return sum + size * item.transaction_count;
+      }, 0) / totalTransactions;
 
     return {
       totalTransactions,
       totalRevenue,
       avgBasketSize: weightedAvgBasketSize.toFixed(1),
       avgBasketValue: (totalRevenue / totalTransactions).toFixed(2),
-      singleItemTransactions: ((basketData.find(item => item.basket_size === 1)?.transaction_count || 0) / totalTransactions * 100).toFixed(1)
+      singleItemTransactions: (
+        ((basketData.find(item => item.basket_size === 1)?.transaction_count || 0) /
+          totalTransactions) *
+        100
+      ).toFixed(1),
     };
   }, [basketData]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="mt-2 text-gray-600">Loading basket behavior analysis...</p>
         </div>
       </div>
@@ -78,10 +109,10 @@ export default function BasketBehavior() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 px-4">
+      <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">Basket Behavior Analysis</h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="mt-2 text-muted-foreground">
             Understanding consumer shopping patterns, basket composition, and product associations
           </p>
         </div>
@@ -104,7 +135,7 @@ export default function BasketBehavior() {
                   <SelectItem value="region4a">Region 4A</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Time period" />
@@ -121,14 +152,16 @@ export default function BasketBehavior() {
 
         {/* Metrics Cards */}
         {basketMetrics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
                 <ShoppingCart className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{basketMetrics.totalTransactions.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  {basketMetrics.totalTransactions.toLocaleString()}
+                </div>
               </CardContent>
             </Card>
 
@@ -171,20 +204,20 @@ export default function BasketBehavior() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">₱{basketMetrics.totalRevenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  ₱{basketMetrics.totalRevenue.toLocaleString()}
+                </div>
               </CardContent>
             </Card>
           </div>
         )}
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Basket Size Distribution</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Number of items per transaction
-              </p>
+              <p className="text-sm text-muted-foreground">Number of items per transaction</p>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -192,10 +225,10 @@ export default function BasketBehavior() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="basket_size" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: any, name: string) => [
                       value.toLocaleString(),
-                      name === 'transaction_count' ? 'Transactions' : 'Avg Value'
+                      name === 'transaction_count' ? 'Transactions' : 'Avg Value',
                     ]}
                   />
                   <Bar dataKey="transaction_count" fill="#3b82f6" name="transaction_count" />
@@ -217,10 +250,10 @@ export default function BasketBehavior() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="basket_size" name="Basket Size" />
                   <YAxis dataKey="avg_value" name="Avg Value" />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: any, name: string) => [
                       name === 'avg_value' ? `₱${value}` : value,
-                      name === 'avg_value' ? 'Avg Value' : 'Basket Size'
+                      name === 'avg_value' ? 'Avg Value' : 'Basket Size',
                     ]}
                   />
                   <Scatter dataKey="avg_value" fill="#10b981">
@@ -245,7 +278,10 @@ export default function BasketBehavior() {
           <CardContent>
             <div className="space-y-4">
               {coPurchaseData.map((pair, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
                   <div className="flex-1">
                     <div className="font-medium">
                       {pair.product1} + {pair.product2}
@@ -255,12 +291,14 @@ export default function BasketBehavior() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={pair.lift > 2.5 ? "default" : pair.lift > 2.0 ? "secondary" : "outline"}>
+                    <Badge
+                      variant={
+                        pair.lift > 2.5 ? 'default' : pair.lift > 2.0 ? 'secondary' : 'outline'
+                      }
+                    >
                       Lift: {pair.lift}x
                     </Badge>
-                    <Badge variant="outline">
-                      {pair.frequency} times
-                    </Badge>
+                    <Badge variant="outline">{pair.frequency} times</Badge>
                   </div>
                 </div>
               ))}

@@ -97,32 +97,30 @@ export default function MultiSelect({
     }
 
     if (value.length <= maxDisplayed) {
-      return value
-        .map(v => options.find(opt => opt.value === v)?.label || v)
-        .join(', ');
+      return value.map(v => options.find(opt => opt.value === v)?.label || v).join(', ');
     }
 
     const firstItems = value
       .slice(0, maxDisplayed)
       .map(v => options.find(opt => opt.value === v)?.label || v)
       .join(', ');
-    
+
     return `${firstItems} +${value.length - maxDisplayed} more`;
   };
 
   const selectedCount = value.length;
-  const allFilteredSelected = filteredOptions.length > 0 && 
-    filteredOptions.every(option => value.includes(option.value));
+  const allFilteredSelected =
+    filteredOptions.length > 0 && filteredOptions.every(option => value.includes(option.value));
 
   return (
     <div className={cn('relative', className)}>
-      <label className="text-sm font-medium text-gray-700 mb-1 block">
+      <label className="mb-1 block text-sm font-medium text-gray-700">
         {label}
         {showCount && selectedCount > 0 && (
           <span className="ml-1 text-xs text-gray-500">({selectedCount})</span>
         )}
       </label>
-      
+
       <Button
         ref={buttonRef}
         variant="outline"
@@ -135,15 +133,14 @@ export default function MultiSelect({
         )}
       >
         <span className="truncate">{getDisplayText()}</span>
-        <ChevronDown className={cn(
-          'h-4 w-4 shrink-0 transition-transform',
-          isOpen && 'rotate-180'
-        )} />
+        <ChevronDown
+          className={cn('h-4 w-4 shrink-0 transition-transform', isOpen && 'rotate-180')}
+        />
       </Button>
 
       {/* Selected items as badges */}
       {selectedCount > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="mt-2 flex flex-wrap gap-1">
           {value.slice(0, maxDisplayed).map(selectedValue => {
             const option = options.find(opt => opt.value === selectedValue);
             return (
@@ -155,7 +152,7 @@ export default function MultiSelect({
                 {option?.label || selectedValue}
                 <X
                   className="h-3 w-3 cursor-pointer hover:text-red-600"
-                  onClick={(e) => handleRemoveItem(selectedValue, e)}
+                  onClick={e => handleRemoveItem(selectedValue, e)}
                 />
               </Badge>
             );
@@ -172,17 +169,17 @@ export default function MultiSelect({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-64 overflow-hidden"
+          className="absolute z-50 mt-1 max-h-64 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg"
         >
           {/* Search and controls */}
-          <div className="p-2 border-b border-gray-100">
+          <div className="border-b border-gray-100 p-2">
             <div className="relative mb-2">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 h-8"
+                onChange={e => setSearchTerm(e.target.value)}
+                className="h-8 pl-8"
               />
             </div>
             <div className="flex gap-2">
@@ -207,11 +204,9 @@ export default function MultiSelect({
           </div>
 
           {/* Options list */}
-          <div className="overflow-y-auto max-h-48">
+          <div className="max-h-48 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <div className="p-3 text-sm text-gray-500 text-center">
-                No options found
-              </div>
+              <div className="p-3 text-center text-sm text-gray-500">No options found</div>
             ) : (
               filteredOptions.map(option => {
                 const isSelected = value.includes(option.value);
@@ -219,16 +214,18 @@ export default function MultiSelect({
                   <div
                     key={option.value}
                     className={cn(
-                      'flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50',
+                      'flex cursor-pointer items-center justify-between p-2 hover:bg-gray-50',
                       isSelected && 'bg-blue-50'
                     )}
                     onClick={() => handleToggleOption(option.value)}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={cn(
-                        'h-4 w-4 border border-gray-300 rounded flex items-center justify-center',
-                        isSelected && 'bg-blue-600 border-blue-600'
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-4 w-4 items-center justify-center rounded border border-gray-300',
+                          isSelected && 'border-blue-600 bg-blue-600'
+                        )}
+                      >
                         {isSelected && <Check className="h-3 w-3 text-white" />}
                       </div>
                       <span className="text-sm">{option.label}</span>

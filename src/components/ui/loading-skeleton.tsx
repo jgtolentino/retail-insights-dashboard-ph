@@ -6,13 +6,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 // Base skeleton component
-export function Skeleton({ className = "", ...props }) {
-  return (
-    <div
-      className={`animate-pulse rounded-md bg-muted ${className}`}
-      {...props}
-    />
-  );
+export function Skeleton({ className = '', ...props }) {
+  return <div className={`animate-pulse rounded-md bg-muted ${className}`} {...props} />;
 }
 
 // Dashboard overview skeleton
@@ -29,7 +24,7 @@ export function DashboardSkeleton() {
             </CardHeader>
             <CardContent>
               <Skeleton className="h-8 w-[120px]" />
-              <Skeleton className="h-3 w-[80px] mt-2" />
+              <Skeleton className="mt-2 h-3 w-[80px]" />
             </CardContent>
           </Card>
         ))}
@@ -75,7 +70,7 @@ export function DashboardSkeleton() {
 }
 
 // Chart skeleton
-export function ChartSkeleton({ height = "300px" }: { height?: string }) {
+export function ChartSkeleton({ height = '300px' }: { height?: string }) {
   return (
     <Card>
       <CardHeader>
@@ -186,7 +181,7 @@ export function RecommendationsSkeleton() {
           {/* Recommendations list */}
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="border rounded-lg p-4 space-y-3">
+              <div key={i} className="space-y-3 rounded-lg border p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
@@ -202,7 +197,7 @@ export function RecommendationsSkeleton() {
                       <Skeleton className="h-3 w-[220px]" />
                     </div>
                   </div>
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     <Skeleton className="h-8 w-[60px]" />
                     <Skeleton className="h-3 w-[80px]" />
                     <Skeleton className="h-5 w-[70px]" />
@@ -230,12 +225,12 @@ export function SubstitutionFlowSkeleton() {
       <CardContent>
         <div className="space-y-6">
           {/* Flow visualization skeleton */}
-          <div className="grid grid-cols-2 gap-8 min-h-96">
+          <div className="grid min-h-96 grid-cols-2 gap-8">
             {/* Original brands column */}
             <div className="space-y-2">
-              <Skeleton className="h-4 w-[150px] mb-4" />
+              <Skeleton className="mb-4 h-4 w-[150px]" />
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="p-3 border rounded-lg">
+                <div key={i} className="rounded-lg border p-3">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-5 w-[60px]" />
@@ -246,9 +241,9 @@ export function SubstitutionFlowSkeleton() {
 
             {/* Substitute brands column */}
             <div className="space-y-2">
-              <Skeleton className="h-4 w-[150px] mb-4" />
+              <Skeleton className="mb-4 h-4 w-[150px]" />
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="p-3 border rounded-lg">
+                <div key={i} className="rounded-lg border p-3">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-4 w-[100px]" />
                     <Skeleton className="h-5 w-[60px]" />
@@ -260,10 +255,10 @@ export function SubstitutionFlowSkeleton() {
 
           {/* Key insights skeleton */}
           <div className="border-t pt-4">
-            <Skeleton className="h-5 w-[180px] mb-3" />
+            <Skeleton className="mb-3 h-5 w-[180px]" />
             <div className="grid gap-3 md:grid-cols-2">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="p-3 border rounded-lg space-y-2">
+                <div key={i} className="space-y-2 rounded-lg border p-3">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-4 w-[80px]" />
                     <Skeleton className="h-3 w-3" />

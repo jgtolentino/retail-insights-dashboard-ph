@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useFilterStore } from '@/stores/filterStore';
@@ -12,20 +13,31 @@ export interface RegionalSalesData {
 }
 
 export function useRegionalSales() {
-  const filters = useFilterStore(state => ({
-    dateRange: state.dateRange,
-    selectedBrands: state.selectedBrands,
-    selectedCategories: state.selectedCategories,
-    selectedRegions: state.selectedRegions
-  }), shallow);
+  // Subscribe to individual filter properties to avoid object creation
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+
+  // Create stable filters object only when needed
+  const filters = useMemo(
+    () => ({
+      dateRange,
+      selectedBrands,
+      selectedCategories,
+      selectedRegions,
+    }),
+    [dateRange, selectedBrands, selectedCategories, selectedRegions]
+  );
+
+  // Stabilize the query key to prevent unnecessary re-renders
+  const stableQueryKey = useMemo(() => ['regionalSales', JSON.stringify(filters)], [filters]);
 
   return useQuery({
-    queryKey: ['regionalSales', filters],
+    queryKey: stableQueryKey,
     queryFn: async () => {
       // Start with base query for transactions
-      let query = supabase
-        .from('transactions')
-        .select(`
+      let query = supabase.from('transactions').select(`
           id,
           total_amount,
           customer_age,
@@ -47,8 +59,11 @@ export function useRegionalSales() {
         const { data: brandTransactions } = await supabase
           .from('transaction_items')
           .select('transaction_id, brand_id')
-          .in('brand_id', filters.selectedBrands.map(b => parseInt(b)));
-        
+          .in(
+            'brand_id',
+            filters.selectedBrands.map(b => parseInt(b))
+          );
+
         if (brandTransactions) {
           const transactionIds = [...new Set(brandTransactions.map(bt => bt.transaction_id))];
           query = query.in('id', transactionIds);
@@ -61,7 +76,7 @@ export function useRegionalSales() {
           .from('transaction_items')
           .select('transaction_id, category')
           .in('category', filters.selectedCategories);
-        
+
         if (categoryTransactions) {
           const transactionIds = [...new Set(categoryTransactions.map(ct => ct.transaction_id))];
           query = query.in('id', transactionIds);
@@ -80,27 +95,30 @@ export function useRegionalSales() {
       if (!data) return [];
 
       // Group by region and calculate metrics
-      const regionMap = new Map<string, {
-        sales: number;
-        transactions: number;
-        customers: Set<number>;
-      }>();
+      const regionMap = new Map<
+        string,
+        {
+          sales: number;
+          transactions: number;
+          customers: Set<number>;
+        }
+      >();
 
       // Parse region from store_location (format: "City, Region")
       data.forEach(transaction => {
         const locationParts = transaction.store_location?.split(',') || [];
         const region = locationParts.length > 1 ? locationParts[1].trim() : 'Unknown';
-        
+
         // Apply region filter if needed
         if (filters.selectedRegions.length > 0 && !filters.selectedRegions.includes(region)) {
           return;
         }
-        
+
         if (!regionMap.has(region)) {
           regionMap.set(region, {
             sales: 0,
             transactions: 0,
-            customers: new Set()
+            customers: new Set(),
           });
         }
 
@@ -114,15 +132,16 @@ export function useRegionalSales() {
       });
 
       // Convert to array format
-      const regionalSales: RegionalSalesData[] = Array.from(regionMap.entries()).map(([region, data]) => ({
-        region,
-        total_sales: Math.round(data.sales * 100) / 100,
-        transaction_count: data.transactions,
-        unique_customers: data.customers.size,
-        avg_transaction_value: data.transactions > 0 
-          ? Math.round((data.sales / data.transactions) * 100) / 100 
-          : 0
-      }));
+      const regionalSales: RegionalSalesData[] = Array.from(regionMap.entries()).map(
+        ([region, data]) => ({
+          region,
+          total_sales: Math.round(data.sales * 100) / 100,
+          transaction_count: data.transactions,
+          unique_customers: data.customers.size,
+          avg_transaction_value:
+            data.transactions > 0 ? Math.round((data.sales / data.transactions) * 100) / 100 : 0,
+        })
+      );
 
       return regionalSales.sort((a, b) => b.total_sales - a.total_sales);
     },

@@ -23,18 +23,18 @@ export function initSentry() {
         // Filter out non-critical errors
         if (event.exception) {
           const error = hint.originalException;
-          
+
           // Don't send network errors for specific domains
           if (error?.message?.includes('NetworkError')) {
             return null;
           }
-          
+
           // Don't send canceled requests
           if (error?.message?.includes('AbortError')) {
             return null;
           }
         }
-        
+
         return event;
       },
     });
@@ -44,7 +44,7 @@ export function initSentry() {
 // Wrapper for error logging with context
 export function logError(error: Error, context?: Record<string, any>) {
   console.error('Error:', error, context);
-  
+
   if (import.meta.env.PROD) {
     Sentry.captureException(error, {
       contexts: {
@@ -55,16 +55,12 @@ export function logError(error: Error, context?: Record<string, any>) {
 }
 
 // Log specific data fetching errors
-export function logDataFetchError(
-  operation: string,
-  error: Error,
-  filters?: Record<string, any>
-) {
+export function logDataFetchError(operation: string, error: Error, filters?: Record<string, any>) {
   const context = {
     operation,
     filters,
     timestamp: new Date().toISOString(),
   };
-  
+
   logError(error, context);
 }

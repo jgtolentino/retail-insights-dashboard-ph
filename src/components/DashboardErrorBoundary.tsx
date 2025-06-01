@@ -32,14 +32,15 @@ export class DashboardErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
-          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-4 text-center max-w-md">
-            {this.state.error?.message || 'Failed to load dashboard data. This might be due to a temporary connection issue.'}
+        <div className="flex min-h-[400px] flex-col items-center justify-center p-8">
+          <AlertCircle className="mb-4 h-12 w-12 text-red-500" />
+          <h2 className="mb-2 text-xl font-semibold">Something went wrong</h2>
+          <p className="mb-4 max-w-md text-center text-gray-600">
+            {this.state.error?.message ||
+              'Failed to load dashboard data. This might be due to a temporary connection issue.'}
           </p>
           <div className="flex gap-2">
-            <Button 
+            <Button
               onClick={this.handleRetry}
               variant="outline"
               className="flex items-center gap-2"
@@ -47,10 +48,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
               <RefreshCw className="h-4 w-4" />
               Try Again
             </Button>
-            <Button 
-              onClick={() => window.location.reload()}
-              variant="default"
-            >
+            <Button onClick={() => window.location.reload()} variant="default">
               Reload Page
             </Button>
           </div>

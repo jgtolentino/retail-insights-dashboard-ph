@@ -32,12 +32,12 @@ export function useDashboardData({ timeRange, filters, enabled = true }: UseDash
   });
 }
 
-export function useTimeSeriesData({ 
-  timeRange, 
-  startDate, 
-  endDate, 
-  filters, 
-  enabled = true 
+export function useTimeSeriesData({
+  timeRange,
+  startDate,
+  endDate,
+  filters,
+  enabled = true,
 }: {
   timeRange: string;
   startDate?: string;
@@ -65,11 +65,11 @@ export function useTimeSeriesData({
           }
         }
       } catch (error) {
-        logDataFetchError('time_series_data_hook', error as Error, { 
-          timeRange, 
-          startDate, 
-          endDate, 
-          filters 
+        logDataFetchError('time_series_data_hook', error as Error, {
+          timeRange,
+          startDate,
+          endDate,
+          filters,
         });
         throw error;
       }

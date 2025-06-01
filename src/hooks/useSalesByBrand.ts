@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useFilterSelectors } from '@/stores/filterStore';
+import { useFilterStore } from '@/stores/filterStore';
 import { supabase } from '@/integrations/supabase/client';
+import { shallow } from 'zustand/shallow';
 
 export interface SalesByBrandData {
   brand_id: string;
@@ -11,19 +13,38 @@ export interface SalesByBrandData {
 }
 
 export function useSalesByBrand() {
-  // Subscribe to all filters to trigger refetch when they change
-  const filters = useFilterSelectors.allFilters();
+  // Subscribe to individual filter properties to avoid object creation
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
+
+  // Create stable filters object only when needed
+  const filters = useMemo(
+    () => ({
+      dateRange,
+      selectedBrands,
+      selectedCategories,
+      selectedRegions,
+      selectedStores,
+    }),
+    [dateRange, selectedBrands, selectedCategories, selectedRegions, selectedStores]
+  );
+
+  // Stabilize the query key to prevent unnecessary re-renders
+  const stableQueryKey = useMemo(() => ['salesByBrand', JSON.stringify(filters)], [filters]);
 
   return useQuery({
-    queryKey: ['salesByBrand', filters],
+    queryKey: stableQueryKey,
     queryFn: async (): Promise<SalesByBrandData[]> => {
-      // Start with base filtered query
-      const filteredQuery = await buildCompleteFilterQuery();
-      
+      // Start with base filtered query using current filters
+      const filteredQuery = await buildCompleteFilterQuery(filters);
+
       // Get transaction data with revenue
-      const { data: transactions, error: transactionError } = await filteredQuery
-        .select('id, total_amount');
-      
+      const { data: transactions, error: transactionError } =
+        await filteredQuery.select('id, total_amount');
+
       if (transactionError) {
         throw transactionError;
       }
@@ -51,7 +72,7 @@ export function useSalesByBrand() {
 
       // Get unique brand IDs to fetch brand names
       const brandIds = [...new Set(transactionItems.map(item => item.brand_id).filter(Boolean))];
-      
+
       // Get brand names separately
       const { data: brands, error: brandsError } = await supabase
         .from('brands')
@@ -69,12 +90,15 @@ export function useSalesByBrand() {
       });
 
       // Calculate revenue by brand
-      const brandRevenue = new Map<string, { 
-        brand_name: string; 
-        total_revenue: number; 
-        transaction_count: number; 
-        transactions: Set<number>;
-      }>();
+      const brandRevenue = new Map<
+        string,
+        {
+          brand_name: string;
+          total_revenue: number;
+          transaction_count: number;
+          transactions: Set<number>;
+        }
+      >();
 
       transactionItems.forEach(item => {
         if (item.brand_id) {
@@ -91,7 +115,7 @@ export function useSalesByBrand() {
               brand_name: brandName,
               total_revenue: itemRevenue,
               transaction_count: 0,
-              transactions: new Set([item.transaction_id])
+              transactions: new Set([item.transaction_id]),
             });
           }
         }

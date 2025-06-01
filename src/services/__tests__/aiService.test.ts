@@ -14,7 +14,7 @@ describe('AIService', () => {
     transactions: {
       total: 1000,
       growth: 5.2,
-      avgBasketSize: 125.50,
+      avgBasketSize: 125.5,
     },
     revenue: {
       total: 125500,
@@ -51,10 +51,10 @@ describe('AIService', () => {
   describe('getRecommendations', () => {
     it('should return fallback recommendations when AI is not available', async () => {
       const recommendations = await aiService.getRecommendations(mockDashboardData);
-      
+
       expect(recommendations).toBeInstanceOf(Array);
       expect(recommendations.length).toBeGreaterThan(0);
-      
+
       // Check recommendation structure
       const rec = recommendations[0];
       expect(rec).toHaveProperty('id');
@@ -71,12 +71,12 @@ describe('AIService', () => {
         ...mockDashboardData,
         transactions: { ...mockDashboardData.transactions, growth: 15 },
       };
-      
+
       const recommendations = await aiService.getRecommendations(highGrowthData);
-      
-      expect(recommendations.some(rec => 
-        rec.title.includes('Scale') || rec.content.includes('growth')
-      )).toBe(true);
+
+      expect(
+        recommendations.some(rec => rec.title.includes('Scale') || rec.content.includes('growth'))
+      ).toBe(true);
     });
   });
 
@@ -86,14 +86,13 @@ describe('AIService', () => {
         ...mockDashboardData,
         revenue: { ...mockDashboardData.revenue, growth: -25 },
       };
-      
+
       const anomalies = await aiService.detectAnomalies(decliningData);
-      
+
       expect(anomalies).toBeInstanceOf(Array);
-      expect(anomalies.some(anomaly => 
-        anomaly.type === 'anomaly' && 
-        anomaly.title.includes('Revenue')
-      )).toBe(true);
+      expect(
+        anomalies.some(anomaly => anomaly.type === 'anomaly' && anomaly.title.includes('Revenue'))
+      ).toBe(true);
     });
 
     it('should detect transaction volume drops', async () => {
@@ -101,13 +100,14 @@ describe('AIService', () => {
         ...mockDashboardData,
         transactions: { ...mockDashboardData.transactions, growth: -20 },
       };
-      
+
       const anomalies = await aiService.detectAnomalies(lowTransactionData);
-      
-      expect(anomalies.some(anomaly => 
-        anomaly.content.includes('Transaction') && 
-        anomaly.priority === 'high'
-      )).toBe(true);
+
+      expect(
+        anomalies.some(
+          anomaly => anomaly.content.includes('Transaction') && anomaly.priority === 'high'
+        )
+      ).toBe(true);
     });
 
     it('should return empty array for normal data', async () => {
@@ -116,9 +116,9 @@ describe('AIService', () => {
         revenue: { ...mockDashboardData.revenue, growth: 5 },
         transactions: { ...mockDashboardData.transactions, growth: 3 },
       };
-      
+
       const anomalies = await aiService.detectAnomalies(normalData);
-      
+
       expect(anomalies).toBeInstanceOf(Array);
       // Should have fewer or no anomalies for normal data
     });
@@ -127,12 +127,11 @@ describe('AIService', () => {
   describe('generatePredictions', () => {
     it('should generate revenue predictions based on trends', async () => {
       const predictions = await aiService.generatePredictions(mockDashboardData);
-      
+
       expect(predictions).toBeInstanceOf(Array);
-      expect(predictions.some(pred => 
-        pred.type === 'prediction' && 
-        pred.title.includes('Revenue')
-      )).toBe(true);
+      expect(
+        predictions.some(pred => pred.type === 'prediction' && pred.title.includes('Revenue'))
+      ).toBe(true);
     });
 
     it('should handle missing trend data gracefully', async () => {
@@ -140,9 +139,9 @@ describe('AIService', () => {
         ...mockDashboardData,
         revenue: { ...mockDashboardData.revenue, trend: [] },
       };
-      
+
       const predictions = await aiService.generatePredictions(noTrendData);
-      
+
       expect(predictions).toBeInstanceOf(Array);
     });
   });
@@ -150,12 +149,13 @@ describe('AIService', () => {
   describe('getConsumerInsights', () => {
     it('should identify dominant age groups', async () => {
       const insights = await aiService.getConsumerInsights(mockDashboardData.customers);
-      
+
       expect(insights).toBeInstanceOf(Array);
-      expect(insights.some(insight => 
-        insight.title.includes('Dominant') && 
-        insight.content.includes('25-34')
-      )).toBe(true);
+      expect(
+        insights.some(
+          insight => insight.title.includes('Dominant') && insight.content.includes('25-34')
+        )
+      ).toBe(true);
     });
 
     it('should detect gender imbalances', async () => {
@@ -166,12 +166,10 @@ describe('AIService', () => {
           { gender: 'Male', count: 200 },
         ],
       };
-      
+
       const insights = await aiService.getConsumerInsights(imbalancedData);
-      
-      expect(insights.some(insight => 
-        insight.title.includes('Gender')
-      )).toBe(true);
+
+      expect(insights.some(insight => insight.title.includes('Gender'))).toBe(true);
     });
 
     it('should handle empty customer data', async () => {
@@ -179,9 +177,9 @@ describe('AIService', () => {
         ageDistribution: [],
         genderDistribution: [],
       };
-      
+
       const insights = await aiService.getConsumerInsights(emptyData);
-      
+
       expect(insights).toBeInstanceOf(Array);
     });
   });

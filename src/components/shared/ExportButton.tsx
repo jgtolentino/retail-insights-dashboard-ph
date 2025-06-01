@@ -1,30 +1,30 @@
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "@/components/ui/use-toast";
+} from '@/components/ui/dropdown-menu';
+import { toast } from '@/components/ui/use-toast';
 
 interface ExportButtonProps {
   data: any[];
   filename: string;
   section?: string;
-  variant?: "default" | "outline" | "ghost";
-  size?: "default" | "sm" | "lg";
+  variant?: 'default' | 'outline' | 'ghost';
+  size?: 'default' | 'sm' | 'lg';
   className?: string;
 }
 
 export function ExportButton({
   data,
   filename,
-  section = "insights",
-  variant = "outline",
-  size = "sm",
-  className = ""
+  section = 'insights',
+  variant = 'outline',
+  size = 'sm',
+  className = '',
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -43,9 +43,9 @@ export function ExportButton({
     try {
       if (!data || data.length === 0) {
         toast({
-          title: "No data to export",
-          description: "There is no data available for export.",
-          variant: "destructive"
+          title: 'No data to export',
+          description: 'There is no data available for export.',
+          variant: 'destructive',
         });
         return;
       }
@@ -54,16 +54,18 @@ export function ExportButton({
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(','),
-        ...data.map(row => 
-          headers.map(header => {
-            const value = row[header];
-            // Handle values that might contain commas
-            if (typeof value === 'string' && value.includes(',')) {
-              return `"${value}"`;
-            }
-            return value;
-          }).join(',')
-        )
+        ...data.map(row =>
+          headers
+            .map(header => {
+              const value = row[header];
+              // Handle values that might contain commas
+              if (typeof value === 'string' && value.includes(',')) {
+                return `"${value}"`;
+              }
+              return value;
+            })
+            .join(',')
+        ),
       ].join('\n');
 
       // Create and download file
@@ -78,14 +80,14 @@ export function ExportButton({
       document.body.removeChild(link);
 
       toast({
-        title: "Export successful",
-        description: `Data exported as ${getFileName('csv')}`
+        title: 'Export successful',
+        description: `Data exported as ${getFileName('csv')}`,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: "There was an error exporting the data.",
-        variant: "destructive"
+        title: 'Export failed',
+        description: 'There was an error exporting the data.',
+        variant: 'destructive',
       });
     } finally {
       setIsExporting(false);
@@ -97,9 +99,9 @@ export function ExportButton({
     try {
       if (!data || data.length === 0) {
         toast({
-          title: "No data to export",
-          description: "There is no data available for export.",
-          variant: "destructive"
+          title: 'No data to export',
+          description: 'There is no data available for export.',
+          variant: 'destructive',
         });
         return;
       }
@@ -116,14 +118,14 @@ export function ExportButton({
       document.body.removeChild(link);
 
       toast({
-        title: "Export successful",
-        description: `Data exported as ${getFileName('json')}`
+        title: 'Export successful',
+        description: `Data exported as ${getFileName('json')}`,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: "There was an error exporting the data.",
-        variant: "destructive"
+        title: 'Export failed',
+        description: 'There was an error exporting the data.',
+        variant: 'destructive',
       });
     } finally {
       setIsExporting(false);
@@ -133,9 +135,9 @@ export function ExportButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant={variant} 
-          size={size} 
+        <Button
+          variant={variant}
+          size={size}
           className={`flex items-center gap-2 ${className}`}
           disabled={isExporting}
         >

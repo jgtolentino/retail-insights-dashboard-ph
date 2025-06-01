@@ -2,38 +2,38 @@ import { createClient } from '@supabase/supabase-js';
 
 class SupabaseExecutor {
   private client;
-  
+
   constructor() {
     this.client = createClient(
       process.env.VITE_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
   }
-  
+
   /**
    * Execute SQL directly using service role privileges
    * Bypasses RLS and permission restrictions
    */
   async executeSql(sql: string): Promise<any> {
     console.log('🚀 Executing SQL with service role...');
-    
+
     try {
       // For CREATE FUNCTION statements, we can use direct data operations
       // Since service role bypasses RLS, we have full access
-      
+
       if (sql.includes('CREATE OR REPLACE FUNCTION')) {
         // Extract function name for verification
         const functionMatch = sql.match(/CREATE OR REPLACE FUNCTION\s+(\w+)/i);
         const functionName = functionMatch?.[1];
-        
+
         console.log(`📝 Creating function: ${functionName}`);
-        
+
         // Use rpc to execute if exec_sql function exists, otherwise use alternative
         try {
-          const { data, error } = await this.client.rpc('exec_sql', { 
-            query: sql 
+          const { data, error } = await this.client.rpc('exec_sql', {
+            query: sql,
           });
-          
+
           if (error) throw error;
           console.log(`✅ Function ${functionName} created successfully`);
           return data;
@@ -43,15 +43,14 @@ class SupabaseExecutor {
           return this.createFunctionAlternative(sql, functionName);
         }
       }
-      
+
       // For other SQL operations
       const { data, error } = await this.client.rpc('query', { sql });
-      
+
       if (error) throw error;
-      
+
       console.log('✅ SQL executed successfully');
       return data;
-      
     } catch (error) {
       console.error('❌ SQL Execution Error:', error);
       throw error;
@@ -63,17 +62,17 @@ class SupabaseExecutor {
    */
   private async createFunctionAlternative(sql: string, functionName?: string): Promise<any> {
     console.log('🔧 Using alternative function creation method...');
-    
+
     // For now, we'll log the SQL and return success
     // In production, you might store functions in a table and execute them
     console.log('📋 Function SQL ready for deployment:');
     console.log(sql.substring(0, 200) + '...');
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       function_name: functionName,
       method: 'alternative',
-      note: 'Function SQL prepared for execution'
+      note: 'Function SQL prepared for execution',
     };
   }
 
@@ -99,9 +98,9 @@ class SupabaseExecutor {
         .from('pg_proc')
         .select('proname')
         .eq('pronamespace', 'public');
-      
+
       if (error) throw error;
-      
+
       return data?.map(row => row.proname) || [];
     } catch {
       // Fallback to known functions
@@ -114,10 +113,10 @@ class SupabaseExecutor {
    */
   async executeMultiple(sqlStatements: string[]): Promise<any[]> {
     const results = [];
-    
+
     for (const [index, sql] of sqlStatements.entries()) {
       console.log(`🔄 Executing statement ${index + 1}/${sqlStatements.length}`);
-      
+
       try {
         const result = await this.executeSql(sql);
         results.push({ success: true, result, statement: index + 1 });
@@ -126,7 +125,7 @@ class SupabaseExecutor {
         results.push({ success: false, error: error.message, statement: index + 1 });
       }
     }
-    
+
     return results;
   }
 
@@ -135,7 +134,7 @@ class SupabaseExecutor {
    */
   async createFilterFunction(name: string, logic: () => Promise<any>): Promise<void> {
     console.log(`🛠️ Creating filter function: ${name}`);
-    
+
     // Store the function logic in a registry or execute directly
     // This is a fallback when SQL function creation isn't available
     try {
@@ -154,10 +153,7 @@ class SupabaseExecutor {
   async healthCheck(): Promise<any> {
     try {
       // Test basic connectivity
-      const { data: brands } = await this.client
-        .from('brands')
-        .select('count')
-        .limit(1);
+      const { data: brands } = await this.client.from('brands').select('count').limit(1);
 
       // Test RPC function if available
       const canCallRPC = await this.testFunction('get_brand_analysis_for_filters');
@@ -166,12 +162,12 @@ class SupabaseExecutor {
         connected: true,
         basic_queries: true,
         rpc_functions: canCallRPC,
-        service_role: true
+        service_role: true,
       };
     } catch (error) {
       return {
         connected: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -182,7 +178,8 @@ export const supabaseExecutor = new SupabaseExecutor();
 
 // Convenience functions
 export const executeSql = (sql: string) => supabaseExecutor.executeSql(sql);
-export const testFunction = (name: string, params?: any) => supabaseExecutor.testFunction(name, params);
+export const testFunction = (name: string, params?: any) =>
+  supabaseExecutor.testFunction(name, params);
 export const healthCheck = () => supabaseExecutor.healthCheck();
 
 export default supabaseExecutor;

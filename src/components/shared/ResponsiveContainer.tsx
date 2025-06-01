@@ -10,12 +10,12 @@ interface ResponsiveContainerProps {
 }
 
 const maxWidthClasses = {
-  sm: 'max-w-screen-sm',   // 640px
-  md: 'max-w-screen-md',   // 768px
-  lg: 'max-w-screen-lg',   // 1024px
-  xl: 'max-w-screen-xl',   // 1280px
+  sm: 'max-w-screen-sm', // 640px
+  md: 'max-w-screen-md', // 768px
+  lg: 'max-w-screen-lg', // 1024px
+  xl: 'max-w-screen-xl', // 1280px
   '2xl': 'max-w-screen-2xl', // 1536px
-  full: 'max-w-full'
+  full: 'max-w-full',
 };
 
 const paddingClasses = {
@@ -23,7 +23,7 @@ const paddingClasses = {
   sm: 'px-4 sm:px-6',
   md: 'px-4 sm:px-6 lg:px-8',
   lg: 'px-6 sm:px-8 lg:px-12',
-  xl: 'px-8 sm:px-12 lg:px-16'
+  xl: 'px-8 sm:px-12 lg:px-16',
 };
 
 export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
@@ -31,7 +31,7 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   className,
   maxWidth = 'full',
   padding = 'md',
-  center = false
+  center = false,
 }) => {
   return (
     <div
@@ -68,14 +68,14 @@ const gapClasses = {
   sm: 'gap-2 sm:gap-3',
   md: 'gap-4 sm:gap-6',
   lg: 'gap-6 sm:gap-8',
-  xl: 'gap-8 sm:gap-10'
+  xl: 'gap-8 sm:gap-10',
 };
 
 export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   children,
   className,
   cols = { default: 1, md: 2, lg: 3 },
-  gap = 'md'
+  gap = 'md',
 }) => {
   const gridCols = [
     cols.default && `grid-cols-${cols.default}`,
@@ -83,21 +83,12 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
     cols.md && `md:grid-cols-${cols.md}`,
     cols.lg && `lg:grid-cols-${cols.lg}`,
     cols.xl && `xl:grid-cols-${cols.xl}`,
-    cols['2xl'] && `2xl:grid-cols-${cols['2xl']}`
-  ].filter(Boolean).join(' ');
+    cols['2xl'] && `2xl:grid-cols-${cols['2xl']}`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
-  return (
-    <div
-      className={cn(
-        'grid',
-        gridCols,
-        gapClasses[gap],
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+  return <div className={cn('grid', gridCols, gapClasses[gap], className)}>{children}</div>;
 };
 
 // Responsive flex container
@@ -123,20 +114,22 @@ export const ResponsiveFlex: React.FC<ResponsiveFlexProps> = ({
   wrap = false,
   gap = 'md',
   align = 'start',
-  justify = 'start'
+  justify = 'start',
 }) => {
   const directionClasses = [
     direction.default && `flex-${direction.default}`,
     direction.sm && `sm:flex-${direction.sm}`,
     direction.md && `md:flex-${direction.md}`,
-    direction.lg && `lg:flex-${direction.lg}`
-  ].filter(Boolean).join(' ');
+    direction.lg && `lg:flex-${direction.lg}`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const alignClasses = {
     start: 'items-start',
     center: 'items-center',
     end: 'items-end',
-    stretch: 'items-stretch'
+    stretch: 'items-stretch',
   };
 
   const justifyClasses = {
@@ -145,7 +138,7 @@ export const ResponsiveFlex: React.FC<ResponsiveFlexProps> = ({
     end: 'justify-end',
     between: 'justify-between',
     around: 'justify-around',
-    evenly: 'justify-evenly'
+    evenly: 'justify-evenly',
   };
 
   return (
@@ -181,13 +174,13 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
   padding = 'md',
   shadow = 'md',
   rounded = 'lg',
-  border = true
+  border = true,
 }) => {
   const paddingClasses = {
     sm: 'p-3 sm:p-4',
     md: 'p-4 sm:p-6',
     lg: 'p-6 sm:p-8',
-    xl: 'p-8 sm:p-10'
+    xl: 'p-8 sm:p-10',
   };
 
   const shadowClasses = {
@@ -195,7 +188,7 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
     sm: 'shadow-sm',
     md: 'shadow-md',
     lg: 'shadow-lg',
-    xl: 'shadow-xl'
+    xl: 'shadow-xl',
   };
 
   const roundedClasses = {
@@ -203,7 +196,7 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
     sm: 'rounded-sm',
     md: 'rounded-md',
     lg: 'rounded-lg',
-    xl: 'rounded-xl'
+    xl: 'rounded-xl',
   };
 
   return (

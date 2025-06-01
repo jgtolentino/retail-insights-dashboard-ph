@@ -1,0 +1,86 @@
+name: backend-qa-v2
+description: "Backend QA with proper pass/fail reporting"
+
+tasks:
+  backend-qa-proper:
+    description: "Run backend QA tests with clear results"
+    run: |
+      echo "🧪 Backend QA Test Suite"
+      echo "========================"
+      
+      # Initialize test results
+      PASSED=0
+      FAILED=0
+      
+      # Load environment
+      if [ -f .env ]; then
+        export $(cat .env | xargs)
+      fi
+      
+      # Test 1: Database Connection
+      echo -n "📋 Database Connection Test... "
+      if node scripts/test-supabase-connection-simple.js > /tmp/test1.log 2>&1; then
+        echo "✅ PASS"
+        ((PASSED++))
+      else
+        echo "❌ FAIL"
+        ((FAILED++))
+      fi
+      
+      # Test 2: SQL Functions
+      echo -n "📋 SQL Functions Test... "
+      if node scripts/test-sql-functions.js > /tmp/test2.log 2>&1; then
+        echo "✅ PASS"
+        ((PASSED++))
+      else
+        echo "❌ FAIL"
+        ((FAILED++))
+      fi
+      
+      # Test 3: Unit Tests
+      echo -n "📋 Unit Tests... "
+      if npm run test:unit -- --run > /tmp/test3.log 2>&1; then
+        echo "✅ PASS"
+        ((PASSED++))
+      else
+        echo "❌ FAIL"
+        ((FAILED++))
+      fi
+      
+      # Test 4: Integration Tests
+      echo -n "📋 Integration Tests... "
+      if npm run test:integration -- --run > /tmp/test4.log 2>&1; then
+        echo "✅ PASS"
+        ((PASSED++))
+      else
+        echo "❌ FAIL"
+        ((FAILED++))
+      fi
+      
+      # Test 5: Filter Tests
+      echo -n "📋 Filter Tests... "
+      if node scripts/comprehensive-filter-test.js > /tmp/test5.log 2>&1; then
+        echo "✅ PASS"
+        ((PASSED++))
+      else
+        echo "❌ FAIL"
+        ((FAILED++))
+      fi
+      
+      # Summary
+      echo ""
+      echo "📊 Test Summary"
+      echo "──────────────"
+      echo "Total: $((PASSED + FAILED))"
+      echo "Passed: $PASSED ✅"
+      echo "Failed: $FAILED ❌"
+      
+      if [ $FAILED -eq 0 ]; then
+        echo ""
+        echo "🎉 All tests passed!"
+        exit 0
+      else
+        echo ""
+        echo "⚠️  Some tests failed"
+        exit 1
+      fi

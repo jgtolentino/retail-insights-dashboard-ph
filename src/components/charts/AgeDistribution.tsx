@@ -11,36 +11,39 @@ interface AgeDistributionProps {
 }
 
 export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
-  const { data: profileData, isLoading, error } = useQuery({
+  const {
+    data: profileData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['consumer-profile-age', startDate, endDate],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_consumer_profile', {
-          p_start: startDate,
-          p_end: endDate
-        });
-      
+      const { data, error } = await supabase.rpc('get_consumer_profile', {
+        p_start: startDate,
+        p_end: endDate,
+      });
+
       if (error) {
         console.error('Consumer profile error:', error);
         throw error;
       }
-      
+
       console.log('Consumer profile data:', data);
       return data;
-    }
+    },
   });
 
   // Process age distribution data into age groups
   const chartData = useMemo(() => {
     if (!profileData?.age_distribution) return [];
-    
+
     const ageGroups = {
       '18-29': 0,
       '30-44': 0,
       '45-59': 0,
-      '60+': 0
+      '60+': 0,
     };
-    
+
     // Sum up individual ages into groups
     profileData.age_distribution.forEach((item: any) => {
       const age = item.customer_age;
@@ -49,18 +52,18 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
       else if (age >= 45 && age <= 59) ageGroups['45-59'] += item.count;
       else if (age >= 60) ageGroups['60+'] += item.count;
     });
-    
+
     // Calculate total for percentages
     const total = Object.values(ageGroups).reduce((sum, count) => sum + count, 0);
-    
+
     // Convert to chart format
     return Object.entries(ageGroups).map(([ageGroup, count]) => ({
       age_group: ageGroup,
       value: count,
-      percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      percentage: total > 0 ? Math.round((count / total) * 100) : 0,
     }));
   }, [profileData]);
-  
+
   console.log('Processed chart data:', chartData);
 
   if (isLoading) {
@@ -73,7 +76,7 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="flex h-[300px] items-center justify-center">
             <div className="animate-pulse text-gray-500">Loading age data...</div>
           </div>
         </CardContent>
@@ -91,7 +94,7 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="flex h-[300px] items-center justify-center">
             <div className="text-red-500">Error loading age distribution</div>
           </div>
         </CardContent>
@@ -107,16 +110,14 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
             <Calendar className="h-5 w-5" />
             Customer Age Distribution
           </CardTitle>
-          <CardDescription>
-            Distribution of customers by age group
-          </CardDescription>
+          <CardDescription>Distribution of customers by age group</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
-            <div className="text-gray-500 text-center">
-              <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+          <div className="flex h-[300px] items-center justify-center">
+            <div className="text-center text-gray-500">
+              <Calendar className="mx-auto mb-3 h-12 w-12 text-gray-300" />
               <p>No age distribution data available</p>
-              <p className="text-sm mt-1">Check if the database has customer age data</p>
+              <p className="mt-1 text-sm">Check if the database has customer age data</p>
             </div>
           </div>
         </CardContent>
@@ -131,9 +132,7 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
           <Calendar className="h-5 w-5" />
           Customer Age Distribution
         </CardTitle>
-        <CardDescription>
-          Distribution of customers by age group
-        </CardDescription>
+        <CardDescription>Distribution of customers by age group</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -141,18 +140,14 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="age_group" />
-              <YAxis tickFormatter={(value) => `${value}%`} />
-              <Tooltip 
+              <YAxis tickFormatter={value => `${value}%`} />
+              <Tooltip
                 formatter={(value: any, name: string) => {
                   if (name === 'percentage') return [`${value}%`, 'Percentage'];
                   return [value, name];
                 }}
               />
-              <Bar 
-                dataKey="percentage" 
-                fill="#3b82f6" 
-                radius={[8, 8, 0, 0]}
-              />
+              <Bar dataKey="percentage" fill="#3b82f6" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

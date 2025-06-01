@@ -1,8 +1,18 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Package, TrendingUp, Building2 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface BrandData {
   id: string;
@@ -20,8 +30,14 @@ interface HierarchicalBrandViewProps {
 type ViewLevel = 'category' | 'brand' | 'product';
 
 const COLORS = [
-  '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
-  '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'
+  '#3B82F6',
+  '#EF4444',
+  '#10B981',
+  '#F59E0B',
+  '#8B5CF6',
+  '#EC4899',
+  '#06B6D4',
+  '#84CC16',
 ];
 
 export function HierarchicalBrandView({ brands, className }: HierarchicalBrandViewProps) {
@@ -31,23 +47,26 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
 
   // Aggregate brands by category
   const categoryData = useMemo(() => {
-    const categoryMap = new Map<string, { name: string; sales: number; brandCount: number; tbwaCount: number }>();
-    
+    const categoryMap = new Map<
+      string,
+      { name: string; sales: number; brandCount: number; tbwaCount: number }
+    >();
+
     brands.forEach(brand => {
       const existing = categoryMap.get(brand.category) || {
         name: brand.category,
         sales: 0,
         brandCount: 0,
-        tbwaCount: 0
+        tbwaCount: 0,
       };
-      
+
       existing.sales += brand.sales;
       existing.brandCount += 1;
       if (brand.is_tbwa) existing.tbwaCount += 1;
-      
+
       categoryMap.set(brand.category, existing);
     });
-    
+
     return Array.from(categoryMap.values())
       .sort((a, b) => b.sales - a.sales)
       .slice(0, 8); // Top 8 categories for clean display
@@ -56,7 +75,7 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
   // Get brands for selected category
   const categoryBrands = useMemo(() => {
     if (!selectedCategory) return [];
-    
+
     return brands
       .filter(brand => brand.category === selectedCategory)
       .sort((a, b) => b.sales - a.sales)
@@ -85,26 +104,30 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
 
   const getBreadcrumbs = () => {
     const crumbs = [
-      { label: 'Categories', level: 'category' as ViewLevel, onClick: () => setCurrentLevel('category') }
+      {
+        label: 'Categories',
+        level: 'category' as ViewLevel,
+        onClick: () => setCurrentLevel('category'),
+      },
     ];
-    
+
     if (selectedCategory) {
       crumbs.push({
         label: selectedCategory,
         level: 'brand' as ViewLevel,
-        onClick: () => setCurrentLevel('brand')
+        onClick: () => setCurrentLevel('brand'),
       });
     }
-    
+
     if (selectedBrand) {
       const brand = brands.find(b => b.id === selectedBrand);
       crumbs.push({
         label: brand?.name || '',
         level: 'product' as ViewLevel,
-        onClick: () => setCurrentLevel('product')
+        onClick: () => setCurrentLevel('product'),
       });
     }
-    
+
     return crumbs;
   };
 
@@ -116,7 +139,7 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
             <Package className="h-5 w-5" />
             Revenue Analysis
           </CardTitle>
-          
+
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-1 text-sm text-gray-600">
             {getBreadcrumbs().map((crumb, index) => (
@@ -124,9 +147,9 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                 {index > 0 && <ChevronRight className="h-4 w-4" />}
                 <button
                   onClick={crumb.onClick}
-                  className={`hover:text-blue-600 transition-colors ${
-                    index === getBreadcrumbs().length - 1 
-                      ? 'text-blue-600 font-medium' 
+                  className={`transition-colors hover:text-blue-600 ${
+                    index === getBreadcrumbs().length - 1
+                      ? 'font-medium text-blue-600'
                       : 'text-gray-500 hover:text-blue-600'
                   }`}
                 >
@@ -136,31 +159,26 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
             ))}
           </div>
         </div>
-        
+
         {/* Back Button */}
         {currentLevel !== 'category' && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goBack}
-            className="w-fit"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
+          <Button variant="outline" size="sm" onClick={goBack} className="w-fit">
+            <ChevronLeft className="mr-1 h-4 w-4" />
             Back
           </Button>
         )}
       </CardHeader>
-      
+
       <CardContent>
         {/* Category Level - Pie Chart */}
         {currentLevel === 'category' && (
           <div className="space-y-4">
-            <div className="text-sm text-gray-600 flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
               <Building2 className="h-4 w-4" />
               Click on a category to drill down to brands
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Pie Chart */}
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
@@ -173,12 +191,12 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                       outerRadius={120}
                       paddingAngle={2}
                       dataKey="sales"
-                      onClick={(data) => handleCategoryClick(data.name)}
+                      onClick={data => handleCategoryClick(data.name)}
                       className="cursor-pointer"
                     >
                       {categoryData.map((_, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
+                        <Cell
+                          key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
                           stroke="#fff"
                           strokeWidth={2}
@@ -187,23 +205,23 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                     </Pie>
                     <Tooltip
                       formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
-                      labelFormatter={(label) => `Category: ${label}`}
+                      labelFormatter={label => `Category: ${label}`}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              
+
               {/* Category List */}
               <div className="space-y-2">
                 {categoryData.map((category, index) => (
                   <div
                     key={category.name}
                     onClick={() => handleCategoryClick(category.name)}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-4 h-4 rounded"
+                        className="h-4 w-4 rounded"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
                       <div>
@@ -227,54 +245,48 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
         {/* Brand Level - Bar Chart */}
         {currentLevel === 'brand' && selectedCategory && (
           <div className="space-y-4">
-            <div className="text-sm text-gray-600 flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
               <TrendingUp className="h-4 w-4" />
               Top brands in {selectedCategory} • Click to see product details
             </div>
-            
+
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryBrands} margin={{ left: 20, right: 20, top: 20, bottom: 60 }}>
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                    fontSize={12}
-                  />
-                  <YAxis 
-                    tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
-                    fontSize={12}
-                  />
+                <BarChart
+                  data={categoryBrands}
+                  margin={{ left: 20, right: 20, top: 20, bottom: 60 }}
+                >
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                  <YAxis tickFormatter={value => `₱${(value / 1000).toFixed(0)}k`} fontSize={12} />
                   <Tooltip
                     formatter={(value: number) => [`₱${value.toLocaleString()}`, 'Revenue']}
-                    labelFormatter={(label) => `Brand: ${label}`}
+                    labelFormatter={label => `Brand: ${label}`}
                   />
-                  <Bar 
-                    dataKey="sales" 
+                  <Bar
+                    dataKey="sales"
                     fill="#3B82F6"
-                    onClick={(data) => handleBrandClick(data.id)}
+                    onClick={data => handleBrandClick(data.id)}
                     className="cursor-pointer"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            
+
             {/* Brand Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-              {categoryBrands.slice(0, 5).map((brand) => (
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-5">
+              {categoryBrands.slice(0, 5).map(brand => (
                 <div
                   key={brand.id}
                   onClick={() => handleBrandClick(brand.id)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${
+                  className={`cursor-pointer rounded-lg border p-3 transition-colors hover:bg-gray-50 ${
                     brand.is_tbwa ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
                   }`}
                 >
-                  <div className="text-sm font-medium truncate">{brand.name}</div>
+                  <div className="truncate text-sm font-medium">{brand.name}</div>
                   <div className="text-xs text-gray-500">₱{(brand.sales / 1000).toFixed(0)}k</div>
                   {brand.is_tbwa && (
-                    <div className="text-xs text-blue-600 font-medium">TBWA Client</div>
+                    <div className="text-xs font-medium text-blue-600">TBWA Client</div>
                   )}
                 </div>
               ))}
@@ -288,7 +300,7 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
             {(() => {
               const brand = brands.find(b => b.id === selectedBrand);
               return (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="rounded-lg bg-gray-50 p-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-semibold">{brand?.name}</h3>
@@ -301,20 +313,22 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                       <div className="text-sm text-gray-500">Total Revenue</div>
                     </div>
                   </div>
-                  
+
                   {brand?.is_tbwa && (
-                    <div className="mt-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <div className="mt-3 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                       TBWA Client
                     </div>
                   )}
                 </div>
               );
             })()}
-            
-            <div className="text-center text-gray-500 py-8">
-              <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+
+            <div className="py-8 text-center text-gray-500">
+              <Package className="mx-auto mb-4 h-12 w-12 text-gray-300" />
               <p>Product-level details would be displayed here.</p>
-              <p className="text-sm">This could include SKU performance, trends, and substitution data.</p>
+              <p className="text-sm">
+                This could include SKU performance, trends, and substitution data.
+              </p>
             </div>
           </div>
         )}

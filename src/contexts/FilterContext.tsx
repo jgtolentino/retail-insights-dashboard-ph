@@ -1,12 +1,11 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { 
-  ConsumerFilters, 
+import {
+  ConsumerFilters,
   ProductMixFilters,
   GlobalFilters,
-  DEFAULT_CONSUMER_FILTERS, 
+  DEFAULT_CONSUMER_FILTERS,
   DEFAULT_PRODUCT_MIX_FILTERS,
-  defaultGlobalFilters
+  defaultGlobalFilters,
 } from '@/types/filters';
 
 interface FilterContextType {
@@ -14,13 +13,13 @@ interface FilterContextType {
   filters: GlobalFilters;
   setFilters: (updates: Partial<GlobalFilters>) => void;
   resetFilters: () => void;
-  
+
   // Consumer Insights filters
   consumerFilters: ConsumerFilters;
   setConsumerFilters: (filters: ConsumerFilters) => void;
   updateConsumerFilters: (updates: Partial<ConsumerFilters>) => void;
   resetConsumerFilters: () => void;
-  
+
   // Product Mix filters
   productMixFilters: ProductMixFilters;
   setProductMixFilters: (filters: ProductMixFilters) => void;
@@ -33,7 +32,9 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [filters, setGlobalFilters] = useState<GlobalFilters>(defaultGlobalFilters);
   const [consumerFilters, setConsumerFilters] = useState<ConsumerFilters>(DEFAULT_CONSUMER_FILTERS);
-  const [productMixFilters, setProductMixFilters] = useState<ProductMixFilters>(DEFAULT_PRODUCT_MIX_FILTERS);
+  const [productMixFilters, setProductMixFilters] = useState<ProductMixFilters>(
+    DEFAULT_PRODUCT_MIX_FILTERS
+  );
 
   const setFilters = (updates: Partial<GlobalFilters>) => {
     setGlobalFilters(prev => ({ ...prev, ...updates }));
@@ -73,11 +74,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     resetProductMixFilters,
   };
 
-  return (
-    <FilterContext.Provider value={value}>
-      {children}
-    </FilterContext.Provider>
-  );
+  return <FilterContext.Provider value={value}>{children}</FilterContext.Provider>;
 }
 
 export function useFilters() {
@@ -91,15 +88,31 @@ export function useFilters() {
 // Convenience hooks for specific filter types
 export function useGlobalFilters() {
   const { filters, setFilters, resetFilters } = useFilters();
-  return { globalFilters: filters, setGlobalFilters: setFilters, updateGlobalFilters: setFilters, resetGlobalFilters: resetFilters };
+  return {
+    globalFilters: filters,
+    setGlobalFilters: setFilters,
+    updateGlobalFilters: setFilters,
+    resetGlobalFilters: resetFilters,
+  };
 }
 
 export function useConsumerFilters() {
-  const { consumerFilters, setConsumerFilters, updateConsumerFilters, resetConsumerFilters } = useFilters();
+  const { consumerFilters, setConsumerFilters, updateConsumerFilters, resetConsumerFilters } =
+    useFilters();
   return { consumerFilters, setConsumerFilters, updateConsumerFilters, resetConsumerFilters };
 }
 
 export function useProductMixFilters() {
-  const { productMixFilters, setProductMixFilters, updateProductMixFilters, resetProductMixFilters } = useFilters();
-  return { productMixFilters, setProductMixFilters, updateProductMixFilters, resetProductMixFilters };
+  const {
+    productMixFilters,
+    setProductMixFilters,
+    updateProductMixFilters,
+    resetProductMixFilters,
+  } = useFilters();
+  return {
+    productMixFilters,
+    setProductMixFilters,
+    updateProductMixFilters,
+    resetProductMixFilters,
+  };
 }

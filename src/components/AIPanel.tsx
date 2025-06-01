@@ -14,7 +14,7 @@ interface AIPanelProps {
 
 const priorityColors = {
   low: 'bg-blue-100 text-blue-800 border-blue-200',
-  medium: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+  medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   high: 'bg-orange-100 text-orange-800 border-orange-200',
   critical: 'bg-red-100 text-red-800 border-red-200',
 };
@@ -31,11 +31,16 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Fetch AI insights based on dashboard data
-  const { data: insights = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: insights = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['ai-insights', dashboardData],
     queryFn: async () => {
       if (!dashboardData) return [];
-      
+
       const [recommendations, anomalies, predictions, consumerInsights] = await Promise.all([
         aiService.getRecommendations(dashboardData),
         aiService.detectAnomalies(dashboardData),
@@ -43,14 +48,15 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
         aiService.getConsumerInsights(dashboardData.customers),
       ]);
 
-      return [...recommendations, ...anomalies, ...predictions, ...consumerInsights]
-        .sort((a, b) => {
+      return [...recommendations, ...anomalies, ...predictions, ...consumerInsights].sort(
+        (a, b) => {
           // Sort by priority, then by confidence
           const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
           const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
           if (priorityDiff !== 0) return priorityDiff;
           return b.confidence - a.confidence;
-        });
+        }
+      );
     },
     enabled: !!dashboardData,
     refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
@@ -66,14 +72,14 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
 
   if (!isExpanded) {
     return (
-      <Card className={`p-3 border-dashed border-2 ${className}`}>
+      <Card className={`border-2 border-dashed p-3 ${className}`}>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsExpanded(true)}
           className="w-full justify-start"
         >
-          <Brain className="h-4 w-4 mr-2" />
+          <Brain className="mr-2 h-4 w-4" />
           AI Insights ({insights.length})
         </Button>
       </Card>
@@ -82,29 +88,18 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
 
   return (
     <Card className={`${className}`}>
-      <div className="p-4 border-b">
+      <div className="border-b p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-blue-600" />
-            <h3 className="font-semibold text-lg">AI Insights</h3>
-            {insights.length > 0 && (
-              <Badge variant="secondary">{insights.length}</Badge>
-            )}
+            <h3 className="text-lg font-semibold">AI Insights</h3>
+            {insights.length > 0 && <Badge variant="secondary">{insights.length}</Badge>}
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isLoading}
-            >
+            <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(false)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setIsExpanded(false)}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -125,25 +120,20 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
         )}
 
         {error && (
-          <div className="text-center py-6">
-            <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+          <div className="py-6 text-center">
+            <AlertTriangle className="mx-auto mb-2 h-8 w-8 text-amber-500" />
             <p className="text-sm text-gray-600">
               Unable to generate AI insights. Using fallback analysis.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              className="mt-2"
-            >
+            <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-2">
               Retry
             </Button>
           </div>
         )}
 
         {!isLoading && !error && insights.length === 0 && (
-          <div className="text-center py-6">
-            <Brain className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+          <div className="py-6 text-center">
+            <Brain className="mx-auto mb-2 h-8 w-8 text-gray-400" />
             <p className="text-sm text-gray-600">
               No insights available yet. Check back once you have more data.
             </p>
@@ -152,54 +142,53 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
 
         {insights.length > 0 && (
           <div className="space-y-3">
-            {insights.slice(0, 5).map((insight) => {
+            {insights.slice(0, 5).map(insight => {
               const Icon = typeIcons[insight.type];
               const isSelected = selectedInsightId === insight.id;
-              
+
               return (
                 <Card
                   key={insight.id}
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md ${
+                  className={`cursor-pointer p-3 transition-all hover:shadow-md ${
                     isSelected ? 'ring-2 ring-blue-500' : ''
                   }`}
                   onClick={() => setSelectedInsightId(isSelected ? null : insight.id)}
                 >
                   <div className="flex items-start gap-3">
-                    <Icon className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
-                      insight.type === 'anomaly' ? 'text-red-500' :
-                      insight.type === 'recommendation' ? 'text-blue-500' :
-                      insight.type === 'prediction' ? 'text-green-500' :
-                      'text-purple-500'
-                    }`} />
-                    
-                    <div className="flex-1 min-w-0">
+                    <Icon
+                      className={`mt-0.5 h-4 w-4 flex-shrink-0 ${
+                        insight.type === 'anomaly'
+                          ? 'text-red-500'
+                          : insight.type === 'recommendation'
+                            ? 'text-blue-500'
+                            : insight.type === 'prediction'
+                              ? 'text-green-500'
+                              : 'text-purple-500'
+                      }`}
+                    />
+
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-medium text-sm leading-tight">
-                          {insight.title}
-                        </h4>
+                        <h4 className="text-sm font-medium leading-tight">{insight.title}</h4>
                         <Badge
                           variant="outline"
-                          className={`text-xs flex-shrink-0 ${priorityColors[insight.priority]}`}
+                          className={`flex-shrink-0 text-xs ${priorityColors[insight.priority]}`}
                         >
                           {insight.priority}
                         </Badge>
                       </div>
-                      
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                        {insight.content}
-                      </p>
-                      
+
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-600">{insight.content}</p>
+
                       {isSelected && (
                         <div className="mt-3 space-y-2">
-                          <p className="text-xs text-gray-700">
-                            {insight.content}
-                          </p>
-                          
+                          <p className="text-xs text-gray-700">{insight.content}</p>
+
                           <div className="flex items-center justify-between text-xs text-gray-500">
                             <span>Confidence: {(insight.confidence * 100).toFixed(0)}%</span>
                             <span>{new Date(insight.timestamp).toLocaleTimeString()}</span>
                           </div>
-                          
+
                           {insight.actions && insight.actions.length > 0 && (
                             <div className="flex gap-2 pt-2">
                               {insight.actions.map((action, index) => (
@@ -207,7 +196,7 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
                                   key={index}
                                   variant={action.type === 'primary' ? 'default' : 'outline'}
                                   size="sm"
-                                  onClick={(e) => {
+                                  onClick={e => {
                                     e.stopPropagation();
                                     action.onClick();
                                   }}
@@ -224,9 +213,9 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
                 </Card>
               );
             })}
-            
+
             {insights.length > 5 && (
-              <div className="text-center pt-2">
+              <div className="pt-2 text-center">
                 <Button variant="outline" size="sm">
                   View All {insights.length} Insights
                 </Button>

@@ -3,25 +3,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Settings as SettingsIcon, 
-  Calendar, 
-  ToggleLeft, 
-  Palette, 
-  Key, 
-  Database, 
+import {
+  Settings as SettingsIcon,
+  Calendar,
+  ToggleLeft,
+  Palette,
+  Key,
+  Database,
   Shield,
   Save,
   RefreshCw,
   Download,
   Upload,
   Eye,
-  EyeOff
+  EyeOff,
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '@/config/features';
 
@@ -72,7 +78,7 @@ export default function Settings() {
       general: { defaultDateRange, autoRefresh, refreshInterval, timezone },
       theme: { theme, colorScheme, compactMode },
       features,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
@@ -89,7 +95,7 @@ export default function Settings() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const settings = JSON.parse(e.target?.result as string);
         // Apply imported settings
@@ -116,23 +122,23 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
             <p className="text-muted-foreground">
               Configure your dashboard preferences and system settings
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleReset}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Reset to Defaults
             </Button>
             <Button size="sm" onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
               Save Changes
             </Button>
           </div>
@@ -158,7 +164,7 @@ export default function Settings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="default-date-range">Default Date Range</Label>
                     <Select value={defaultDateRange} onValueChange={setDefaultDateRange}>
@@ -245,7 +251,7 @@ export default function Settings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
                     <Select value={theme} onValueChange={setTheme}>
@@ -325,7 +331,7 @@ export default function Settings() {
                         <Switch
                           id={key}
                           checked={enabled}
-                          onCheckedChange={(checked) =>
+                          onCheckedChange={checked =>
                             setFeatures(prev => ({ ...prev, [key]: checked }))
                           }
                         />
@@ -354,7 +360,7 @@ export default function Settings() {
                       id="supabase-url"
                       type="url"
                       value={supabaseUrl}
-                      onChange={(e) => setSupabaseUrl(e.target.value)}
+                      onChange={e => setSupabaseUrl(e.target.value)}
                       placeholder="https://your-project.supabase.co"
                     />
                   </div>
@@ -364,9 +370,9 @@ export default function Settings() {
                     <div className="relative">
                       <Input
                         id="supabase-key"
-                        type={showKeys ? "text" : "password"}
+                        type={showKeys ? 'text' : 'password'}
                         value={supabaseKey}
-                        onChange={(e) => setSupabaseKey(e.target.value)}
+                        onChange={e => setSupabaseKey(e.target.value)}
                         placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                       />
                       <Button
@@ -376,22 +382,18 @@ export default function Settings() {
                         className="absolute right-0 top-0 h-full px-3 py-2"
                         onClick={() => setShowKeys(!showKeys)}
                       >
-                        {showKeys ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {showKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-yellow-600" />
                     <span className="text-sm font-medium text-yellow-800">Security Note</span>
                   </div>
-                  <p className="text-sm text-yellow-700 mt-1">
+                  <p className="mt-1 text-sm text-yellow-700">
                     API keys are stored locally in your browser and never sent to external servers.
                   </p>
                 </div>
@@ -409,7 +411,7 @@ export default function Settings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="export-format">Export Format</Label>
                     <Select value={exportFormat} onValueChange={setExportFormat}>
@@ -441,9 +443,9 @@ export default function Settings() {
 
                 <Separator />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Button variant="outline" onClick={handleExportSettings} className="w-full">
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                     Export Settings
                   </Button>
 
@@ -460,7 +462,7 @@ export default function Settings() {
                       onClick={() => document.getElementById('import-settings')?.click()}
                       className="w-full"
                     >
-                      <Upload className="h-4 w-4 mr-2" />
+                      <Upload className="mr-2 h-4 w-4" />
                       Import Settings
                     </Button>
                   </div>
@@ -476,14 +478,14 @@ export default function Settings() {
 
 function getFeatureDescription(key: string): string {
   const descriptions: Record<string, string> = {
-    'DASHBOARD_OVERVIEW': 'Main dashboard with KPIs and charts',
-    'PRODUCT_MIX': 'Product mix and SKU analysis features',
-    'BRANDS_PAGE': 'Brand performance and competitive analysis',
-    'CONSUMER_INSIGHTS': 'Consumer demographics and behavior analytics',
-    'TRENDS_PAGE': 'Trend analysis and forecasting tools',
-    'SETTINGS_PAGE': 'Application settings and configuration',
-    'EXPORT_FEATURES': 'Data export and download capabilities',
-    'REAL_TIME_UPDATES': 'Live data updates and notifications'
+    DASHBOARD_OVERVIEW: 'Main dashboard with KPIs and charts',
+    PRODUCT_MIX: 'Product mix and SKU analysis features',
+    BRANDS_PAGE: 'Brand performance and competitive analysis',
+    CONSUMER_INSIGHTS: 'Consumer demographics and behavior analytics',
+    TRENDS_PAGE: 'Trend analysis and forecasting tools',
+    SETTINGS_PAGE: 'Application settings and configuration',
+    EXPORT_FEATURES: 'Data export and download capabilities',
+    REAL_TIME_UPDATES: 'Live data updates and notifications',
   };
   return descriptions[key] || 'Feature configuration option';
 }

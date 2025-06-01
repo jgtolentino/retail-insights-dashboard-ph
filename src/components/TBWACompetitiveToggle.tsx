@@ -20,7 +20,7 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
   onValueChange,
   tbwaStats,
   showCounts = true,
-  size = 'md'
+  size = 'md',
 }) => {
   const toggleValue = value === null ? 'all' : value === true ? 'tbwa' : 'competitors';
 
@@ -41,7 +41,7 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
   const sizeClasses = {
     sm: 'text-xs px-2 py-1',
     md: 'text-sm px-3 py-2',
-    lg: 'text-base px-4 py-3'
+    lg: 'text-base px-4 py-3',
   };
 
   return (
@@ -50,14 +50,14 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
         type="single"
         value={toggleValue}
         onValueChange={handleValueChange}
-        className="grid grid-cols-3 w-full"
+        className="grid w-full grid-cols-3"
       >
-        <ToggleGroupItem 
-          value="all" 
+        <ToggleGroupItem
+          value="all"
           className={`flex items-center gap-2 ${sizeClasses[size]}`}
           variant="outline"
         >
-          <Filter className="w-4 h-4" />
+          <Filter className="h-4 w-4" />
           <span>All Brands</span>
           {showCounts && tbwaStats && (
             <Badge variant="secondary" className="ml-1">
@@ -66,12 +66,12 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
           )}
         </ToggleGroupItem>
 
-        <ToggleGroupItem 
-          value="tbwa" 
-          className={`flex items-center gap-2 ${sizeClasses[size]} data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800 data-[state=on]:border-yellow-300`}
+        <ToggleGroupItem
+          value="tbwa"
+          className={`flex items-center gap-2 ${sizeClasses[size]} data-[state=on]:border-yellow-300 data-[state=on]:bg-yellow-100 data-[state=on]:text-yellow-800`}
           variant="outline"
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="h-4 w-4" />
           <span>TBWA Clients</span>
           {showCounts && tbwaStats && (
             <Badge variant="secondary" className="ml-1 bg-yellow-200 text-yellow-800">
@@ -80,12 +80,12 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
           )}
         </ToggleGroupItem>
 
-        <ToggleGroupItem 
-          value="competitors" 
-          className={`flex items-center gap-2 ${sizeClasses[size]} data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800 data-[state=on]:border-blue-300`}
+        <ToggleGroupItem
+          value="competitors"
+          className={`flex items-center gap-2 ${sizeClasses[size]} data-[state=on]:border-blue-300 data-[state=on]:bg-blue-100 data-[state=on]:text-blue-800`}
           variant="outline"
         >
-          <Building2 className="w-4 h-4" />
+          <Building2 className="h-4 w-4" />
           <span>Competitors</span>
           {showCounts && tbwaStats && (
             <Badge variant="secondary" className="ml-1 bg-blue-200 text-blue-800">
@@ -100,12 +100,12 @@ export const TBWACompetitiveToggle: React.FC<TBWACompetitiveToggleProps> = ({
         <div className="flex items-center gap-2 text-xs text-gray-600">
           {value === true ? (
             <div className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-yellow-600" />
+              <Sparkles className="h-3 w-3 text-yellow-600" />
               <span>Showing {tbwaStats.tbwa_brands} TBWA client brands</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <Building2 className="w-3 h-3 text-blue-600" />
+              <Building2 className="h-3 w-3 text-blue-600" />
               <span>Showing {tbwaStats.competitor_brands} competitor brands</span>
             </div>
           )}
@@ -127,21 +127,21 @@ export const MarketShareWidget: React.FC<MarketShareWidgetProps> = ({
   tbwaShare,
   tbwaRevenue,
   competitorRevenue,
-  className = ''
+  className = '',
 }) => {
   const formatCurrency = (amount: number) => `₱${amount.toLocaleString()}`;
 
   return (
-    <div className={`bg-white rounded-lg border p-4 ${className}`}>
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="w-5 h-5 text-yellow-600" />
+    <div className={`rounded-lg border bg-white p-4 ${className}`}>
+      <div className="mb-3 flex items-center gap-2">
+        <Sparkles className="h-5 w-5 text-yellow-600" />
         <h3 className="font-semibold text-gray-900">TBWA Market Share</h3>
       </div>
 
       {/* Progress Bar */}
-      <div className="relative h-6 bg-gray-200 rounded-full mb-4">
-        <div 
-          className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center text-white text-sm font-medium"
+      <div className="relative mb-4 h-6 rounded-full bg-gray-200">
+        <div
+          className="flex h-full items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-sm font-medium text-white"
           style={{ width: `${Math.max(tbwaShare, 10)}%` }} // Minimum 10% for visibility
         >
           {tbwaShare.toFixed(1)}%
@@ -151,39 +151,33 @@ export const MarketShareWidget: React.FC<MarketShareWidgetProps> = ({
       {/* Revenue Breakdown */}
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <Sparkles className="w-4 h-4 text-yellow-600" />
+          <div className="mb-1 flex items-center justify-center gap-1">
+            <Sparkles className="h-4 w-4 text-yellow-600" />
             <span className="font-medium text-gray-700">TBWA</span>
           </div>
-          <div className="text-lg font-bold text-yellow-600">
-            {formatCurrency(tbwaRevenue)}
-          </div>
+          <div className="text-lg font-bold text-yellow-600">{formatCurrency(tbwaRevenue)}</div>
         </div>
-        
+
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <Building2 className="w-4 h-4 text-blue-600" />
+          <div className="mb-1 flex items-center justify-center gap-1">
+            <Building2 className="h-4 w-4 text-blue-600" />
             <span className="font-medium text-gray-700">Competitors</span>
           </div>
-          <div className="text-lg font-bold text-blue-600">
-            {formatCurrency(competitorRevenue)}
-          </div>
+          <div className="text-lg font-bold text-blue-600">{formatCurrency(competitorRevenue)}</div>
         </div>
       </div>
 
       {/* Market Dominance Indicator */}
-      <div className="mt-3 pt-3 border-t">
+      <div className="mt-3 border-t pt-3">
         <div className="text-center">
           {tbwaShare >= 70 ? (
-            <Badge className="bg-green-100 text-green-800 border-green-300">
-              🏆 Market Leader
-            </Badge>
+            <Badge className="border-green-300 bg-green-100 text-green-800">🏆 Market Leader</Badge>
           ) : tbwaShare >= 50 ? (
-            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            <Badge className="border-yellow-300 bg-yellow-100 text-yellow-800">
               📈 Strong Position
             </Badge>
           ) : (
-            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+            <Badge className="border-blue-300 bg-blue-100 text-blue-800">
               🤝 Competitive Market
             </Badge>
           )}

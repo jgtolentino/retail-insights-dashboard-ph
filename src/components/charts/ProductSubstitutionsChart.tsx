@@ -1,12 +1,12 @@
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,13 +27,12 @@ interface ProductSubstitutionsChartProps {
   height?: number;
 }
 
-export function ProductSubstitutionsChart({ 
-  data, 
+export function ProductSubstitutionsChart({
+  data,
   loading = false,
-  title = "Top Product Substitutions",
-  height = 400
+  title = 'Top Product Substitutions',
+  height = 400,
 }: ProductSubstitutionsChartProps) {
-  
   if (loading) {
     return (
       <Card>
@@ -41,7 +40,7 @@ export function ProductSubstitutionsChart({
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <Skeleton className="w-full" style={{ height: height / 2 }} />
             <Skeleton className="w-full" style={{ height: height / 2 }} />
           </div>
@@ -71,21 +70,20 @@ export function ProductSubstitutionsChart({
     original: item.original_product,
     substitute: item.substitute_product,
     count: item.count,
-    shortName: item.original_product.length > 20 
-      ? item.original_product.substring(0, 20) + '...' 
-      : item.original_product
+    shortName:
+      item.original_product.length > 20
+        ? item.original_product.substring(0, 20) + '...'
+        : item.original_product,
   }));
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="font-semibold text-sm">{data.original}</p>
+        <div className="rounded-lg border bg-background p-3 shadow-lg">
+          <p className="text-sm font-semibold">{data.original}</p>
           <p className="text-sm text-muted-foreground">→ {data.substitute}</p>
-          <p className="text-sm text-primary mt-1">
-            Substitutions: {data.count}
-          </p>
+          <p className="mt-1 text-sm text-primary">Substitutions: {data.count}</p>
         </div>
       );
     }
@@ -101,7 +99,7 @@ export function ProductSubstitutionsChart({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Horizontal Bar Chart */}
           <div>
             <ResponsiveContainer width="100%" height={height}>
@@ -112,19 +110,11 @@ export function ProductSubstitutionsChart({
               >
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis type="number" />
-                <YAxis 
-                  dataKey="shortName" 
-                  type="category" 
-                  width={90}
-                  tick={{ fontSize: 12 }}
-                />
+                <YAxis dataKey="shortName" type="category" width={90} tick={{ fontSize: 12 }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {chartData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={index === 0 ? '#3b82f6' : '#60a5fa'} 
-                    />
+                    <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : '#60a5fa'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -136,10 +126,10 @@ export function ProductSubstitutionsChart({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left pb-3">Original</th>
-                  <th className="text-left pb-3">Substitution</th>
-                  <th className="text-right pb-3">Count</th>
-                  <th className="text-left pb-3">Reasons</th>
+                  <th className="pb-3 text-left">Original</th>
+                  <th className="pb-3 text-left">Substitution</th>
+                  <th className="pb-3 text-right">Count</th>
+                  <th className="pb-3 text-left">Reasons</th>
                 </tr>
               </thead>
               <tbody>
@@ -148,15 +138,11 @@ export function ProductSubstitutionsChart({
                     <td className="py-3">
                       <span className="font-medium">{row.original_product}</span>
                     </td>
-                    <td className="py-3 text-muted-foreground">
-                      {row.substitute_product}
-                    </td>
-                    <td className="py-3 text-right font-mono">
-                      {row.count}
-                    </td>
+                    <td className="py-3 text-muted-foreground">{row.substitute_product}</td>
+                    <td className="py-3 text-right font-mono">{row.count}</td>
                     <td className="py-3">
                       {row.reasons || (
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-xs text-muted-foreground">
                           {['Out of stock', 'Price preference', 'Brand loyalty'][i % 3]}
                         </span>
                       )}
@@ -165,9 +151,9 @@ export function ProductSubstitutionsChart({
                 ))}
               </tbody>
             </table>
-            
+
             {data.length > 10 && (
-              <p className="text-sm text-muted-foreground mt-3">
+              <p className="mt-3 text-sm text-muted-foreground">
                 Showing top 10 of {data.length} substitutions
               </p>
             )}

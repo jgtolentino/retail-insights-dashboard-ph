@@ -1,30 +1,39 @@
-import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+  UseMutationOptions,
+} from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { handleApiError } from '@/stores/errorStore';
 import { useFilterStore } from '@/stores/filterStore';
+import { shallow } from 'zustand/shallow';
 
 // Query key factory for consistent caching
 export const queryKeys = {
   all: ['dashboard'] as const,
-  
+
   // Brands
   brands: () => [...queryKeys.all, 'brands'] as const,
   brand: (id: string) => [...queryKeys.brands(), id] as const,
-  
+
   // Transactions
   transactions: (filters?: any) => [...queryKeys.all, 'transactions', filters] as const,
   transactionsSummary: (filters?: any) => [...queryKeys.transactions(filters), 'summary'] as const,
-  
+
   // Sales
   sales: (filters?: any) => [...queryKeys.all, 'sales', filters] as const,
   salesByBrand: (filters?: any) => [...queryKeys.sales(filters), 'by-brand'] as const,
   salesByRegion: (filters?: any) => [...queryKeys.sales(filters), 'by-region'] as const,
-  
+
   // Analytics
   analytics: (filters?: any) => [...queryKeys.all, 'analytics', filters] as const,
-  customerDensity: (level: string, filters?: any) => [...queryKeys.analytics(filters), 'customer-density', level] as const,
-  storePerformance: (filters?: any) => [...queryKeys.analytics(filters), 'store-performance'] as const,
-  
+  customerDensity: (level: string, filters?: any) =>
+    [...queryKeys.analytics(filters), 'customer-density', level] as const,
+  storePerformance: (filters?: any) =>
+    [...queryKeys.analytics(filters), 'store-performance'] as const,
+
   // Filters
   filterOptions: () => [...queryKeys.all, 'filter-options'] as const,
 } as const;
@@ -33,17 +42,17 @@ export const queryKeys = {
 const apiCall = async <T>(fn: () => Promise<{ data: T | null; error: any }>): Promise<T> => {
   try {
     const { data, error } = await fn();
-    
+
     if (error) {
       console.error('Supabase error:', error);
       handleApiError(error);
       throw new Error(error.message || 'Database query failed');
     }
-    
+
     if (data === null) {
       throw new Error('No data returned from query');
     }
-    
+
     return data;
   } catch (error) {
     console.error('API call failed:', error);
@@ -54,20 +63,10 @@ const apiCall = async <T>(fn: () => Promise<{ data: T | null; error: any }>): Pr
 
 // Brands API
 export const brandsApi = {
-  getAll: () => apiCall(() => 
-    supabase
-      .from('brands')
-      .select('id, name, category, is_tbwa')
-      .order('name')
-  ),
-  
-  getById: (id: string) => apiCall(() =>
-    supabase
-      .from('brands')
-      .select('*')
-      .eq('id', id)
-      .single()
-  ),
+  getAll: () =>
+    apiCall(() => supabase.from('brands').select('id, name, category, is_tbwa').order('name')),
+
+  getById: (id: string) => apiCall(() => supabase.from('brands').select('*').eq('id', id).single()),
 };
 
 // Transactions API with filters
@@ -101,12 +100,13 @@ export const transactionsApi = {
     // Add brand/category filtering through transaction_items
     if (filters.selectedBrands?.length > 0 || filters.selectedCategories?.length > 0) {
       // First get transaction IDs that match product filters
-      let itemQuery = supabase
-        .from('transaction_items')
-        .select('transaction_id');
+      let itemQuery = supabase.from('transaction_items').select('transaction_id');
 
       if (filters.selectedBrands?.length > 0) {
-        itemQuery = itemQuery.in('brand_id', filters.selectedBrands.map((b: string) => parseInt(b)));
+        itemQuery = itemQuery.in(
+          'brand_id',
+          filters.selectedBrands.map((b: string) => parseInt(b))
+        );
       }
 
       if (filters.selectedCategories?.length > 0) {
@@ -114,14 +114,14 @@ export const transactionsApi = {
       }
 
       const { data: filteredItems, error: itemsError } = await itemQuery;
-      
+
       if (itemsError) {
         handleApiError(itemsError);
         throw itemsError;
       }
 
       const transactionIds = [...new Set(filteredItems?.map(item => item.transaction_id))];
-      
+
       if (transactionIds.length > 0) {
         query = query.in('id', transactionIds);
       } else {
@@ -135,13 +135,15 @@ export const transactionsApi = {
 
   getSummary: async (filters: any) => {
     const transactions = await transactionsApi.getFiltered(filters);
-    
+
     return {
       totalTransactions: transactions.length,
       totalRevenue: transactions.reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0),
-      avgTransactionValue: transactions.length > 0 
-        ? transactions.reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0) / transactions.length 
-        : 0,
+      avgTransactionValue:
+        transactions.length > 0
+          ? transactions.reduce((sum: number, t: any) => sum + (t.total_amount || 0), 0) /
+            transactions.length
+          : 0,
       uniqueStores: new Set(transactions.map((t: any) => t.store_id)).size,
     };
   },
@@ -149,10 +151,9 @@ export const transactionsApi = {
 
 // Sales API
 export const salesApi = {
-  getByBrand: (filters: any) => apiCall(async () => {
-    let query = supabase
-      .from('transaction_items')
-      .select(`
+  getByBrand: (filters: any) =>
+    apiCall(async () => {
+      let query = supabase.from('transaction_items').select(`
         quantity,
         price,
         brand_id,
@@ -164,40 +165,47 @@ export const salesApi = {
         )
       `);
 
-    if (filters.selectedBrands?.length > 0) {
-      query = query.in('brand_id', filters.selectedBrands.map((b: string) => parseInt(b)));
-    }
+      if (filters.selectedBrands?.length > 0) {
+        query = query.in(
+          'brand_id',
+          filters.selectedBrands.map((b: string) => parseInt(b))
+        );
+      }
 
-    if (filters.selectedCategories?.length > 0) {
-      query = query.in('category', filters.selectedCategories);
-    }
+      if (filters.selectedCategories?.length > 0) {
+        query = query.in('category', filters.selectedCategories);
+      }
 
-    return query.order('brand_id');
-  }),
+      return query.order('brand_id');
+    }),
 
-  getByRegion: (filters: any) => apiCall(() =>
-    supabase.rpc('get_sales_by_region', { 
-      start_date: filters.dateRange?.start,
-      end_date: filters.dateRange?.end 
-    })
-  ),
+  getByRegion: (filters: any) =>
+    apiCall(() =>
+      supabase.rpc('get_sales_by_region', {
+        start_date: filters.dateRange?.start,
+        end_date: filters.dateRange?.end,
+      })
+    ),
 };
 
 // Analytics API
 export const analyticsApi = {
-  getCustomerDensity: (level: 'barangay' | 'city' | 'province', filters: any) => 
-    apiCall(() => supabase.rpc('get_customer_density', { 
-      aggregation_level: level,
-      start_date: filters.dateRange?.start,
-      end_date: filters.dateRange?.end 
-    })),
+  getCustomerDensity: (level: 'barangay' | 'city' | 'province', filters: any) =>
+    apiCall(() =>
+      supabase.rpc('get_customer_density', {
+        aggregation_level: level,
+        start_date: filters.dateRange?.start,
+        end_date: filters.dateRange?.end,
+      })
+    ),
 
-  getStorePerformance: (filters: any) => apiCall(() =>
-    supabase.rpc('get_store_performance', {
-      start_date: filters.dateRange?.start,
-      end_date: filters.dateRange?.end
-    })
-  ),
+  getStorePerformance: (filters: any) =>
+    apiCall(() =>
+      supabase.rpc('get_store_performance', {
+        start_date: filters.dateRange?.start,
+        end_date: filters.dateRange?.end,
+      })
+    ),
 };
 
 // Filter options API
@@ -215,10 +223,12 @@ export const filterOptionsApi = {
         value: brand.id.toString(),
         label: brand.name,
       })),
-      categoryOptions: [...new Set(categories.map((c: any) => c.category))].map((category: string) => ({
-        value: category,
-        label: category.charAt(0).toUpperCase() + category.slice(1),
-      })),
+      categoryOptions: [...new Set(categories.map((c: any) => c.category))].map(
+        (category: string) => ({
+          value: category,
+          label: category.charAt(0).toUpperCase() + category.slice(1),
+        })
+      ),
       regionOptions: [...new Set(regions.map((r: any) => r.region))].map((region: string) => ({
         value: region,
         label: region,
@@ -255,21 +265,20 @@ export const useApiQuery = <T>(
 
 // Specific hooks with filters integration
 export const useBrands = (options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>) => {
-  return useApiQuery(
-    queryKeys.brands(),
-    brandsApi.getAll,
-    options
-  );
+  return useApiQuery(queryKeys.brands(), brandsApi.getAll, options);
 };
 
 export const useTransactions = (options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>) => {
-  const filters = useFilterStore((state) => ({
-    dateRange: state.dateRange,
-    selectedBrands: state.selectedBrands,
-    selectedCategories: state.selectedCategories,
-    selectedRegions: state.selectedRegions,
-    selectedStores: state.selectedStores,
-  }));
+  const filters = useFilterStore(
+    state => ({
+      dateRange: state.dateRange,
+      selectedBrands: state.selectedBrands,
+      selectedCategories: state.selectedCategories,
+      selectedRegions: state.selectedRegions,
+      selectedStores: state.selectedStores,
+    }),
+    shallow
+  );
 
   return useApiQuery(
     queryKeys.transactions(filters),
@@ -278,14 +287,19 @@ export const useTransactions = (options?: Omit<UseQueryOptions<any>, 'queryKey' 
   );
 };
 
-export const useTransactionsSummary = (options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>) => {
-  const filters = useFilterStore((state) => ({
-    dateRange: state.dateRange,
-    selectedBrands: state.selectedBrands,
-    selectedCategories: state.selectedCategories,
-    selectedRegions: state.selectedRegions,
-    selectedStores: state.selectedStores,
-  }));
+export const useTransactionsSummary = (
+  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>
+) => {
+  const filters = useFilterStore(
+    state => ({
+      dateRange: state.dateRange,
+      selectedBrands: state.selectedBrands,
+      selectedCategories: state.selectedCategories,
+      selectedRegions: state.selectedRegions,
+      selectedStores: state.selectedStores,
+    }),
+    shallow
+  );
 
   return useApiQuery(
     queryKeys.transactionsSummary(filters),
@@ -297,29 +311,12 @@ export const useTransactionsSummary = (options?: Omit<UseQueryOptions<any>, 'que
   );
 };
 
-export const useSalesByBrand = (options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>) => {
-  const filters = useFilterStore((state) => ({
-    selectedBrands: state.selectedBrands,
-    selectedCategories: state.selectedCategories,
-  }));
-
-  return useApiQuery(
-    queryKeys.salesByBrand(filters),
-    () => salesApi.getByBrand(filters),
-    options
-  );
-};
-
 export const useFilterOptions = (options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>) => {
-  return useApiQuery(
-    queryKeys.filterOptions(),
-    filterOptionsApi.getAll,
-    {
-      staleTime: 15 * 60 * 1000, // 15 minutes - filter options don't change often
-      cacheTime: 30 * 60 * 1000, // 30 minutes
-      ...options,
-    }
-  );
+  return useApiQuery(queryKeys.filterOptions(), filterOptionsApi.getAll, {
+    staleTime: 15 * 60 * 1000, // 15 minutes - filter options don't change often
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+    ...options,
+  });
 };
 
 // Mutation helpers
@@ -331,7 +328,7 @@ export const useApiMutation = <TData, TVariables>(
 
   return useMutation({
     mutationFn,
-    onError: (error) => {
+    onError: error => {
       handleApiError(error);
     },
     onSuccess: () => {
@@ -349,7 +346,8 @@ export const useInvalidateQueries = () => {
   return {
     invalidateAll: () => queryClient.invalidateQueries({ queryKey: queryKeys.all }),
     invalidateBrands: () => queryClient.invalidateQueries({ queryKey: queryKeys.brands() }),
-    invalidateTransactions: () => queryClient.invalidateQueries({ queryKey: queryKeys.transactions() }),
+    invalidateTransactions: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.transactions() }),
     invalidateSales: () => queryClient.invalidateQueries({ queryKey: queryKeys.sales() }),
     invalidateAnalytics: () => queryClient.invalidateQueries({ queryKey: queryKeys.analytics() }),
   };

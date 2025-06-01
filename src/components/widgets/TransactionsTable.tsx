@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
-  ChevronsRight, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   FileText,
-  Loader2 
+  Loader2,
 } from 'lucide-react';
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions';
 
@@ -24,9 +24,9 @@ interface TransactionsTableProps {
   initialPageSize?: number;
 }
 
-function TransactionsTableComponent({ 
+function TransactionsTableComponent({
   className = '',
-  initialPageSize = 10
+  initialPageSize = 10,
 }: TransactionsTableProps) {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(initialPageSize);
@@ -59,13 +59,13 @@ function TransactionsTableComponent({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="text-sm flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
             <FileText className="h-4 w-4" />
             Transactions
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64 text-red-500">
+          <div className="flex h-64 items-center justify-center text-red-500">
             Error loading transactions: {error?.message}
           </div>
         </CardContent>
@@ -77,29 +77,28 @@ function TransactionsTableComponent({
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
             <FileText className="h-4 w-4" />
             Transactions
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
           </CardTitle>
-          
+
           {data && (
             <div className="text-sm text-gray-600">
-              Showing {((pageNumber - 1) * pageSize) + 1} to{' '}
-              {Math.min(pageNumber * pageSize, data.totalCount)} of{' '}
-              {data.totalCount} transactions
+              Showing {(pageNumber - 1) * pageSize + 1} to{' '}
+              {Math.min(pageNumber * pageSize, data.totalCount)} of {data.totalCount} transactions
             </div>
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         ) : !data || data.rows.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex h-64 items-center justify-center text-gray-500">
             No transactions found for current filter selection
           </div>
         ) : (
@@ -117,22 +116,15 @@ function TransactionsTableComponent({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.rows.map((transaction) => (
+                  {data.rows.map(transaction => (
                     <TableRow key={transaction.id}>
-                      <TableCell className="font-medium">
-                        #{transaction.id}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(transaction.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        {transaction.store?.name || 'Unknown Store'}
-                      </TableCell>
+                      <TableCell className="font-medium">#{transaction.id}</TableCell>
+                      <TableCell>{formatDate(transaction.created_at)}</TableCell>
+                      <TableCell>{transaction.store?.name || 'Unknown Store'}</TableCell>
                       <TableCell>
                         {transaction.store?.city && transaction.store?.region
                           ? `${transaction.store.city}, ${transaction.store.region}`
-                          : 'Unknown Location'
-                        }
+                          : 'Unknown Location'}
                       </TableCell>
                       <TableCell className="text-right font-medium">
                         {formatCurrency(transaction.total_amount)}
@@ -145,11 +137,11 @@ function TransactionsTableComponent({
 
             {/* Pagination */}
             {data.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
+              <div className="mt-4 flex items-center justify-between">
                 <div className="text-sm text-gray-600">
                   Page {pageNumber} of {data.totalPages}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -159,7 +151,7 @@ function TransactionsTableComponent({
                   >
                     <ChevronsLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -168,7 +160,7 @@ function TransactionsTableComponent({
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -177,7 +169,7 @@ function TransactionsTableComponent({
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -191,15 +183,17 @@ function TransactionsTableComponent({
             )}
 
             {/* Summary */}
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="mt-4 rounded-lg bg-gray-50 p-4">
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
                 <div>
                   <span className="text-gray-600">Total Transactions:</span>
                   <div className="font-semibold">{data.totalCount.toLocaleString()}</div>
                 </div>
                 <div>
                   <span className="text-gray-600">Current Page:</span>
-                  <div className="font-semibold">{pageNumber} of {data.totalPages}</div>
+                  <div className="font-semibold">
+                    {pageNumber} of {data.totalPages}
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">Page Total:</span>

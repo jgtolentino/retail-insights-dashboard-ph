@@ -28,7 +28,7 @@ interface ErrorActions {
   clearErrors: () => void;
   setNetworkStatus: (status: ErrorState['networkStatus']) => void;
   updateLastSync: () => void;
-  
+
   // Convenience methods
   addNetworkError: (message?: string) => void;
   addValidationError: (field: string, message: string) => void;
@@ -45,10 +45,10 @@ export const useErrorStore = create<ErrorStore>()(
     networkStatus: 'online',
     lastSync: null,
 
-    addError: (error) => {
+    addError: error => {
       const id = generateId();
       const timestamp = Date.now();
-      
+
       const newError: AppError = {
         id,
         timestamp,
@@ -56,7 +56,7 @@ export const useErrorStore = create<ErrorStore>()(
         ...error,
       };
 
-      set((state) => ({
+      set(state => ({
         errors: [...state.errors, newError],
       }));
 
@@ -68,9 +68,9 @@ export const useErrorStore = create<ErrorStore>()(
       }
     },
 
-    removeError: (id) => {
-      set((state) => ({
-        errors: state.errors.filter((error) => error.id !== id),
+    removeError: id => {
+      set(state => ({
+        errors: state.errors.filter(error => error.id !== id),
       }));
     },
 
@@ -78,9 +78,9 @@ export const useErrorStore = create<ErrorStore>()(
       set({ errors: [] });
     },
 
-    setNetworkStatus: (status) => {
+    setNetworkStatus: status => {
       set({ networkStatus: status });
-      
+
       if (status === 'offline') {
         get().addError({
           message: 'Connection lost. Some features may not work properly.',
@@ -89,10 +89,8 @@ export const useErrorStore = create<ErrorStore>()(
         });
       } else if (status === 'online') {
         // Remove offline warnings
-        set((state) => ({
-          errors: state.errors.filter(
-            (error) => !error.message.includes('Connection lost')
-          ),
+        set(state => ({
+          errors: state.errors.filter(error => !error.message.includes('Connection lost')),
         }));
       }
     },
@@ -133,14 +131,12 @@ export const useErrorStore = create<ErrorStore>()(
   }))
 );
 
-// Selectors
-export const useErrorSelectors = {
-  errors: () => useErrorStore((state) => state.errors),
-  hasErrors: () => useErrorStore((state) => state.errors.length > 0),
-  networkStatus: () => useErrorStore((state) => state.networkStatus),
-  isOnline: () => useErrorStore((state) => state.networkStatus === 'online'),
-  lastSync: () => useErrorStore((state) => state.lastSync),
-};
+// Hook selectors
+export const useErrors = () => useErrorStore(state => state.errors);
+export const useHasErrors = () => useErrorStore(state => state.errors.length > 0);
+export const useNetworkStatus = () => useErrorStore(state => state.networkStatus);
+export const useIsOnline = () => useErrorStore(state => state.networkStatus === 'online');
+export const useLastSync = () => useErrorStore(state => state.lastSync);
 
 // Network status monitor
 export const setupNetworkMonitoring = () => {
@@ -192,13 +188,13 @@ export const handleApiError = (error: any, context?: string) => {
           code: 'UNAUTHORIZED',
           action: {
             label: 'Login',
-            handler: () => window.location.href = '/login',
+            handler: () => (window.location.href = '/login'),
           },
         });
         break;
       case 403:
         addError({
-          message: 'Access denied. You don\'t have permission for this action.',
+          message: "Access denied. You don't have permission for this action.",
           type: 'error',
           code: 'FORBIDDEN',
         });

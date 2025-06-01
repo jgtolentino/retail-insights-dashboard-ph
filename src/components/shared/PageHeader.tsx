@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 interface PageHeaderProps {
   title: string;
@@ -19,25 +19,21 @@ export function PageHeader({
   onRefresh,
   isLoading = false,
   showRefreshButton = true,
-  className = ""
+  className = '',
 }: PageHeaderProps) {
   return (
     <div className={`mb-6 ${className}`}>
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
-            {title}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{title}</h1>
           {subtitle && (
-            <p className="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">
-              {subtitle}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">{subtitle}</p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {children}
-          
+
           {showRefreshButton && onRefresh && (
             <Button
               variant="outline"

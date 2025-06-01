@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { SprintErrorBoundary } from '@/utils/error-boundary-sprint';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -19,7 +18,7 @@ export function SprintDashboard({ sprint, children }: SprintDashboardProps) {
     loading: false,
     passed: true,
     errors: [],
-    warnings: []
+    warnings: [],
   });
 
   // Remove the validation logic for now since the functions are missing
@@ -37,9 +36,7 @@ export function SprintDashboard({ sprint, children }: SprintDashboardProps) {
       </Alert>
 
       {/* Wrapped Content with Error Boundary */}
-      <SprintErrorBoundary sprint={sprint}>
-        {children}
-      </SprintErrorBoundary>
+      <SprintErrorBoundary sprint={sprint}>{children}</SprintErrorBoundary>
     </div>
   );
 }

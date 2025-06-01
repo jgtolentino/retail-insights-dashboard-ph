@@ -40,14 +40,14 @@ export function Sprint4DataVerification() {
         checks.push({
           check: 'Transaction Count',
           status: 'error',
-          message: `Error: ${countError.message}`
+          message: `Error: ${countError.message}`,
         });
       } else {
         checks.push({
           check: 'Transaction Count',
           status: totalCount >= 1000 ? 'success' : 'warning',
           message: `${totalCount.toLocaleString()} records found`,
-          count: totalCount
+          count: totalCount,
         });
       }
 
@@ -62,10 +62,10 @@ export function Sprint4DataVerification() {
       checks.push({
         check: 'Sprint 4 Fields',
         status: sprint4FieldsPopulated ? 'success' : 'error',
-        message: sprint4FieldsPopulated 
+        message: sprint4FieldsPopulated
           ? `Enhanced fields populated (${sampleTransactions.length} verified)`
           : 'Sprint 4 fields not found - run data generator',
-        count: sampleTransactions?.length || 0
+        count: sampleTransactions?.length || 0,
       });
 
       // Check 3: Substitutions table
@@ -77,7 +77,7 @@ export function Sprint4DataVerification() {
         check: 'Substitutions Table',
         status: substitutionCount > 0 ? 'success' : 'warning',
         message: `${substitutionCount} substitution records`,
-        count: substitutionCount
+        count: substitutionCount,
       });
 
       // Check 4: Request behaviors table
@@ -89,7 +89,7 @@ export function Sprint4DataVerification() {
         check: 'Request Behaviors',
         status: behaviorCount > 0 ? 'success' : 'warning',
         message: `${behaviorCount} behavior records`,
-        count: behaviorCount
+        count: behaviorCount,
       });
 
       // Check 5: Payment method distribution
@@ -104,7 +104,7 @@ export function Sprint4DataVerification() {
         check: 'Payment Methods',
         status: uniquePaymentMethods.size >= 3 ? 'success' : 'warning',
         message: `${uniquePaymentMethods.size} types: ${Array.from(uniquePaymentMethods).join(', ')}`,
-        count: uniquePaymentMethods.size
+        count: uniquePaymentMethods.size,
       });
 
       // Check 6: Request type distribution
@@ -119,7 +119,7 @@ export function Sprint4DataVerification() {
         check: 'Request Types',
         status: uniqueRequestTypes.size === 3 ? 'success' : 'warning',
         message: `${uniqueRequestTypes.size} types: ${Array.from(uniqueRequestTypes).join(', ')}`,
-        count: uniqueRequestTypes.size
+        count: uniqueRequestTypes.size,
       });
 
       // Check 7: RPC Functions
@@ -129,13 +129,13 @@ export function Sprint4DataVerification() {
           check: 'RPC Functions',
           status: testData && testData.length > 0 ? 'success' : 'error',
           message: testData ? 'Analytics functions working' : 'RPC functions not found',
-          count: testData?.length || 0
+          count: testData?.length || 0,
         });
       } catch (rpcError) {
         checks.push({
           check: 'RPC Functions',
           status: 'error',
-          message: 'RPC functions error - run migrations'
+          message: 'RPC functions error - run migrations',
         });
       }
 
@@ -154,16 +154,16 @@ export function Sprint4DataVerification() {
 
       if (dateRange && latestDate && dateRange[0] && latestDate[0]) {
         const daysDiff = Math.floor(
-          (new Date(latestDate[0].checkout_time).getTime() - 
-           new Date(dateRange[0].checkout_time).getTime()) / 
-          (1000 * 60 * 60 * 24)
+          (new Date(latestDate[0].checkout_time).getTime() -
+            new Date(dateRange[0].checkout_time).getTime()) /
+            (1000 * 60 * 60 * 24)
         );
 
         checks.push({
           check: 'Date Range',
           status: daysDiff >= 30 ? 'success' : 'warning',
           message: `${daysDiff} days of data`,
-          count: daysDiff
+          count: daysDiff,
         });
       }
 
@@ -175,11 +175,13 @@ export function Sprint4DataVerification() {
       setResults(checks);
     } catch (error) {
       console.error('Verification error:', error);
-      setResults([{
-        check: 'System Check',
-        status: 'error',
-        message: `Critical error: ${error.message}`
-      }]);
+      setResults([
+        {
+          check: 'System Check',
+          status: 'error',
+          message: `Critical error: ${error.message}`,
+        },
+      ]);
       setOverallStatus('error');
     } finally {
       setLoading(false);
@@ -188,18 +190,25 @@ export function Sprint4DataVerification() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'warning': return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-      case 'error': return <XCircle className="h-5 w-5 text-red-500" />;
-      default: return null;
+      case 'success':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'warning':
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+      case 'error':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
     }
   };
 
   const getOverallMessage = () => {
     switch (overallStatus) {
-      case 'success': return 'All Sprint 4 features are ready!';
-      case 'warning': return 'Sprint 4 is functional but some data may be missing';
-      case 'error': return 'Sprint 4 setup incomplete - follow pre-test checklist';
+      case 'success':
+        return 'All Sprint 4 features are ready!';
+      case 'warning':
+        return 'Sprint 4 is functional but some data may be missing';
+      case 'error':
+        return 'Sprint 4 setup incomplete - follow pre-test checklist';
     }
   };
 
@@ -212,8 +221,14 @@ export function Sprint4DataVerification() {
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           </span>
           {!loading && (
-            <Badge 
-              variant={overallStatus === 'success' ? 'default' : overallStatus === 'warning' ? 'secondary' : 'destructive'}
+            <Badge
+              variant={
+                overallStatus === 'success'
+                  ? 'default'
+                  : overallStatus === 'warning'
+                    ? 'secondary'
+                    : 'destructive'
+              }
               className="text-sm"
             >
               {getOverallMessage()}
@@ -229,7 +244,7 @@ export function Sprint4DataVerification() {
         ) : (
           <div className="space-y-3">
             {results.map((result, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={index} className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3">
                   {getStatusIcon(result.status)}
                   <span className="font-medium">{result.check}</span>
@@ -246,22 +261,39 @@ export function Sprint4DataVerification() {
             ))}
 
             {overallStatus === 'error' && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-medium text-red-900 mb-2">Action Required</h4>
-                <ol className="text-sm text-red-700 space-y-1 list-decimal list-inside">
-                  <li>Run: <code className="bg-red-100 px-1 rounded">npm install @faker-js/faker @radix-ui/react-progress</code></li>
-                  <li>Run migrations: <code className="bg-red-100 px-1 rounded">supabase db push</code></li>
-                  <li>Generate data: <code className="bg-red-100 px-1 rounded">npm run tsx scripts/generate-enhanced-retail-data.ts</code></li>
-                  <li>Or run all: <code className="bg-red-100 px-1 rounded">./scripts/deploy-sprint4.sh</code></li>
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+                <h4 className="mb-2 font-medium text-red-900">Action Required</h4>
+                <ol className="list-inside list-decimal space-y-1 text-sm text-red-700">
+                  <li>
+                    Run:{' '}
+                    <code className="rounded bg-red-100 px-1">
+                      npm install @faker-js/faker @radix-ui/react-progress
+                    </code>
+                  </li>
+                  <li>
+                    Run migrations:{' '}
+                    <code className="rounded bg-red-100 px-1">supabase db push</code>
+                  </li>
+                  <li>
+                    Generate data:{' '}
+                    <code className="rounded bg-red-100 px-1">
+                      npm run tsx scripts/generate-enhanced-retail-data.ts
+                    </code>
+                  </li>
+                  <li>
+                    Or run all:{' '}
+                    <code className="rounded bg-red-100 px-1">./scripts/deploy-sprint4.sh</code>
+                  </li>
                 </ol>
               </div>
             )}
 
             {overallStatus === 'success' && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-medium text-green-900 mb-2">Ready to Test! 🎉</h4>
+              <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
+                <h4 className="mb-2 font-medium text-green-900">Ready to Test! 🎉</h4>
                 <p className="text-sm text-green-700">
-                  All Sprint 4 components are properly configured. Navigate to the Advanced Analytics tab to explore the new features.
+                  All Sprint 4 components are properly configured. Navigate to the Advanced
+                  Analytics tab to explore the new features.
                 </p>
               </div>
             )}

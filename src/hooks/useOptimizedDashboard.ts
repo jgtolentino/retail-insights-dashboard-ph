@@ -52,7 +52,7 @@ export function useOptimizedDashboard(dateRange: { start: Date; end: Date }) {
           .lte('hour', dateRange.end.toISOString())
           .order('hour', { ascending: false })
           .limit(1),
-        
+
         // Top Brands from materialized view
         supabase
           .from('mv_brand_performance')
@@ -62,7 +62,7 @@ export function useOptimizedDashboard(dateRange: { start: Date; end: Date }) {
           .eq('performance_tier', 'Top 5')
           .order('revenue', { ascending: false })
           .limit(5),
-        
+
         // Customer Segments
         supabase
           .from('mv_customer_segments')
@@ -71,36 +71,39 @@ export function useOptimizedDashboard(dateRange: { start: Date; end: Date }) {
           .limit(1000) // Process client-side for now
           .then(({ data }) => {
             // Group by segment client-side
-            const segments = data?.reduce((acc, customer) => {
-              const segment = customer.customer_segment;
-              if (!acc[segment]) {
-                acc[segment] = { count: 0, totalValue: 0 };
-              }
-              acc[segment].count++;
-              acc[segment].totalValue += customer.total_spent;
-              return acc;
-            }, {} as Record<string, any>);
-            
+            const segments = data?.reduce(
+              (acc, customer) => {
+                const segment = customer.customer_segment;
+                if (!acc[segment]) {
+                  acc[segment] = { count: 0, totalValue: 0 };
+                }
+                acc[segment].count++;
+                acc[segment].totalValue += customer.total_spent;
+                return acc;
+              },
+              {} as Record<string, any>
+            );
+
             return Object.entries(segments || {}).map(([segment, data]) => ({
               segment,
               count: data.count,
               totalValue: data.totalValue,
-              avgValue: data.totalValue / data.count
+              avgValue: data.totalValue / data.count,
             }));
           }),
-        
+
         // Time series metrics
         supabase
           .from('mv_time_series_metrics')
           .select('*')
           .gte('hour', dateRange.start.toISOString())
           .lte('hour', dateRange.end.toISOString())
-          .order('hour', { ascending: true })
+          .order('hour', { ascending: true }),
       ]);
 
       // Process results
       const latestKpi = kpisResult.data?.[0];
-      
+
       const metrics: DashboardMetrics = {
         totalRevenue: latestKpi?.revenue || 0,
         totalTransactions: latestKpi?.transaction_count || 0,
@@ -108,29 +111,31 @@ export function useOptimizedDashboard(dateRange: { start: Date; end: Date }) {
         avgTransaction: latestKpi?.avg_transaction || 0,
         revenueGrowth24h: calculateGrowth(latestKpi?.revenue, latestKpi?.revenue_24h_ago),
         revenueGrowth7d: calculateGrowth(latestKpi?.revenue, latestKpi?.revenue_7d_ago),
-        topBrands: brandsResult.data?.map(brand => ({
-          brandId: brand.brand_id,
-          brandName: brand.brand_name,
-          revenue: brand.revenue,
-          unitsSOld: brand.units_sold,
-          transactionCount: brand.transaction_count,
-          performanceTier: brand.performance_tier
-        })) || [],
-        hourlyMetrics: timeSeriesResult.data?.map(metric => ({
-          hour: metric.hour,
-          revenue: metric.revenue,
-          transactions: metric.transaction_count,
-          avgTransaction: metric.avg_transaction,
-          trafficAnomaly: metric.traffic_anomaly
-        })) || [],
-        customerSegments: segmentsResult || []
+        topBrands:
+          brandsResult.data?.map(brand => ({
+            brandId: brand.brand_id,
+            brandName: brand.brand_name,
+            revenue: brand.revenue,
+            unitsSOld: brand.units_sold,
+            transactionCount: brand.transaction_count,
+            performanceTier: brand.performance_tier,
+          })) || [],
+        hourlyMetrics:
+          timeSeriesResult.data?.map(metric => ({
+            hour: metric.hour,
+            revenue: metric.revenue,
+            transactions: metric.transaction_count,
+            avgTransaction: metric.avg_transaction,
+            trafficAnomaly: metric.traffic_anomaly,
+          })) || [],
+        customerSegments: segmentsResult || [],
       };
 
       return metrics;
     },
     staleTime: 30000, // Data is fresh for 30 seconds
     cacheTime: 300000, // Cache for 5 minutes
-    refetchInterval: 60000 // Refetch every minute
+    refetchInterval: 60000, // Refetch every minute
   });
 }
 
@@ -143,21 +148,25 @@ function calculateGrowth(current: number | null, previous: number | null): numbe
 export function useRealtimeDashboard() {
   const { data, refetch } = useOptimizedDashboard({
     start: subDays(new Date(), 30),
-    end: new Date()
+    end: new Date(),
   });
 
   // Subscribe to real-time updates
   useEffect(() => {
     const channel = supabase
       .channel('dashboard-updates')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'transactions'
-      }, () => {
-        // Debounce refetch to avoid too many requests
-        debounceRefetch();
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'transactions',
+        },
+        () => {
+          // Debounce refetch to avoid too many requests
+          debounceRefetch();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -165,10 +174,7 @@ export function useRealtimeDashboard() {
     };
   }, []);
 
-  const debounceRefetch = useMemo(
-    () => debounce(() => refetch(), 5000),
-    [refetch]
-  );
+  const debounceRefetch = useMemo(() => debounce(() => refetch(), 5000), [refetch]);
 
   return data;
 }
@@ -192,19 +198,19 @@ export function useBrandPerformance(brandId: string, days: number = 30) {
         totalRevenue: data?.reduce((sum, day) => sum + day.revenue, 0) || 0,
         totalUnits: data?.reduce((sum, day) => sum + day.units_sold, 0) || 0,
         avgDailyRevenue: (data?.reduce((sum, day) => sum + day.revenue, 0) || 0) / days,
-        trend: calculateTrend(data || [])
+        trend: calculateTrend(data || []),
       };
     },
-    staleTime: 60000 // 1 minute
+    staleTime: 60000, // 1 minute
   });
 }
 
 function calculateTrend(data: any[]): 'up' | 'down' | 'stable' {
   if (data.length < 2) return 'stable';
-  
+
   const recent = data.slice(-7).reduce((sum, d) => sum + d.revenue, 0);
   const previous = data.slice(-14, -7).reduce((sum, d) => sum + d.revenue, 0);
-  
+
   if (recent > previous * 1.05) return 'up';
   if (recent < previous * 0.95) return 'down';
   return 'stable';
@@ -224,31 +230,34 @@ export function useCustomerSegments() {
       if (error) throw error;
 
       // Aggregate by segment
-      const segments = data?.reduce((acc, customer) => {
-        const segment = customer.customer_segment;
-        if (!acc[segment]) {
-          acc[segment] = {
-            name: segment,
-            count: 0,
-            totalValue: 0,
-            customers: []
-          };
-        }
-        acc[segment].count++;
-        acc[segment].totalValue += customer.total_spent;
-        acc[segment].customers.push(customer);
-        return acc;
-      }, {} as Record<string, any>);
+      const segments = data?.reduce(
+        (acc, customer) => {
+          const segment = customer.customer_segment;
+          if (!acc[segment]) {
+            acc[segment] = {
+              name: segment,
+              count: 0,
+              totalValue: 0,
+              customers: [],
+            };
+          }
+          acc[segment].count++;
+          acc[segment].totalValue += customer.total_spent;
+          acc[segment].customers.push(customer);
+          return acc;
+        },
+        {} as Record<string, any>
+      );
 
       return Object.values(segments || {}).map((segment: any) => ({
         ...segment,
         avgValue: segment.totalValue / segment.count,
         topCustomers: segment.customers
           .sort((a: any, b: any) => b.total_spent - a.total_spent)
-          .slice(0, 5)
+          .slice(0, 5),
       }));
     },
-    staleTime: 300000 // 5 minutes
+    staleTime: 300000, // 5 minutes
   });
 }
 

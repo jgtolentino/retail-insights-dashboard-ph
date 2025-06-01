@@ -26,9 +26,9 @@ class ExportService {
    */
   exportToCSV(exportData: ExportData): void {
     const { title, headers, data, metadata } = exportData;
-    
+
     let csvContent = '';
-    
+
     // Add metadata if provided
     if (metadata) {
       csvContent += `# ${title}\n`;
@@ -38,10 +38,10 @@ class ExportService {
       }
       csvContent += '\n';
     }
-    
+
     // Add headers
     csvContent += headers.join(',') + '\n';
-    
+
     // Add data rows
     data.forEach(row => {
       const escapedRow = row.map(cell => {
@@ -54,7 +54,7 @@ class ExportService {
       });
       csvContent += escapedRow.join(',') + '\n';
     });
-    
+
     // Download file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
@@ -65,46 +65,51 @@ class ExportService {
    */
   exportToExcel(exportData: ExportData): void {
     const { title, headers, data, metadata } = exportData;
-    
+
     // Create workbook
     const wb = XLSX.utils.book_new();
-    
+
     // Create metadata sheet if provided
     if (metadata) {
       const metadataRows = [
         ['Report Title', title],
         ['Generated At', metadata.generatedAt],
-        ...(metadata.dateRange ? [
-          ['Date Range Start', metadata.dateRange.start],
-          ['Date Range End', metadata.dateRange.end]
-        ] : []),
-        ...(metadata.filters ? Object.entries(metadata.filters).map(([key, value]) => [
-          `Filter: ${key}`, Array.isArray(value) ? value.join(', ') : String(value)
-        ]) : [])
+        ...(metadata.dateRange
+          ? [
+              ['Date Range Start', metadata.dateRange.start],
+              ['Date Range End', metadata.dateRange.end],
+            ]
+          : []),
+        ...(metadata.filters
+          ? Object.entries(metadata.filters).map(([key, value]) => [
+              `Filter: ${key}`,
+              Array.isArray(value) ? value.join(', ') : String(value),
+            ])
+          : []),
       ];
-      
+
       const metadataWS = XLSX.utils.aoa_to_sheet(metadataRows);
       XLSX.utils.book_append_sheet(wb, metadataWS, 'Metadata');
     }
-    
+
     // Create data sheet
     const wsData = [headers, ...data];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    
+
     // Auto-size columns
     const colWidths = headers.map((header, i) => {
-      const maxLength = Math.max(
-        header.length,
-        ...data.map(row => String(row[i] || '').length)
-      );
+      const maxLength = Math.max(header.length, ...data.map(row => String(row[i] || '').length));
       return { wch: Math.min(maxLength + 2, 50) };
     });
     ws['!cols'] = colWidths;
-    
+
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
-    
+
     // Download file
-    XLSX.writeFile(wb, `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`
+    );
   }
 
   /**
@@ -112,28 +117,32 @@ class ExportService {
    */
   exportToPDF(exportData: ExportData, includeCharts?: ChartData[]): void {
     const { title, headers, data, metadata } = exportData;
-    
+
     const doc = new jsPDF();
-    
+
     // Add title
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(title, 20, 20);
-    
+
     let yPosition = 35;
-    
+
     // Add metadata
     if (metadata) {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text(`Generated: ${metadata.generatedAt}`, 20, yPosition);
       yPosition += 7;
-      
+
       if (metadata.dateRange) {
-        doc.text(`Date Range: ${metadata.dateRange.start} to ${metadata.dateRange.end}`, 20, yPosition);
+        doc.text(
+          `Date Range: ${metadata.dateRange.start} to ${metadata.dateRange.end}`,
+          20,
+          yPosition
+        );
         yPosition += 7;
       }
-      
+
       if (metadata.filters && Object.keys(metadata.filters).length > 0) {
         doc.text('Applied Filters:', 20, yPosition);
         yPosition += 5;
@@ -143,10 +152,10 @@ class ExportService {
           yPosition += 5;
         });
       }
-      
+
       yPosition += 10;
     }
-    
+
     // Add charts if provided
     if (includeCharts && includeCharts.length > 0) {
       for (const chartData of includeCharts) {
@@ -156,7 +165,7 @@ class ExportService {
             const imgData = canvas.toDataURL('image/png');
             doc.addImage(imgData, 'PNG', 20, yPosition, 170, 100);
             yPosition += 110;
-            
+
             // Add new page if needed
             if (yPosition > 250) {
               doc.addPage();
@@ -168,7 +177,7 @@ class ExportService {
         }
       }
     }
-    
+
     // Add data table
     autoTable(doc, {
       head: [headers],
@@ -189,7 +198,7 @@ class ExportService {
       columnStyles: {
         // Auto-adjust column widths based on content
       },
-      didDrawPage: (data) => {
+      didDrawPage: data => {
         // Add page numbers
         const pageCount = doc.internal.pages.length - 1;
         doc.setFontSize(8);
@@ -200,7 +209,7 @@ class ExportService {
         );
       },
     });
-    
+
     // Download file
     doc.save(`${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
   }
@@ -210,7 +219,7 @@ class ExportService {
    */
   exportToJSON(exportData: ExportData): void {
     const { title, headers, data, metadata } = exportData;
-    
+
     // Convert array data to objects
     const jsonData = data.map(row => {
       const obj: any = {};
@@ -219,7 +228,7 @@ class ExportService {
       });
       return obj;
     });
-    
+
     const exportObject = {
       title,
       metadata: {
@@ -229,7 +238,7 @@ class ExportService {
       },
       data: jsonData,
     };
-    
+
     const jsonString = JSON.stringify(exportObject, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
     saveAs(blob, `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`);
@@ -241,7 +250,7 @@ class ExportService {
   printView(title: string): void {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -268,7 +277,7 @@ class ExportService {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

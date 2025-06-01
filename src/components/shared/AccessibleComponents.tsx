@@ -5,9 +5,7 @@ import { cn } from '@/lib/utils';
 export const SkipToContent: React.FC = () => (
   <a
     href="#main-content"
-    className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
-               bg-[var(--color-primary)] text-white px-4 py-2 rounded-md 
-               font-medium z-[var(--z-tooltip)] transition-all"
+    className="sr-only z-[var(--z-tooltip)] rounded-md bg-[var(--color-primary)] px-4 py-2 font-medium text-white transition-all focus:not-sr-only focus:absolute focus:left-4 focus:top-4"
   >
     Skip to main content
   </a>
@@ -28,7 +26,7 @@ export const AccessibleHeading: React.FC<AccessibleHeadingProps> = ({
   id,
 }) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-  
+
   const baseClasses = {
     1: 'text-3xl font-bold text-[var(--color-text-primary)]',
     2: 'text-2xl font-semibold text-[var(--color-text-primary)]',
@@ -39,10 +37,7 @@ export const AccessibleHeading: React.FC<AccessibleHeadingProps> = ({
   };
 
   return (
-    <Tag
-      id={id}
-      className={cn(baseClasses[level], className)}
-    >
+    <Tag id={id} className={cn(baseClasses[level], className)}>
       {children}
     </Tag>
   );
@@ -71,25 +66,25 @@ export const AccessibleInput: React.FC<AccessibleInputProps> = ({
 
   return (
     <div className="space-y-2">
-      <label 
+      <label
         htmlFor={inputId}
         className="block text-sm font-medium text-[var(--color-text-primary)]"
       >
         {label}
         {required && (
-          <span className="text-[var(--color-error)] ml-1" aria-label="required">
+          <span className="ml-1 text-[var(--color-error)]" aria-label="required">
             *
           </span>
         )}
       </label>
-      
+
       <input
         id={inputId}
         className={cn(
-          'w-full px-3 py-2 border rounded-md',
+          'w-full rounded-md border px-3 py-2',
           'border-[var(--color-border-primary)]',
-          'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent',
-          'disabled:bg-[var(--color-gray-100)] disabled:cursor-not-allowed',
+          'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]',
+          'disabled:cursor-not-allowed disabled:bg-[var(--color-gray-100)]',
           error && 'border-[var(--color-error)] focus:ring-[var(--color-error)]',
           className
         )}
@@ -98,18 +93,15 @@ export const AccessibleInput: React.FC<AccessibleInputProps> = ({
         required={required}
         {...props}
       />
-      
+
       {helperText && (
-        <p 
-          id={helperId}
-          className="text-sm text-[var(--color-text-secondary)]"
-        >
+        <p id={helperId} className="text-sm text-[var(--color-text-secondary)]">
           {helperText}
         </p>
       )}
-      
+
       {error && (
-        <p 
+        <p
           id={errorId}
           className="text-sm text-[var(--color-error)]"
           role="alert"
@@ -144,9 +136,9 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium rounded-md',
+        'inline-flex items-center justify-center rounded-md font-medium',
         'focus:outline-none focus:ring-2 focus:ring-offset-2',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         'transition-colors duration-200',
         {
           'px-3 py-1.5 text-sm': size === 'sm',
@@ -154,10 +146,14 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
           'px-6 py-3 text-base': size === 'lg',
         },
         {
-          'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] focus:ring-[var(--color-primary)]': variant === 'primary',
-          'bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-hover)] focus:ring-[var(--color-secondary)]': variant === 'secondary',
-          'border border-[var(--color-border-primary)] bg-white text-[var(--color-text-primary)] hover:bg-[var(--color-gray-50)] focus:ring-[var(--color-primary)]': variant === 'outline',
-          'text-[var(--color-text-primary)] hover:bg-[var(--color-gray-100)] focus:ring-[var(--color-primary)]': variant === 'ghost',
+          'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] focus:ring-[var(--color-primary)]':
+            variant === 'primary',
+          'bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-hover)] focus:ring-[var(--color-secondary)]':
+            variant === 'secondary',
+          'border border-[var(--color-border-primary)] bg-white text-[var(--color-text-primary)] hover:bg-[var(--color-gray-50)] focus:ring-[var(--color-primary)]':
+            variant === 'outline',
+          'text-[var(--color-text-primary)] hover:bg-[var(--color-gray-100)] focus:ring-[var(--color-primary)]':
+            variant === 'ghost',
         },
         className
       )}
@@ -168,7 +164,7 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
       {loading && (
         <>
           <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
+            className="-ml-1 mr-2 h-4 w-4 animate-spin"
             fill="none"
             viewBox="0 0 24 24"
             aria-hidden="true"
@@ -274,19 +270,19 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
         onClick={onClose}
         aria-hidden="true"
       />
-      
+
       {/* Modal */}
       <div className="flex min-h-screen items-center justify-center p-4">
         <div
           ref={modalRef}
           className={cn(
-            'relative bg-white rounded-lg shadow-xl max-w-md w-full p-6',
+            'relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl',
             'transform transition-all',
             className
           )}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 id={titleId} className="text-lg font-semibold text-[var(--color-text-primary)]">
               {title}
             </h2>
@@ -295,8 +291,13 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
               className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               aria-label="Close modal"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -325,9 +326,7 @@ export const AccessibleTable: React.FC<AccessibleTableProps> = ({
     <div className="overflow-x-auto">
       <table className={cn('min-w-full divide-y divide-[var(--color-border-primary)]', className)}>
         {caption && (
-          <caption className="text-sm text-[var(--color-text-secondary)] mb-4">
-            {caption}
-          </caption>
+          <caption className="mb-4 text-sm text-[var(--color-text-secondary)]">{caption}</caption>
         )}
         <thead className="bg-[var(--color-bg-secondary)]">
           <tr>
@@ -335,20 +334,20 @@ export const AccessibleTable: React.FC<AccessibleTableProps> = ({
               <th
                 key={index}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-secondary)]"
               >
                 {header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-[var(--color-border-primary)]">
+        <tbody className="divide-y divide-[var(--color-border-primary)] bg-white">
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-[var(--color-bg-secondary)]">
               {row.map((cell, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-text-primary)]"
+                  className="whitespace-nowrap px-6 py-4 text-sm text-[var(--color-text-primary)]"
                 >
                   {cell}
                 </td>
@@ -367,15 +366,11 @@ export const ScreenReaderOnly: React.FC<{ children: React.ReactNode }> = ({ chil
 );
 
 // Live region for announcements
-export const LiveRegion: React.FC<{ 
+export const LiveRegion: React.FC<{
   children: React.ReactNode;
   politeness?: 'polite' | 'assertive';
 }> = ({ children, politeness = 'polite' }) => (
-  <div
-    aria-live={politeness}
-    aria-atomic="true"
-    className="sr-only"
-  >
+  <div aria-live={politeness} aria-atomic="true" className="sr-only">
     {children}
   </div>
 );

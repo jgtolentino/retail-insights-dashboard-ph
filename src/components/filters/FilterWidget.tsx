@@ -10,11 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 export interface FilterOption {
@@ -50,14 +46,14 @@ export function FilterWidget({
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter options based on search
-  const filteredOptions = options.filter((option) =>
+  const filteredOptions = options.filter(option =>
     option.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Handle selection toggle
   const handleSelect = (value: string) => {
     const newValues = selectedValues.includes(value)
-      ? selectedValues.filter((v) => v !== value)
+      ? selectedValues.filter(v => v !== value)
       : [...selectedValues, value];
     onSelectionChange(newValues);
   };
@@ -72,7 +68,7 @@ export function FilterWidget({
   const getDisplayText = () => {
     if (selectedValues.length === 0) return placeholder;
     if (selectedValues.length === 1) {
-      const option = options.find((opt) => opt.value === selectedValues[0]);
+      const option = options.find(opt => opt.value === selectedValues[0]);
       return option?.label || selectedValues[0];
     }
     return `${selectedValues.length} selected`;
@@ -93,10 +89,7 @@ export function FilterWidget({
             <span className="truncate">{getDisplayText()}</span>
             <div className="flex items-center gap-1">
               {selectedValues.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-2 rounded-sm px-1 font-normal"
-                >
+                <Badge variant="secondary" className="ml-2 rounded-sm px-1 font-normal">
                   {selectedValues.length}
                 </Badge>
               )}
@@ -104,7 +97,7 @@ export function FilterWidget({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] sm:w-[300px] p-0" align="start">
+        <PopoverContent className="w-[200px] p-0 sm:w-[300px]" align="start">
           <Command>
             <CommandInput
               placeholder={searchPlaceholder}
@@ -115,15 +108,12 @@ export function FilterWidget({
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
                 {selectedValues.length > 0 && (
-                  <CommandItem
-                    onSelect={handleClear}
-                    className="justify-center text-center"
-                  >
+                  <CommandItem onSelect={handleClear} className="justify-center text-center">
                     <X className="mr-2 h-4 w-4" />
                     Clear all
                   </CommandItem>
                 )}
-                {filteredOptions.map((option) => (
+                {filteredOptions.map(option => (
                   <CommandItem
                     key={option.value}
                     value={option.value}
@@ -132,9 +122,7 @@ export function FilterWidget({
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        selectedValues.includes(option.value)
-                          ? 'opacity-100'
-                          : 'opacity-0'
+                        selectedValues.includes(option.value) ? 'opacity-100' : 'opacity-0'
                       )}
                     />
                     <span className="flex-1">{option.label}</span>
@@ -150,27 +138,23 @@ export function FilterWidget({
           </Command>
         </PopoverContent>
       </Popover>
-      
+
       {/* Selected values as badges (mobile-friendly) */}
       {selectedValues.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {selectedValues.map((value) => {
-            const option = options.find((opt) => opt.value === value);
+          {selectedValues.map(value => {
+            const option = options.find(opt => opt.value === value);
             return (
-              <Badge
-                key={value}
-                variant="secondary"
-                className="text-xs"
-              >
+              <Badge key={value} variant="secondary" className="text-xs">
                 {option?.label || value}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  onKeyDown={(e) => {
+                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleSelect(value);
                     }
                   }}
-                  onMouseDown={(e) => {
+                  onMouseDown={e => {
                     e.preventDefault();
                     e.stopPropagation();
                   }}

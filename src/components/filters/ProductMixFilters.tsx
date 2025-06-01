@@ -11,10 +11,7 @@ interface ProductMixFiltersProps {
   className?: string;
 }
 
-export function ProductMixFilters({
-  onFiltersChange,
-  className,
-}: ProductMixFiltersProps) {
+export function ProductMixFilters({ onFiltersChange, className }: ProductMixFiltersProps) {
   // Filter states with URL persistence
   const filters = {
     categories: useFilterState({ key: 'pm_categories' }),
@@ -27,11 +24,8 @@ export function ProductMixFilters({
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('category')
-        .not('category', 'is', null);
-      
+      const { data } = await supabase.from('brands').select('category').not('category', 'is', null);
+
       const uniqueCategories = [...new Set(data?.map(b => b.category) || [])];
       return uniqueCategories.sort();
     },
@@ -41,10 +35,7 @@ export function ProductMixFilters({
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('id, name')
-        .order('name');
+      const { data } = await supabase.from('brands').select('id, name').order('name');
       return data || [];
     },
   });
@@ -57,7 +48,7 @@ export function ProductMixFilters({
         .from('transactions')
         .select('store_location')
         .not('store_location', 'is', null);
-      
+
       const uniqueStores = [...new Set(data?.map(t => t.store_location) || [])];
       return uniqueStores.sort();
     },
@@ -89,9 +80,7 @@ export function ProductMixFilters({
   }));
 
   // Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some(
-    filter => filter.value.length > 0
-  );
+  const hasActiveFilters = Object.values(filters).some(filter => filter.value.length > 0);
 
   // Clear all filters
   const clearAllFilters = () => {
@@ -118,26 +107,21 @@ export function ProductMixFilters({
   ]);
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border p-4 ${className || ''}`}>
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+    <div className={`rounded-lg border bg-white p-4 shadow-sm ${className || ''}`}>
+      <div className="mb-3 flex items-center justify-between sm:mb-4">
+        <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
           <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
           Product Mix Filters
         </h3>
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs">
+            <RefreshCw className="mr-1 h-3 w-3" />
             Clear all
           </Button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <FilterWidget
           title="Categories"
           options={categoryOptions}

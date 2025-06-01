@@ -9,6 +9,26 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
     pool: 'forks',
+    css: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        'src/vite-env.d.ts',
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+    },
   },
   resolve: {
     alias: {

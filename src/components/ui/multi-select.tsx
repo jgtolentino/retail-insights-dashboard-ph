@@ -1,20 +1,16 @@
-import * as React from "react";
-import { Check, X, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { Check, X, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export interface MultiSelectOption {
   label: string;
@@ -34,27 +30,25 @@ export function MultiSelect({
   options,
   selected,
   onChange,
-  placeholder = "Select items...",
+  placeholder = 'Select items...',
   className,
   maxDisplayedTags = 3,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
   const handleUnselect = (value: string) => {
-    onChange(selected.filter((item) => item !== value));
+    onChange(selected.filter(item => item !== value));
   };
 
   const handleSelectAll = () => {
-    onChange(options.map((option) => option.value));
+    onChange(options.map(option => option.value));
   };
 
   const handleClearAll = () => {
     onChange([]);
   };
 
-  const selectedOptions = options.filter((option) => 
-    selected.includes(option.value)
-  );
+  const selectedOptions = options.filter(option => selected.includes(option.value));
 
   const displayedTags = selectedOptions.slice(0, maxDisplayedTags);
   const remainingCount = selectedOptions.length - maxDisplayedTags;
@@ -66,22 +60,19 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(
-            "w-full justify-between min-h-10 h-auto",
-            className
-          )}
+          className={cn('h-auto min-h-10 w-full justify-between', className)}
         >
-          <div className="flex gap-1 flex-wrap">
+          <div className="flex flex-wrap gap-1">
             {selected.length === 0 ? (
               <span className="text-muted-foreground">{placeholder}</span>
             ) : (
               <>
-                {displayedTags.map((option) => (
+                {displayedTags.map(option => (
                   <Badge
                     variant="secondary"
                     key={option.value}
-                    className="mr-1 mb-1"
-                    onClick={(e) => {
+                    className="mb-1 mr-1"
+                    onClick={e => {
                       e.stopPropagation();
                       handleUnselect(option.value);
                     }}
@@ -91,7 +82,7 @@ export function MultiSelect({
                   </Badge>
                 ))}
                 {remainingCount > 0 && (
-                  <Badge variant="outline" className="mr-1 mb-1">
+                  <Badge variant="outline" className="mb-1 mr-1">
                     +{remainingCount} more
                   </Badge>
                 )}
@@ -107,7 +98,7 @@ export function MultiSelect({
           <CommandEmpty>No option found.</CommandEmpty>
           <CommandGroup>
             {/* Select All / Clear All buttons */}
-            <div className="flex justify-between px-2 py-1 border-b">
+            <div className="flex justify-between border-b px-2 py-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -127,13 +118,13 @@ export function MultiSelect({
                 Clear All
               </Button>
             </div>
-            
-            {options.map((option) => (
+
+            {options.map(option => (
               <CommandItem
                 key={option.value}
                 onSelect={() => {
                   const newSelected = selected.includes(option.value)
-                    ? selected.filter((item) => item !== option.value)
+                    ? selected.filter(item => item !== option.value)
                     : [...selected, option.value];
                   onChange(newSelected);
                 }}
@@ -141,8 +132,8 @@ export function MultiSelect({
               >
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
-                    selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                    'mr-2 h-4 w-4',
+                    selected.includes(option.value) ? 'opacity-100' : 'opacity-0'
                   )}
                 />
                 {option.label}

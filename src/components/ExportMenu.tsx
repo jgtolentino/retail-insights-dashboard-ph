@@ -51,29 +51,31 @@ export function ExportMenu({
     setExporting(true);
     try {
       const { headers, rows } = formatData(data);
-      
+
       // Create CSV content
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => 
-          row.map(cell => {
-            const cellStr = String(cell || '');
-            return cellStr.includes(',') || cellStr.includes('"') 
-              ? `"${cellStr.replace(/"/g, '""')}"` 
-              : cellStr;
-          }).join(',')
-        )
+        ...rows.map(row =>
+          row
+            .map(cell => {
+              const cellStr = String(cell || '');
+              return cellStr.includes(',') || cellStr.includes('"')
+                ? `"${cellStr.replace(/"/g, '""')}"`
+                : cellStr;
+            })
+            .join(',')
+        ),
       ].join('\n');
 
       // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -106,7 +108,7 @@ export function ExportMenu({
     setExporting(true);
     try {
       const { headers, rows } = formatData(data);
-      
+
       // Convert to array of objects
       const jsonData = rows.map(row => {
         const obj: Record<string, any> = {};
@@ -120,11 +122,11 @@ export function ExportMenu({
       const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.json`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -156,7 +158,7 @@ export function ExportMenu({
 
     try {
       const { headers, rows } = formatData(data);
-      
+
       // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -192,11 +194,15 @@ export function ExportMenu({
               </tr>
             </thead>
             <tbody>
-              ${rows.map(row => `
+              ${rows
+                .map(
+                  row => `
                 <tr>
                   ${row.map(cell => `<td>${cell || ''}</td>`).join('')}
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </body>
@@ -222,13 +228,8 @@ export function ExportMenu({
 
   if (!canExport) {
     return (
-      <Button
-        variant={variant}
-        size={size}
-        disabled
-        className={className}
-      >
-        <Download className="h-4 w-4 mr-2" />
+      <Button variant={variant} size={size} disabled className={className}>
+        <Download className="mr-2 h-4 w-4" />
         Export (No Permission)
       </Button>
     );
@@ -243,7 +244,7 @@ export function ExportMenu({
           disabled={disabled || loading || exporting}
           className={className}
         >
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="mr-2 h-4 w-4" />
           {exporting ? 'Exporting...' : 'Export'}
         </Button>
       </DropdownMenuTrigger>

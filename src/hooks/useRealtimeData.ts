@@ -31,14 +31,14 @@ export function useRealtimeTransactions({ enabled = true, onUpdate }: UseRealtim
               schema: 'public',
               table: 'transactions',
             },
-            (payload) => {
+            payload => {
               logger.info('New transaction received:', payload);
               setLastUpdate(new Date());
-              
+
               // Invalidate relevant queries
               queryClient.invalidateQueries({ queryKey: ['dashboard-data'] });
               queryClient.invalidateQueries({ queryKey: ['time-series-data'] });
-              
+
               if (onUpdate) {
                 onUpdate();
               }
@@ -47,11 +47,10 @@ export function useRealtimeTransactions({ enabled = true, onUpdate }: UseRealtim
           .on('presence', { event: 'sync' }, () => {
             setIsConnected(true);
           })
-          .subscribe((status) => {
+          .subscribe(status => {
             logger.info('Realtime subscription status:', status);
             setIsConnected(status === 'SUBSCRIBED');
           });
-
       } catch (error) {
         logger.error('Failed to setup realtime subscription:', error);
         setIsConnected(false);
@@ -94,24 +93,23 @@ export function useRealtimeProductUpdates({ enabled = true, onUpdate }: UseRealt
               schema: 'public',
               table: 'products',
             },
-            (payload) => {
+            payload => {
               logger.info('Product update received:', payload);
               setLastUpdate(new Date());
-              
+
               // Invalidate product-related queries
               queryClient.invalidateQueries({ queryKey: ['products'] });
               queryClient.invalidateQueries({ queryKey: ['categories'] });
-              
+
               if (onUpdate) {
                 onUpdate();
               }
             }
           )
-          .subscribe((status) => {
+          .subscribe(status => {
             logger.info('Product realtime subscription status:', status);
             setIsConnected(status === 'SUBSCRIBED');
           });
-
       } catch (error) {
         logger.error('Failed to setup product realtime subscription:', error);
         setIsConnected(false);
@@ -135,12 +133,13 @@ export function useRealtimeProductUpdates({ enabled = true, onUpdate }: UseRealt
 // Combined hook for all realtime data
 export function useRealtimeUpdates({ enabled = true }: { enabled?: boolean } = {}) {
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
-  
-  const { isConnected: transactionsConnected, lastUpdate: transactionsUpdate } = useRealtimeTransactions({
-    enabled,
-    onUpdate: () => setShowUpdateNotification(true),
-  });
-  
+
+  const { isConnected: transactionsConnected, lastUpdate: transactionsUpdate } =
+    useRealtimeTransactions({
+      enabled,
+      onUpdate: () => setShowUpdateNotification(true),
+    });
+
   const { isConnected: productsConnected, lastUpdate: productsUpdate } = useRealtimeProductUpdates({
     enabled,
     onUpdate: () => setShowUpdateNotification(true),

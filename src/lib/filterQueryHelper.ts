@@ -14,33 +14,34 @@ export interface FilterOptions {
  * with all current global filters applied.
  * Every data-fetching hook should use this as the starting point.
  */
-export function buildFilterQuery() {
-  // Get the current filter state from Zustand store
-  const state = useFilterStore.getState();
-  
+export function buildFilterQuery(state?: GlobalFilterState) {
+  // Use provided state or fallback to current store state
+  const filters = state || useFilterStore.getState();
+
   let query = supabase.from('transactions').select('*');
 
   // Apply date range filter
-  if (state.dateRange?.start && state.dateRange?.end) {
+  if (filters.dateRange?.start && filters.dateRange?.end) {
     query = query
-      .gte('created_at', state.dateRange.start)
-      .lte('created_at', state.dateRange.end);
+      .gte('created_at', filters.dateRange.start)
+      .lte('created_at', filters.dateRange.end);
   }
 
   // Apply store filter first (most direct)
-  if (state.selectedStores && state.selectedStores.length > 0) {
-    query = query.in('store_id', state.selectedStores);
+  if (filters.selectedStores && filters.selectedStores.length > 0) {
+    query = query.in('store_id', filters.selectedStores);
   }
 
   // Apply region filter via stores (if no specific stores selected)
-  if (state.selectedRegions && state.selectedRegions.length > 0 && 
-      (!state.selectedStores || state.selectedStores.length === 0)) {
+  if (
+    filters.selectedRegions &&
+    filters.selectedRegions.length > 0 &&
+    (!filters.selectedStores || filters.selectedStores.length === 0)
+  ) {
     // Get store IDs for selected regions
-    query = query.in('store_id',
-      supabase
-        .from('stores')
-        .select('id')
-        .in('region', state.selectedRegions)
+    query = query.in(
+      'store_id',
+      supabase.from('stores').select('id').in('region', filters.selectedRegions)
     );
   }
 
@@ -52,12 +53,14 @@ export function buildFilterQuery() {
  * since brands/categories are properties of products, not transactions directly.
  * This function returns transaction IDs that match the product filters.
  */
-export async function getFilteredTransactionIds() {
-  const state = useFilterStore.getState();
-  
+export async function getFilteredTransactionIds(state?: GlobalFilterState) {
+  const filters = state || useFilterStore.getState();
+
   // If no product-level filters, return null (no filtering needed)
-  if ((!state.selectedBrands || state.selectedBrands.length === 0) &&
-      (!state.selectedCategories || state.selectedCategories.length === 0)) {
+  if (
+    (!filters.selectedBrands || filters.selectedBrands.length === 0) &&
+    (!filters.selectedCategories || filters.selectedCategories.length === 0)
+  ) {
     return null;
   }
 
@@ -66,17 +69,20 @@ export async function getFilteredTransactionIds() {
     .select('transaction_id, product_id, brand_id, category');
 
   // Apply brand filter
-  if (state.selectedBrands && state.selectedBrands.length > 0) {
-    itemQuery = itemQuery.in('brand_id', state.selectedBrands.map(b => parseInt(b)));
+  if (filters.selectedBrands && filters.selectedBrands.length > 0) {
+    itemQuery = itemQuery.in(
+      'brand_id',
+      filters.selectedBrands.map(b => parseInt(b))
+    );
   }
 
   // Apply category filter
-  if (state.selectedCategories && state.selectedCategories.length > 0) {
-    itemQuery = itemQuery.in('category', state.selectedCategories);
+  if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+    itemQuery = itemQuery.in('category', filters.selectedCategories);
   }
 
   const { data: filteredItems, error } = await itemQuery;
-  
+
   if (error) {
     console.error('Error filtering by products:', error);
     return null;
@@ -90,16 +96,16 @@ export async function getFilteredTransactionIds() {
 /**
  * Enhanced version that applies all filters including product-level ones
  */
-export async function buildCompleteFilterQuery() {
-  let query = buildFilterQuery();
-  
+export async function buildCompleteFilterQuery(state?: GlobalFilterState) {
+  let query = buildFilterQuery(state);
+
   // Get transaction IDs that match product filters
-  const filteredTransactionIds = await getFilteredTransactionIds();
-  
+  const filteredTransactionIds = await getFilteredTransactionIds(state);
+
   if (filteredTransactionIds !== null) {
     query = query.in('id', filteredTransactionIds);
   }
-  
+
   return query;
 }
 
@@ -152,7 +158,7 @@ export async function getFilterOptions() {
     .from('brands')
     .select('id, name')
     .order('name');
-    
+
   if (brandsError) {
     console.error('Error fetching brands:', brandsError);
   } else {
@@ -178,16 +184,14 @@ export async function getFilterOptions() {
   const regions = [...new Set(regionsRaw?.map(item => item.region))];
 
   // Fetch stores
-  const { data: stores } = await supabase
-    .from('stores')
-    .select('id, name, city')
-    .order('name');
+  const { data: stores } = await supabase.from('stores').select('id, name, city').order('name');
 
   return {
-    brandOptions: brands?.map(brand => ({
-      value: brand.id.toString(),
-      label: brand.name,
-    })) || [],
+    brandOptions:
+      brands?.map(brand => ({
+        value: brand.id.toString(),
+        label: brand.name,
+      })) || [],
     categoryOptions: categories.map(category => ({
       value: category,
       label: category.charAt(0).toUpperCase() + category.slice(1),
@@ -196,9 +200,10 @@ export async function getFilterOptions() {
       value: region,
       label: region,
     })),
-    storeOptions: stores?.map(store => ({
-      value: store.id.toString(),
-      label: `${store.name} (${store.city})`,
-    })) || [],
+    storeOptions:
+      stores?.map(store => ({
+        value: store.id.toString(),
+        label: `${store.name} (${store.city})`,
+      })) || [],
   };
 }

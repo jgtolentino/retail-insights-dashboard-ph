@@ -1,31 +1,31 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 
 interface Category {
-  id: string
-  name: string
-  count: number
+  id: string;
+  name: string;
+  count: number;
 }
 
 interface CategoryFilterProps {
-  categories: Category[]
-  selectedCategories: string[]
-  onCategoryChange: (categories: string[]) => void
+  categories: Category[];
+  selectedCategories: string[];
+  onCategoryChange: (categories: string[]) => void;
 }
 
-export function CategoryFilter({ 
-  categories, 
-  selectedCategories, 
-  onCategoryChange 
+export function CategoryFilter({
+  categories,
+  selectedCategories,
+  onCategoryChange,
 }: CategoryFilterProps) {
   const toggleCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
-      onCategoryChange(selectedCategories.filter(id => id !== categoryId))
+      onCategoryChange(selectedCategories.filter(id => id !== categoryId));
     } else {
-      onCategoryChange([...selectedCategories, categoryId])
+      onCategoryChange([...selectedCategories, categoryId]);
     }
-  }
+  };
 
   return (
     <Card>
@@ -49,22 +49,22 @@ export function CategoryFilter({
             />
             <label
               htmlFor={category.id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 cursor-pointer"
+              className="flex-1 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               {category.name}
-              <span className="text-gray-500 ml-2">({category.count})</span>
+              <span className="ml-2 text-gray-500">({category.count})</span>
             </label>
           </div>
         ))}
         {selectedCategories.length > 0 && (
           <button
             onClick={() => onCategoryChange([])}
-            className="text-xs text-blue-600 hover:text-blue-800 mt-2"
+            className="mt-2 text-xs text-blue-600 hover:text-blue-800"
           >
             Clear all
           </button>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

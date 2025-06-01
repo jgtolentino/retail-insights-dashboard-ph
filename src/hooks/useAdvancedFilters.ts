@@ -8,10 +8,10 @@ const supabase = createClient(
 
 export interface FilterOptions {
   categories: Array<{ value: string; label: string; count: number }>;
-  brands: Array<{ 
-    value: string; 
-    label: string; 
-    category: string; 
+  brands: Array<{
+    value: string;
+    label: string;
+    category: string;
     is_tbwa: boolean;
     count?: number;
   }>;
@@ -70,7 +70,7 @@ export const useAdvancedFilters = () => {
     categories: [],
     brands: [],
     locations: [],
-    tbwa_only: null
+    tbwa_only: null,
   });
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
@@ -101,7 +101,7 @@ export const useAdvancedFilters = () => {
         .from('brands')
         .select('category')
         .not('category', 'is', null);
-      
+
       const categories = [...new Set(brandCategories?.map(b => b.category) || [])];
 
       // Get brands with TBWA status
@@ -116,30 +116,31 @@ export const useAdvancedFilters = () => {
         .from('stores')
         .select('location')
         .not('location', 'is', null);
-      
+
       const locations = [...new Set(allStores?.map(s => s.location) || [])];
 
       const options: FilterOptions = {
         categories: categories.map(cat => ({
           value: cat,
           label: cat,
-          count: allBrands?.filter(b => b.category === cat).length || 0
+          count: allBrands?.filter(b => b.category === cat).length || 0,
         })),
-        brands: allBrands?.map(brand => ({
-          value: brand.id.toString(),
-          label: brand.name,
-          category: brand.category,
-          is_tbwa: brand.is_tbwa || false
-        })) || [],
+        brands:
+          allBrands?.map(brand => ({
+            value: brand.id.toString(),
+            label: brand.name,
+            category: brand.category,
+            is_tbwa: brand.is_tbwa || false,
+          })) || [],
         locations: locations.map(loc => ({
           value: loc,
-          label: loc
+          label: loc,
         })),
         tbwa_stats: {
           total_brands: allBrands?.length || 0,
           tbwa_brands: allBrands?.filter(b => b.is_tbwa === true).length || 0,
-          competitor_brands: allBrands?.filter(b => b.is_tbwa === false).length || 0
-        }
+          competitor_brands: allBrands?.filter(b => b.is_tbwa === false).length || 0,
+        },
       };
 
       setFilterOptions(options);
@@ -156,31 +157,31 @@ export const useAdvancedFilters = () => {
       const sampleSize = 100;
       const { data: sampleTransactions } = await supabase
         .from('transactions')
-        .select(`
+        .select(
+          `
           id,
           transaction_items(
             products(
               brands(category, is_tbwa)
             )
           )
-        `)
+        `
+        )
         .limit(sampleSize);
 
       let matchingCount = 0;
       sampleTransactions?.forEach(transaction => {
         const items = transaction.transaction_items || [];
-        
+
         // Check category filter
-        const matchesCategory = filters.categories.length === 0 || 
-          items.some(item => 
-            filters.categories.includes(item.products?.brands?.category)
-          );
+        const matchesCategory =
+          filters.categories.length === 0 ||
+          items.some(item => filters.categories.includes(item.products?.brands?.category));
 
         // Check TBWA filter
-        const matchesTBWA = filters.tbwa_only === null ||
-          items.some(item => 
-            item.products?.brands?.is_tbwa === filters.tbwa_only
-          );
+        const matchesTBWA =
+          filters.tbwa_only === null ||
+          items.some(item => item.products?.brands?.is_tbwa === filters.tbwa_only);
 
         if (matchesCategory && matchesTBWA) {
           matchingCount++;
@@ -198,29 +199,29 @@ export const useAdvancedFilters = () => {
     }
   };
 
-  const getBrandAnalysis = useCallback(async (
-    category?: string, 
-    tbwaOnly?: boolean
-  ): Promise<BrandAnalysis | null> => {
-    try {
-      const { data, error } = await supabase.rpc('get_brand_analysis_for_filters', {
-        p_category: category || null,
-        p_tbwa_only: tbwaOnly ?? null
-      });
+  const getBrandAnalysis = useCallback(
+    async (category?: string, tbwaOnly?: boolean): Promise<BrandAnalysis | null> => {
+      try {
+        const { data, error } = await supabase.rpc('get_brand_analysis_for_filters', {
+          p_category: category || null,
+          p_tbwa_only: tbwaOnly ?? null,
+        });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error getting brand analysis:', error);
-      return null;
-    }
-  }, []);
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error('Error getting brand analysis:', error);
+        return null;
+      }
+    },
+    []
+  );
 
   const getMarketShare = useCallback(async (): Promise<MarketShare | null> => {
     try {
       const [tbwaData, compData] = await Promise.all([
         supabase.rpc('get_brand_analysis_for_filters', { p_tbwa_only: true }),
-        supabase.rpc('get_brand_analysis_for_filters', { p_tbwa_only: false })
+        supabase.rpc('get_brand_analysis_for_filters', { p_tbwa_only: false }),
       ]);
 
       if (tbwaData.error || compData.error) {
@@ -235,7 +236,7 @@ export const useAdvancedFilters = () => {
         tbwa_revenue: tbwaRevenue,
         competitor_revenue: compRevenue,
         total_revenue: totalRevenue,
-        tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue * 100) : 0
+        tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0,
       };
     } catch (error) {
       console.error('Error getting market share:', error);
@@ -248,10 +249,10 @@ export const useAdvancedFilters = () => {
 
     try {
       const categoryData = await Promise.all(
-        filterOptions.categories.map(async (category) => {
+        filterOptions.categories.map(async category => {
           const [tbwaData, compData] = await Promise.all([
             getBrandAnalysis(category.value, true),
-            getBrandAnalysis(category.value, false)
+            getBrandAnalysis(category.value, false),
           ]);
 
           const tbwaRevenue = tbwaData?.summary?.total_revenue || 0;
@@ -263,9 +264,9 @@ export const useAdvancedFilters = () => {
             tbwa_revenue: tbwaRevenue,
             competitor_revenue: compRevenue,
             total_revenue: totalRevenue,
-            tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue * 100) : 0,
+            tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0,
             tbwa_brands: tbwaData?.summary?.total_brands || 0,
-            competitor_brands: compData?.summary?.total_brands || 0
+            competitor_brands: compData?.summary?.total_brands || 0,
           };
         })
       );
@@ -286,23 +287,24 @@ export const useAdvancedFilters = () => {
       categories: [],
       brands: [],
       locations: [],
-      tbwa_only: null
+      tbwa_only: null,
     });
   }, []);
 
-  const getAvailableBrands = useCallback((selectedCategories?: string[]) => {
-    if (!filterOptions) return [];
+  const getAvailableBrands = useCallback(
+    (selectedCategories?: string[]) => {
+      if (!filterOptions) return [];
 
-    const categoriesToFilter = selectedCategories || filters.categories;
-    
-    if (categoriesToFilter.length === 0) {
-      return filterOptions.brands;
-    }
+      const categoriesToFilter = selectedCategories || filters.categories;
 
-    return filterOptions.brands.filter(brand => 
-      categoriesToFilter.includes(brand.category)
-    );
-  }, [filterOptions, filters.categories]);
+      if (categoriesToFilter.length === 0) {
+        return filterOptions.brands;
+      }
+
+      return filterOptions.brands.filter(brand => categoriesToFilter.includes(brand.category));
+    },
+    [filterOptions, filters.categories]
+  );
 
   return {
     // State
@@ -331,7 +333,10 @@ export const useAdvancedFilters = () => {
       }
     },
     removeCategory: (category: string) => {
-      updateFilter('categories', filters.categories.filter(c => c !== category));
-    }
+      updateFilter(
+        'categories',
+        filters.categories.filter(c => c !== category)
+      );
+    },
   };
 };

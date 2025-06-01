@@ -43,13 +43,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     // Mock authentication - in production, this would call an API
     setIsLoading(true);
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock user based on email
     let mockUser: User;
-    
+
     if (email === 'admin@retailinsights.ph') {
       mockUser = {
         id: '1',

@@ -9,15 +9,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Download, RefreshCw, Brain, TrendingUp, Users, MessageSquare, Target } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Calendar,
+  Download,
+  RefreshCw,
+  Brain,
+  TrendingUp,
+  Users,
+  MessageSquare,
+  Target,
+} from 'lucide-react';
 
 // Import new Sprint 4 components
 import SubstitutionFlow from '@/components/charts/SubstitutionFlow';
 import RequestBehaviorAnalysis from '@/components/charts/RequestBehaviorAnalysis';
 import AIRecommendations from '@/components/AIRecommendations';
 import { Sprint4DataVerification } from '@/components/Sprint4DataVerification';
-import { DashboardSkeleton, AnalyticsSkeleton, RecommendationsSkeleton } from '@/components/ui/loading-skeleton';
+import {
+  DashboardSkeleton,
+  AnalyticsSkeleton,
+  RecommendationsSkeleton,
+} from '@/components/ui/loading-skeleton';
 import { BehaviorSuggestionsTable } from '@/components/BehaviorSuggestionsTable';
 
 // Import services
@@ -32,7 +51,7 @@ export default function Sprint4Dashboard() {
   const dateRange: DateRange = useMemo(() => {
     const end = new Date();
     const start = new Date();
-    
+
     switch (selectedDateRange) {
       case '7d':
         start.setDate(start.getDate() - 7);
@@ -49,10 +68,10 @@ export default function Sprint4Dashboard() {
       default:
         start.setDate(start.getDate() - 30);
     }
-    
+
     return {
       start: start.toISOString(),
-      end: end.toISOString()
+      end: end.toISOString(),
     };
   }, [selectedDateRange]);
 
@@ -60,7 +79,7 @@ export default function Sprint4Dashboard() {
     try {
       setIsLoading(true);
       const summary = await enhancedAnalyticsService.getDashboardSummary(dateRange);
-      
+
       // Create CSV data
       const csvData = [
         ['Metric', 'Value'],
@@ -70,7 +89,7 @@ export default function Sprint4Dashboard() {
         ['Substitution Rate', `${summary.avgSubstitutionRate.toFixed(1)}%`],
         ['Digital Payment Rate', `${summary.avgDigitalPaymentRate.toFixed(1)}%`],
       ];
-      
+
       const csvContent = csvData.map(row => row.join(',')).join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
@@ -103,11 +122,11 @@ export default function Sprint4Dashboard() {
             AI-powered insights, substitution patterns, and customer behavior analysis
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Select value={selectedDateRange} onValueChange={setSelectedDateRange}>
             <SelectTrigger className="w-32">
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className="mr-2 h-4 w-4" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -117,21 +136,21 @@ export default function Sprint4Dashboard() {
               <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline" onClick={handleExportData} disabled={isLoading}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          
+
           <Button variant="outline" onClick={handleRefreshData}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
         </div>
       </div>
 
       {/* Status Banner */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -145,11 +164,11 @@ export default function Sprint4Dashboard() {
             </div>
             <div className="flex gap-2">
               <Badge variant="default" className="bg-green-600">
-                <Target className="h-3 w-3 mr-1" />
+                <Target className="mr-1 h-3 w-3" />
                 AI Active
               </Badge>
               <Badge variant="outline">
-                <TrendingUp className="h-3 w-3 mr-1" />
+                <TrendingUp className="mr-1 h-3 w-3" />
                 Real-time
               </Badge>
             </div>
@@ -185,7 +204,7 @@ export default function Sprint4Dashboard() {
         <TabsContent value="overview" className="space-y-6">
           {/* Data Verification */}
           <Sprint4DataVerification />
-          
+
           {/* Quick Stats Overview */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -195,9 +214,7 @@ export default function Sprint4Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">Active</div>
-                <p className="text-xs text-muted-foreground">
-                  AI insights enabled
-                </p>
+                <p className="text-xs text-muted-foreground">AI insights enabled</p>
               </CardContent>
             </Card>
 
@@ -208,9 +225,7 @@ export default function Sprint4Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">Live</div>
-                <p className="text-xs text-muted-foreground">
-                  Real-time pattern detection
-                </p>
+                <p className="text-xs text-muted-foreground">Real-time pattern detection</p>
               </CardContent>
             </Card>
 
@@ -221,9 +236,7 @@ export default function Sprint4Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">Advanced</div>
-                <p className="text-xs text-muted-foreground">
-                  NLP transcription insights
-                </p>
+                <p className="text-xs text-muted-foreground">NLP transcription insights</p>
               </CardContent>
             </Card>
 
@@ -234,9 +247,7 @@ export default function Sprint4Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-emerald-600">98%</div>
-                <p className="text-xs text-muted-foreground">
-                  Schema compliance rate
-                </p>
+                <p className="text-xs text-muted-foreground">Schema compliance rate</p>
               </CardContent>
             </Card>
           </div>
@@ -246,7 +257,7 @@ export default function Sprint4Dashboard() {
             <React.Suspense fallback={<AnalyticsSkeleton />}>
               <SubstitutionFlow dateRange={dateRange} />
             </React.Suspense>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Implementation Status</CardTitle>
@@ -255,33 +266,45 @@ export default function Sprint4Dashboard() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Database Schema Updates</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">RPC Functions</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Enhanced Data Generation</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">AI Recommendations Engine</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">NLP Transcription Analysis</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Performance Optimizations</span>
-                    <Badge variant="default" className="bg-green-600">Complete</Badge>
+                    <Badge variant="default" className="bg-green-600">
+                      Complete
+                    </Badge>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium mb-2">New Capabilities</h4>
-                  <ul className="text-sm space-y-1 text-gray-600">
+                <div className="border-t pt-4">
+                  <h4 className="mb-2 font-medium">New Capabilities</h4>
+                  <ul className="space-y-1 text-sm text-gray-600">
                     <li>• Real-time substitution pattern detection</li>
                     <li>• Customer request behavior analysis</li>
                     <li>• AI-powered recommendations</li>
@@ -309,7 +332,7 @@ export default function Sprint4Dashboard() {
 
         <TabsContent value="suggestions" className="space-y-6">
           <React.Suspense fallback={<AnalyticsSkeleton />}>
-            <BehaviorSuggestionsTable 
+            <BehaviorSuggestionsTable
               startDate={dateRange.start.split('T')[0]}
               endDate={dateRange.end.split('T')[0]}
             />
@@ -328,7 +351,8 @@ export default function Sprint4Dashboard() {
         <CardContent className="pt-4">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div>
-              Sprint 4 Implementation • Advanced Analytics & AI Insights • Data Period: {selectedDateRange}
+              Sprint 4 Implementation • Advanced Analytics & AI Insights • Data Period:{' '}
+              {selectedDateRange}
             </div>
             <div className="flex items-center gap-4">
               <span>Last Updated: {new Date().toLocaleString()}</span>

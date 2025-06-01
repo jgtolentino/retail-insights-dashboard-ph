@@ -17,20 +17,20 @@ interface FilterBarProps {
   sticky?: boolean;
 }
 
-export default function FilterBarFixed({ 
-  className = '', 
-  compact = false, 
-  sticky = true 
+export default function FilterBarFixed({
+  className = '',
+  compact = false,
+  sticky = true,
 }: FilterBarProps) {
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
   // Use the store with shallow comparison to avoid getSnapshot warnings
   const dateRange = useFilterStore(state => state.dateRange, shallow);
   const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
   const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
   const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
   const selectedStores = useFilterStore(state => state.selectedStores, shallow);
-  
+
   const setDateRange = useFilterStore(state => state.setDateRange);
   const setSelectedBrands = useFilterStore(state => state.setSelectedBrands);
   const setSelectedCategories = useFilterStore(state => state.setSelectedCategories);
@@ -44,7 +44,7 @@ export default function FilterBarFixed({
     selectedCategories.length > 0,
     selectedRegions.length > 0,
     selectedStores.length > 0,
-    dateRange.start && dateRange.end
+    dateRange.start && dateRange.end,
   ].filter(Boolean).length;
 
   // Build filter summary
@@ -78,7 +78,14 @@ export default function FilterBarFixed({
     if (isInitialized) {
       persistFiltersToURL();
     }
-  }, [dateRange, selectedBrands, selectedCategories, selectedRegions, selectedStores, isInitialized]);
+  }, [
+    dateRange,
+    selectedBrands,
+    selectedCategories,
+    selectedRegions,
+    selectedStores,
+    isInitialized,
+  ]);
 
   // Fetch filter options
   const { data: filterOptions, isLoading: optionsLoading } = useQuery({
@@ -123,14 +130,11 @@ export default function FilterBarFixed({
       {/* Date Range */}
       <div className="flex items-center gap-2">
         <Calendar className="h-4 w-4 text-gray-500" />
-        <DatePickerWithRange
-          date={getDateRange()}
-          onDateChange={handleDateRangeChange}
-        />
+        <DatePickerWithRange date={getDateRange()} onDateChange={handleDateRangeChange} />
       </div>
 
       {/* Filter Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MultiSelect
           label="Brands"
           options={filterOptions?.brandOptions || []}
@@ -174,7 +178,7 @@ export default function FilterBarFixed({
 
       {/* Active Filters Summary */}
       {activeFiltersCount > 0 && (
-        <div className="flex items-center gap-2 pt-2 border-t">
+        <div className="flex items-center gap-2 border-t pt-2">
           <span className="text-sm text-gray-600">Active filters:</span>
           <div className="flex flex-wrap gap-1">
             {filterSummary.map((summary, index) => (
@@ -183,13 +187,8 @@ export default function FilterBarFixed({
               </Badge>
             ))}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="ml-auto text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
+          <Button variant="ghost" size="sm" onClick={handleReset} className="ml-auto text-xs">
+            <RefreshCw className="mr-1 h-3 w-3" />
             Reset All
           </Button>
         </div>
@@ -201,12 +200,10 @@ export default function FilterBarFixed({
     return (
       <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
             <Filter className="h-4 w-4" />
             Filters
-            {activeFiltersCount > 0 && (
-              <Badge variant="default">{activeFiltersCount}</Badge>
-            )}
+            {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -219,12 +216,10 @@ export default function FilterBarFixed({
   return (
     <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
           <Filter className="h-4 w-4" />
           Filters
-          {activeFiltersCount > 0 && (
-            <Badge variant="default">{activeFiltersCount}</Badge>
-          )}
+          {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
         </CardTitle>
       </CardHeader>
       <CardContent>

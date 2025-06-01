@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -8,7 +7,8 @@ export const useRetailAnalytics = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('transaction_items')
-        .select(`
+        .select(
+          `
           quantity,
           price,
           products (
@@ -18,7 +18,8 @@ export const useRetailAnalytics = () => {
               is_tbwa
             )
           )
-        `)
+        `
+        )
         .not('products.brands.name', 'is', null);
 
       if (error) {
@@ -38,18 +39,18 @@ export const useRetailAnalytics = () => {
           { name: 'Fortune', sales: 12400, is_tbwa_client: false },
           { name: 'Hope', sales: 11200, is_tbwa_client: false },
           { name: 'More', sales: 9800, is_tbwa_client: false },
-          { name: 'Champion', sales: 8900, is_tbwa_client: false }
+          { name: 'Champion', sales: 8900, is_tbwa_client: false },
         ];
       }
 
       // Aggregate sales by brand
       const brandSales: { [key: string]: { sales: number; is_tbwa_client: boolean } } = {};
-      
+
       data.forEach(item => {
         const brandName = item.products?.brands?.name;
         const subtotal = (item.quantity || 0) * (item.price || 0);
         const isTbwaClient = item.products?.brands?.is_tbwa || false;
-        
+
         if (brandName) {
           if (!brandSales[brandName]) {
             brandSales[brandName] = { sales: 0, is_tbwa_client: isTbwaClient };
@@ -62,7 +63,7 @@ export const useRetailAnalytics = () => {
         .map(([name, data]) => ({
           name,
           sales: data.sales,
-          is_tbwa_client: data.is_tbwa_client
+          is_tbwa_client: data.is_tbwa_client,
         }))
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 6);
@@ -78,12 +79,12 @@ export const useRetailAnalytics = () => {
           { name: 'Fortune', sales: 12400, is_tbwa_client: false },
           { name: 'Hope', sales: 11200, is_tbwa_client: false },
           { name: 'More', sales: 9800, is_tbwa_client: false },
-          { name: 'Champion', sales: 8900, is_tbwa_client: false }
+          { name: 'Champion', sales: 8900, is_tbwa_client: false },
         ];
       }
 
       return topBrands;
-    }
+    },
   });
 
   const { data: totalStats, isLoading: statsLoading } = useQuery({
@@ -103,14 +104,14 @@ export const useRetailAnalytics = () => {
       return {
         totalRevenue,
         totalTransactions,
-        avgTransaction
+        avgTransaction,
       };
-    }
+    },
   });
 
   return {
     topBrands: topBrands || [],
     totalStats: totalStats || { totalRevenue: 0, totalTransactions: 0, avgTransaction: 0 },
-    isLoading: brandsLoading || statsLoading
+    isLoading: brandsLoading || statsLoading,
   };
 };

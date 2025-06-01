@@ -1,12 +1,7 @@
 import { Download, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/contexts/UserContext';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ExportButtonProps {
   onExport: () => void;
@@ -35,13 +30,8 @@ export function ExportButton({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant={variant}
-              size={size}
-              disabled
-              className={className}
-            >
-              <Lock className="h-4 w-4 mr-2" />
+            <Button variant={variant} size={size} disabled className={className}>
+              <Lock className="mr-2 h-4 w-4" />
               {label}
             </Button>
           </TooltipTrigger>
@@ -61,7 +51,7 @@ export function ExportButton({
       disabled={disabled || loading}
       className={className}
     >
-      <Download className="h-4 w-4 mr-2" />
+      <Download className="mr-2 h-4 w-4" />
       {loading ? 'Exporting...' : label}
     </Button>
   );

@@ -3,17 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TBWACompetitiveToggle, MarketShareWidget } from './TBWACompetitiveToggle';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts';
 import { Sparkles, Building2, TrendingUp, Award } from 'lucide-react';
 
@@ -25,7 +25,7 @@ export const EnhancedBrandsPage: React.FC = () => {
     getBrandAnalysis,
     getMarketShare,
     getCategoryPerformance,
-    setTBWAOnly
+    setTBWAOnly,
   } = useAdvancedFilters();
 
   const [marketShare, setMarketShare] = useState<any>(null);
@@ -71,9 +71,9 @@ export const EnhancedBrandsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="text-gray-600">Loading brand analytics...</p>
         </div>
       </div>
@@ -81,14 +81,14 @@ export const EnhancedBrandsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Brand Intelligence</h1>
-          <p className="text-gray-600 mt-1">TBWA competitive analysis and market insights</p>
+          <p className="mt-1 text-gray-600">TBWA competitive analysis and market insights</p>
         </div>
-        
+
         {/* TBWA Toggle */}
         <div className="w-96">
           <TBWACompetitiveToggle
@@ -102,7 +102,7 @@ export const EnhancedBrandsPage: React.FC = () => {
 
       {/* Market Share Overview */}
       {marketShare && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <MarketShareWidget
               tbwaShare={marketShare.tbwa_share}
@@ -110,14 +110,14 @@ export const EnhancedBrandsPage: React.FC = () => {
               competitorRevenue={marketShare.competitor_revenue}
             />
           </div>
-          
+
           {/* Quick Stats */}
           <div className="space-y-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <Sparkles className="w-6 h-6 text-yellow-600" />
+                  <div className="rounded-lg bg-yellow-100 p-2">
+                    <Sparkles className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">TBWA Revenue</p>
@@ -132,8 +132,8 @@ export const EnhancedBrandsPage: React.FC = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Building2 className="w-6 h-6 text-blue-600" />
+                  <div className="rounded-lg bg-blue-100 p-2">
+                    <Building2 className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Competitor Revenue</p>
@@ -149,12 +149,12 @@ export const EnhancedBrandsPage: React.FC = () => {
       )}
 
       {/* Category Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Category Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
+              <TrendingUp className="h-5 w-5" />
               Category Performance
             </CardTitle>
           </CardHeader>
@@ -163,11 +163,11 @@ export const EnhancedBrandsPage: React.FC = () => {
               <BarChart data={categoryData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="category" />
-                <YAxis tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}K`} />
-                <Tooltip 
+                <YAxis tickFormatter={value => `₱${(value / 1000).toFixed(0)}K`} />
+                <Tooltip
                   formatter={(value: number, name: string) => [
                     formatCurrency(value),
-                    name === 'tbwa_revenue' ? 'TBWA Revenue' : 'Competitor Revenue'
+                    name === 'tbwa_revenue' ? 'TBWA Revenue' : 'Competitor Revenue',
                   ]}
                 />
                 <Bar dataKey="tbwa_revenue" fill="#fbbf24" name="TBWA" />
@@ -181,7 +181,7 @@ export const EnhancedBrandsPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Award className="w-5 h-5" />
+              <Award className="h-5 w-5" />
               TBWA Market Dominance
             </CardTitle>
           </CardHeader>
@@ -214,21 +214,21 @@ export const EnhancedBrandsPage: React.FC = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                selectedCategory === null 
-                  ? 'bg-blue-600 text-white' 
+              className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                selectedCategory === null
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               All Categories
             </button>
-            {filterOptions?.categories.map((category) => (
+            {filterOptions?.categories.map(category => (
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
-                className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                  selectedCategory === category.value 
-                    ? 'bg-blue-600 text-white' 
+                className={`rounded-full px-3 py-1 text-sm transition-colors ${
+                  selectedCategory === category.value
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -243,22 +243,14 @@ export const EnhancedBrandsPage: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Award className="w-5 h-5" />
+            <Award className="h-5 w-5" />
             Top Performing Brands
-            {selectedCategory && (
-              <Badge variant="secondary">
-                {selectedCategory}
-              </Badge>
-            )}
+            {selectedCategory && <Badge variant="secondary">{selectedCategory}</Badge>}
             {filters.tbwa_only === true && (
-              <Badge className="bg-yellow-100 text-yellow-800">
-                TBWA Clients Only
-              </Badge>
+              <Badge className="bg-yellow-100 text-yellow-800">TBWA Clients Only</Badge>
             )}
             {filters.tbwa_only === false && (
-              <Badge className="bg-blue-100 text-blue-800">
-                Competitors Only
-              </Badge>
+              <Badge className="bg-blue-100 text-blue-800">Competitors Only</Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -267,13 +259,13 @@ export const EnhancedBrandsPage: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left p-3">Rank</th>
-                  <th className="text-left p-3">Brand</th>
-                  <th className="text-left p-3">Category</th>
-                  <th className="text-left p-3">Type</th>
-                  <th className="text-right p-3">Revenue</th>
-                  <th className="text-right p-3">Transactions</th>
-                  <th className="text-right p-3">Products</th>
+                  <th className="p-3 text-left">Rank</th>
+                  <th className="p-3 text-left">Brand</th>
+                  <th className="p-3 text-left">Category</th>
+                  <th className="p-3 text-left">Type</th>
+                  <th className="p-3 text-right">Revenue</th>
+                  <th className="p-3 text-right">Transactions</th>
+                  <th className="p-3 text-right">Products</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,9 +274,7 @@ export const EnhancedBrandsPage: React.FC = () => {
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-gray-600">#{index + 1}</span>
-                        {index < 3 && (
-                          <span className="text-yellow-500">🏆</span>
-                        )}
+                        {index < 3 && <span className="text-yellow-500">🏆</span>}
                       </div>
                     </td>
                     <td className="p-3 font-medium">{brand.name}</td>
@@ -294,13 +284,13 @@ export const EnhancedBrandsPage: React.FC = () => {
                     <td className="p-3">
                       {brand.is_tbwa ? (
                         <div className="flex items-center gap-1">
-                          <Sparkles className="w-4 h-4 text-yellow-600" />
-                          <span className="text-yellow-600 font-medium">TBWA</span>
+                          <Sparkles className="h-4 w-4 text-yellow-600" />
+                          <span className="font-medium text-yellow-600">TBWA</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <Building2 className="w-4 h-4 text-blue-600" />
-                          <span className="text-blue-600 font-medium">Competitor</span>
+                          <Building2 className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-blue-600">Competitor</span>
                         </div>
                       )}
                     </td>
@@ -310,9 +300,7 @@ export const EnhancedBrandsPage: React.FC = () => {
                     <td className="p-3 text-right">
                       {brand.metrics.transactions.toLocaleString()}
                     </td>
-                    <td className="p-3 text-right">
-                      {brand.metrics.products}
-                    </td>
+                    <td className="p-3 text-right">{brand.metrics.products}</td>
                   </tr>
                 ))}
               </tbody>

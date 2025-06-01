@@ -20,7 +20,7 @@ vi.mock('jspdf', () => {
       pageSize: { width: 210, height: 297 },
     },
   };
-  
+
   return {
     default: vi.fn(() => mockDoc),
   };
@@ -63,9 +63,9 @@ describe('ExportService', () => {
   describe('exportToCSV', () => {
     it('should generate CSV content with headers and data', () => {
       const { saveAs } = require('file-saver');
-      
+
       exportService.exportToCSV(mockExportData);
-      
+
       expect(saveAs).toHaveBeenCalledWith(
         expect.any(Blob),
         expect.stringContaining('Test_Report_')
@@ -77,9 +77,9 @@ describe('ExportService', () => {
         ...mockExportData,
         data: [['Item, with comma', '100', '2024-01-01']],
       };
-      
+
       exportService.exportToCSV(dataWithCommas);
-      
+
       expect(require('file-saver').saveAs).toHaveBeenCalled();
     });
   });
@@ -87,9 +87,9 @@ describe('ExportService', () => {
   describe('exportToJSON', () => {
     it('should convert array data to JSON objects', () => {
       const { saveAs } = require('file-saver');
-      
+
       exportService.exportToJSON(mockExportData);
-      
+
       expect(saveAs).toHaveBeenCalledWith(
         expect.any(Blob),
         expect.stringContaining('Test_Report_')
@@ -100,9 +100,9 @@ describe('ExportService', () => {
   describe('exportToExcel', () => {
     it('should create workbook with data and metadata sheets', () => {
       const XLSX = require('xlsx');
-      
+
       exportService.exportToExcel(mockExportData);
-      
+
       expect(XLSX.utils.book_new).toHaveBeenCalled();
       expect(XLSX.utils.aoa_to_sheet).toHaveBeenCalled();
       expect(XLSX.writeFile).toHaveBeenCalled();
@@ -112,9 +112,9 @@ describe('ExportService', () => {
   describe('exportToPDF', () => {
     it('should create PDF with title and data table', () => {
       const jsPDF = require('jspdf').default;
-      
+
       exportService.exportToPDF(mockExportData);
-      
+
       expect(jsPDF).toHaveBeenCalled();
     });
   });

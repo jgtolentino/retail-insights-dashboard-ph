@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { LucideIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { LucideIcon } from 'lucide-react';
 
 interface HeaderStatsBoxProps {
   title: string;
@@ -8,7 +8,7 @@ interface HeaderStatsBoxProps {
   subtitle?: string;
   badge?: {
     text: string;
-    variant?: "default" | "secondary" | "destructive" | "outline";
+    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   };
   icon?: LucideIcon;
   iconColor?: string;
@@ -26,9 +26,9 @@ export function HeaderStatsBox({
   subtitle,
   badge,
   icon: Icon,
-  iconColor = "text-muted-foreground",
+  iconColor = 'text-muted-foreground',
   trend,
-  className = ""
+  className = '',
 }: HeaderStatsBoxProps) {
   const formatValue = (val: string | number) => {
     if (typeof val === 'number') {
@@ -51,19 +51,17 @@ export function HeaderStatsBox({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{formatValue(value)}</div>
-        
-        {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-        )}
-        
+
+        {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+
         {badge && (
-          <Badge variant={badge.variant || "secondary"} className="mt-1">
+          <Badge variant={badge.variant || 'secondary'} className="mt-1">
             {badge.text}
           </Badge>
         )}
-        
+
         {trend && (
-          <div className={`text-xs mt-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`mt-1 text-xs ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
             {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
             {trend.label && ` ${trend.label}`}
           </div>

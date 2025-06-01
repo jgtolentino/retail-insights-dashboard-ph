@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface LiveIndicatorProps {
@@ -38,7 +33,7 @@ export function LiveIndicator({
 
   const formatLastUpdate = (date: Date | null) => {
     if (!date) return 'No updates yet';
-    
+
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const seconds = Math.floor(diff / 1000);
@@ -62,10 +57,12 @@ export function LiveIndicator({
                 <>
                   <Wifi className="h-4 w-4 text-green-600" />
                   <div className="relative">
-                    <div className={cn(
-                      "h-2 w-2 rounded-full bg-green-600",
-                      pulseAnimation && "animate-ping absolute"
-                    )} />
+                    <div
+                      className={cn(
+                        'h-2 w-2 rounded-full bg-green-600',
+                        pulseAnimation && 'absolute animate-ping'
+                      )}
+                    />
                     <div className="h-2 w-2 rounded-full bg-green-600" />
                   </div>
                   <span className="text-sm font-medium text-green-600">Live</span>
@@ -80,10 +77,9 @@ export function LiveIndicator({
           </TooltipTrigger>
           <TooltipContent>
             <p className="text-xs">
-              {isConnected 
+              {isConnected
                 ? `Connected • Last update: ${formatLastUpdate(lastUpdate)}`
-                : 'Not receiving real-time updates'
-              }
+                : 'Not receiving real-time updates'}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -91,7 +87,7 @@ export function LiveIndicator({
 
       {/* Update Notification */}
       {showUpdateNotification && onDismissNotification && (
-        <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-sm animate-in slide-in-from-top-2">
+        <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1 text-sm text-blue-700 animate-in slide-in-from-top-2">
           <RefreshCw className="h-3 w-3" />
           <span>New data available</span>
           {onRefresh && (
@@ -102,7 +98,7 @@ export function LiveIndicator({
                 onRefresh();
                 onDismissNotification();
               }}
-              className="h-auto p-0 ml-2 text-blue-700 hover:text-blue-800"
+              className="ml-2 h-auto p-0 text-blue-700 hover:text-blue-800"
             >
               Refresh
             </Button>

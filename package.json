@@ -19,11 +19,16 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:agents": "vitest tests/agents/",
+    "test:integration": "vitest tests/integration/",
     "test:e2e": "playwright test",
     "test:console": "echo 'Playwright tests to be implemented'",
     "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\"",
     "validate:pre-deploy": "node scripts/pre-deployment-validation.js",
     "test:all": "npm run validate:pre-deploy",
+    "test:unit": "vitest run tests/unit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "verify:env": "node scripts/verify-env.js",
     "verify:supabase": "node scripts/verify-supabase-config.js",
     "fix:supabase-config": "echo 'Supabase client now uses environment variables only. Please ensure your .env file is configured.'",
@@ -37,10 +42,12 @@
     "docs:visual": "npm run capture:visuals && echo 'Visual documentation generated in ./visual-docs'",
     "docs:changelog": "tsx scripts/generate-visual-changelog.ts",
     "commit:task": "npm run capture:visuals && git add visual-docs/* && git commit",
-    "setup:visual-hooks": "chmod +x scripts/setup-visual-hooks.sh && ./scripts/setup-visual-hooks.sh"
+    "setup:visual-hooks": "chmod +x scripts/setup-visual-hooks.sh && ./scripts/setup-visual-hooks.sh",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@octokit/rest": "^22.0.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -99,6 +106,7 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "test-package": "^0.0.1",
     "vaul": "^0.9.3",
     "zod": "^3.23.8",
     "zustand": "^5.0.5"
@@ -108,26 +116,44 @@
     "@faker-js/faker": "^9.8.0",
     "@playwright/test": "^1.40.0",
     "@tailwindcss/typography": "^0.5.15",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitest/coverage-v8": "^3.1.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
+    "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.0",
     "lovable-tagger": "^1.1.7",
     "nodemon": "^3.1.10",
     "pg": "^8.16.0",
     "playwright": "^1.52.0",
     "postcss": "^8.4.47",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "^3.4.11",
     "tsx": "^4.19.4",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
     "wait-on": "^7.2.0"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

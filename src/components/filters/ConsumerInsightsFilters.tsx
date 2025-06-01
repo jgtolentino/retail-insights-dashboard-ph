@@ -36,11 +36,8 @@ export function ConsumerInsightsFilters({
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('category')
-        .not('category', 'is', null);
-      
+      const { data } = await supabase.from('brands').select('category').not('category', 'is', null);
+
       const uniqueCategories = [...new Set(data?.map(b => b.category) || [])];
       return uniqueCategories.sort();
     },
@@ -50,10 +47,7 @@ export function ConsumerInsightsFilters({
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('brands')
-        .select('id, name')
-        .order('name');
+      const { data } = await supabase.from('brands').select('id, name').order('name');
       return data || [];
     },
   });
@@ -62,10 +56,7 @@ export function ConsumerInsightsFilters({
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('id, name')
-        .order('name');
+      const { data } = await supabase.from('products').select('id, name').order('name');
       return data || [];
     },
   });
@@ -87,9 +78,7 @@ export function ConsumerInsightsFilters({
   }));
 
   // Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some(
-    filter => filter.value.length > 0
-  );
+  const hasActiveFilters = Object.values(filters).some(filter => filter.value.length > 0);
 
   // Clear all filters
   const clearAllFilters = () => {
@@ -122,20 +111,15 @@ export function ConsumerInsightsFilters({
   ]);
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border p-4 ${className || ''}`}>
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+    <div className={`rounded-lg border bg-white p-4 shadow-sm ${className || ''}`}>
+      <div className="mb-3 flex items-center justify-between sm:mb-4">
+        <h3 className="flex items-center gap-2 text-base font-semibold sm:text-lg">
           <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
           Consumer Segment Filters
         </h3>
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs">
+            <RefreshCw className="mr-1 h-3 w-3" />
             Clear all
           </Button>
         )}
@@ -144,8 +128,8 @@ export function ConsumerInsightsFilters({
       <div className="space-y-4">
         {/* Product Filters */}
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Product Filters</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <h4 className="mb-2 text-sm font-medium text-gray-700">Product Filters</h4>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             <FilterWidget
               title="Categories"
               options={categoryOptions}
@@ -180,8 +164,8 @@ export function ConsumerInsightsFilters({
 
         {/* Demographic Filters */}
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Demographic Filters</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <h4 className="mb-2 text-sm font-medium text-gray-700">Demographic Filters</h4>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             <FilterWidget
               title="Age Groups"
               options={AGE_GROUP_OPTIONS}

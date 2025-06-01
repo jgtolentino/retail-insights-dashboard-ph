@@ -1,0 +1,53 @@
+# Patcha Auto-Fix Entry
+# Generated: 2025-06-02
+# Issue: Backend QA environment failures
+
+fix_id: env-dns-server-2025-06-02
+description: "Fix DNS resolution and server startup for backend QA tests"
+confidence: 95
+category: environment
+
+issues:
+  - name: "DNS Resolution Failure"
+    test: "Unit Tests, Integration Tests"
+    error: "ENOTFOUND localhost"
+    severity: medium
+    
+  - name: "API Server Not Running"
+    test: "API Health Check"
+    error: "Connection refused on port 5000"
+    severity: low
+
+fixes:
+  dns_resolution:
+    description: "Add localhost to /etc/hosts"
+    command: |
+      echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts
+    rollback: |
+      sudo sed -i '/127.0.0.1.*localhost/d' /etc/hosts
+    permanent: true
+    
+  server_startup:
+    description: "Start development server"
+    command: |
+      npm run dev &
+    rollback: |
+      pkill -f "npm run dev"
+    permanent: false
+    notes: "Temporary fix - server should be running before tests"
+
+validation:
+  - test: "ping localhost"
+    expected: "127.0.0.1"
+  - test: "lsof -i:5000"
+    expected: "node process listening"
+
+auto_apply:
+  safe: true
+  requires_sudo: true
+  estimated_time: "10 seconds"
+
+post_fix_actions:
+  - "Re-run ./backend-qa-summary.sh"
+  - "Verify all tests pass"
+  - "Consider adding to CI/CD pre-test setup"

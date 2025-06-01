@@ -22,16 +22,18 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn(() => ({
-        order: vi.fn(() => Promise.resolve({
-          data: [
-            { id: 1, name: 'Test Brand' },
-            { id: 2, name: 'Another Brand' }
-          ],
-          error: null
-        }))
-      }))
-    }))
-  }
+        order: vi.fn(() =>
+          Promise.resolve({
+            data: [
+              { id: 1, name: 'Test Brand' },
+              { id: 2, name: 'Another Brand' },
+            ],
+            error: null,
+          })
+        ),
+      })),
+    })),
+  },
 }));
 
 describe('DashboardFilters', () => {
@@ -48,16 +50,12 @@ describe('DashboardFilters', () => {
   });
 
   const renderWithQuery = (component: React.ReactElement) => {
-    return render(
-      <QueryClientProvider client={queryClient}>
-        {component}
-      </QueryClientProvider>
-    );
+    return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
   };
 
   test('renders filter components', async () => {
     renderWithQuery(<DashboardFilters />);
-    
+
     expect(screen.getByText('Filters')).toBeInTheDocument();
     expect(screen.getByText('Brands')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
@@ -67,14 +65,14 @@ describe('DashboardFilters', () => {
 
   test('renders date range picker', () => {
     renderWithQuery(<DashboardFilters />);
-    
+
     expect(screen.getByRole('button', { name: /pick a date/i })).toBeInTheDocument();
   });
 
   test('calls onFiltersChange when filters change', async () => {
     const mockOnFiltersChange = vi.fn();
     renderWithQuery(<DashboardFilters onFiltersChange={mockOnFiltersChange} />);
-    
+
     // The effect should call onFiltersChange on mount
     await waitFor(() => {
       expect(mockOnFiltersChange).toHaveBeenCalled();
@@ -84,11 +82,11 @@ describe('DashboardFilters', () => {
   test('calls onDateRangeChange when date range changes', () => {
     const mockOnDateRangeChange = vi.fn();
     renderWithQuery(<DashboardFilters onDateRangeChange={mockOnDateRangeChange} />);
-    
+
     // Find and click the date picker button
     const dateButton = screen.getByRole('button', { name: /pick a date/i });
     fireEvent.click(dateButton);
-    
+
     // Note: Full date picker interaction would require more complex mocking
     // This test verifies the component renders correctly with the callback
     expect(mockOnDateRangeChange).toBeDefined();
@@ -96,7 +94,7 @@ describe('DashboardFilters', () => {
 
   test('displays correct placeholder text', () => {
     renderWithQuery(<DashboardFilters />);
-    
+
     expect(screen.getByText('All brands')).toBeInTheDocument();
     expect(screen.getByText('All categories')).toBeInTheDocument();
     expect(screen.getByText('All regions')).toBeInTheDocument();

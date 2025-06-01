@@ -17,39 +17,40 @@ export function DataTestComponent() {
     try {
       // Test 1: Age Distribution
       console.log('🧪 Testing age distribution...');
-      const { data: ageData, error: ageError } = await supabase
-        .rpc('get_age_distribution', {
-          start_date: '2025-04-30T00:00:00Z',
-          end_date: '2025-05-30T23:59:59Z',
-          bucket_size: 10
-        });
-      
+      const { data: ageData, error: ageError } = await supabase.rpc('get_age_distribution', {
+        start_date: '2025-04-30T00:00:00Z',
+        end_date: '2025-05-30T23:59:59Z',
+        bucket_size: 10,
+      });
+
       results.ageDistribution = {
         success: !ageError,
         error: ageError?.message,
         dataCount: ageData?.length || 0,
-        sampleData: ageData?.slice(0, 3)
+        sampleData: ageData?.slice(0, 3),
       };
 
       // Test 2: Consumer Profile (includes gender distribution)
       console.log('🧪 Testing consumer profile...');
-      const { data: consumerData, error: consumerError } = await supabase
-        .rpc('get_consumer_profile' as any, {
+      const { data: consumerData, error: consumerError } = await supabase.rpc(
+        'get_consumer_profile' as any,
+        {
           p_start: '2025-04-30T00:00:00Z',
-          p_end: '2025-05-30T23:59:59Z'
-        });
-      
+          p_end: '2025-05-30T23:59:59Z',
+        }
+      );
+
       // Extract gender distribution from consumer profile
       let genderDistribution: any[] = [];
       if (consumerData && typeof consumerData === 'object') {
         genderDistribution = (consumerData as any).gender_distribution || [];
       }
-      
+
       results.genderDistribution = {
         success: !consumerError,
         error: consumerError?.message,
         dataCount: genderDistribution?.length || 0,
-        sampleData: genderDistribution
+        sampleData: genderDistribution,
       };
 
       // Test 3: Raw transaction sample
@@ -59,17 +60,16 @@ export function DataTestComponent() {
         .select('customer_age, customer_gender, amount, created_at')
         .not('customer_age', 'is', null)
         .limit(5);
-      
+
       results.transactions = {
         success: !transactionError,
         error: transactionError?.message,
         dataCount: transactionData?.length || 0,
-        sampleData: transactionData
+        sampleData: transactionData,
       };
 
       console.log('📊 All test results:', results);
       setTestResults(results);
-
     } catch (error) {
       console.error('💥 Test failed:', error);
       results.error = error;
@@ -86,7 +86,7 @@ export function DataTestComponent() {
           <CardTitle>🧪 Testing Data Connection...</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </CardContent>
       </Card>
     );
@@ -100,8 +100,8 @@ export function DataTestComponent() {
       <CardContent>
         <div className="space-y-4">
           {/* Age Distribution Test */}
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-semibold flex items-center gap-2">
+          <div className="rounded-lg border p-4">
+            <h3 className="flex items-center gap-2 font-semibold">
               {testResults.ageDistribution?.success ? '✅' : '❌'} Age Distribution Function
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -111,16 +111,17 @@ export function DataTestComponent() {
               <p className="text-sm text-red-600">Error: {testResults.ageDistribution.error}</p>
             )}
             {testResults.ageDistribution?.sampleData && (
-              <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
+              <pre className="mt-2 overflow-auto rounded bg-gray-100 p-2 text-xs">
                 {JSON.stringify(testResults.ageDistribution.sampleData, null, 2)}
               </pre>
             )}
           </div>
 
           {/* Gender Distribution Test */}
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-semibold flex items-center gap-2">
-              {testResults.genderDistribution?.success ? '✅' : '❌'} Consumer Profile Function (Gender Data)
+          <div className="rounded-lg border p-4">
+            <h3 className="flex items-center gap-2 font-semibold">
+              {testResults.genderDistribution?.success ? '✅' : '❌'} Consumer Profile Function
+              (Gender Data)
             </h3>
             <p className="text-sm text-muted-foreground">
               Records found: {testResults.genderDistribution?.dataCount || 0}
@@ -129,15 +130,15 @@ export function DataTestComponent() {
               <p className="text-sm text-red-600">Error: {testResults.genderDistribution.error}</p>
             )}
             {testResults.genderDistribution?.sampleData && (
-              <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
+              <pre className="mt-2 overflow-auto rounded bg-gray-100 p-2 text-xs">
                 {JSON.stringify(testResults.genderDistribution.sampleData, null, 2)}
               </pre>
             )}
           </div>
 
           {/* Transactions Test */}
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-semibold flex items-center gap-2">
+          <div className="rounded-lg border p-4">
+            <h3 className="flex items-center gap-2 font-semibold">
               {testResults.transactions?.success ? '✅' : '❌'} Raw Transaction Data
             </h3>
             <p className="text-sm text-muted-foreground">
@@ -147,15 +148,15 @@ export function DataTestComponent() {
               <p className="text-sm text-red-600">Error: {testResults.transactions.error}</p>
             )}
             {testResults.transactions?.sampleData && (
-              <pre className="text-xs mt-2 bg-gray-100 p-2 rounded overflow-auto">
+              <pre className="mt-2 overflow-auto rounded bg-gray-100 p-2 text-xs">
                 {JSON.stringify(testResults.transactions.sampleData, null, 2)}
               </pre>
             )}
           </div>
 
-          <button 
+          <button
             onClick={testAllFunctions}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             🔄 Re-run Tests
           </button>

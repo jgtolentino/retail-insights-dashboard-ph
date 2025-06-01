@@ -5,7 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, TrendingUp, Target, Users, Package, Copy, Download, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+  Brain,
+  TrendingUp,
+  Target,
+  Users,
+  Package,
+  Copy,
+  Download,
+  Lightbulb,
+  AlertTriangle,
+  CheckCircle,
+} from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface Recommendation {
@@ -28,7 +39,8 @@ const mockRecommendations: Recommendation[] = [
   {
     id: '1',
     title: 'Optimize Marlboro Red Inventory in QC South',
-    description: 'Marlboro Red shows 23% higher demand in QC South vs other regions, but current stock levels suggest potential shortages during peak hours (3-6 PM).',
+    description:
+      'Marlboro Red shows 23% higher demand in QC South vs other regions, but current stock levels suggest potential shortages during peak hours (3-6 PM).',
     priority: 'high',
     category: 'inventory',
     confidence: 87,
@@ -36,17 +48,18 @@ const mockRecommendations: Recommendation[] = [
     actionItems: [
       'Increase Marlboro Red stock by 30% for QC South stores',
       'Implement dynamic pricing during peak hours',
-      'Set up automated reorder alerts at 20% stock level'
+      'Set up automated reorder alerts at 20% stock level',
     ],
     metrics: {
       potential_revenue: 125000,
-      efficiency_gain: 18
-    }
+      efficiency_gain: 18,
+    },
   },
   {
     id: '2',
     title: 'Bundle Max Energy + Yosi for Gen Z Customers',
-    description: 'Data shows 65% of Gen Z customers who buy energy drinks also purchase cigarettes within the same transaction. Creating a bundle could increase basket size.',
+    description:
+      'Data shows 65% of Gen Z customers who buy energy drinks also purchase cigarettes within the same transaction. Creating a bundle could increase basket size.',
     priority: 'high',
     category: 'marketing',
     confidence: 82,
@@ -54,17 +67,18 @@ const mockRecommendations: Recommendation[] = [
     actionItems: [
       'Create "Energy + Focus" bundle promotion',
       'Target 18-25 age demographic with digital promotion',
-      'Track bundle performance vs individual sales'
+      'Track bundle performance vs individual sales',
     ],
     metrics: {
       potential_revenue: 89000,
-      efficiency_gain: 12
-    }
+      efficiency_gain: 12,
+    },
   },
   {
     id: '3',
     title: 'Address Weekend Sales Dip',
-    description: 'Weekend sales are 18% lower than weekdays, particularly Saturday mornings. This suggests opportunity for targeted promotions.',
+    description:
+      'Weekend sales are 18% lower than weekdays, particularly Saturday mornings. This suggests opportunity for targeted promotions.',
     priority: 'medium',
     category: 'sales',
     confidence: 75,
@@ -72,17 +86,18 @@ const mockRecommendations: Recommendation[] = [
     actionItems: [
       'Launch "Saturday Special" discount program',
       'Promote breakfast + coffee bundles for Saturday AM',
-      'Analyze competitor weekend pricing strategies'
+      'Analyze competitor weekend pricing strategies',
     ],
     metrics: {
       potential_revenue: 67000,
-      cost_reduction: 5
-    }
+      cost_reduction: 5,
+    },
   },
   {
     id: '4',
     title: 'Implement Smart Substitution Alerts',
-    description: 'When customers ask for unavailable products, staff suggest alternatives only 45% of the time. AI-powered substitution prompts could improve this.',
+    description:
+      'When customers ask for unavailable products, staff suggest alternatives only 45% of the time. AI-powered substitution prompts could improve this.',
     priority: 'medium',
     category: 'operations',
     confidence: 73,
@@ -90,17 +105,18 @@ const mockRecommendations: Recommendation[] = [
     actionItems: [
       'Deploy tablet-based substitution recommendation system',
       'Train staff on top 10 product substitutions',
-      'Track substitution acceptance rates'
+      'Track substitution acceptance rates',
     ],
     metrics: {
       potential_revenue: 54000,
-      efficiency_gain: 22
-    }
+      efficiency_gain: 22,
+    },
   },
   {
     id: '5',
     title: 'Optimize Female Customer Experience',
-    description: 'Female customers represent only 28% of transactions but have 15% higher average basket value. Targeted improvements could increase this segment.',
+    description:
+      'Female customers represent only 28% of transactions but have 15% higher average basket value. Targeted improvements could increase this segment.',
     priority: 'low',
     category: 'marketing',
     confidence: 68,
@@ -108,13 +124,13 @@ const mockRecommendations: Recommendation[] = [
     actionItems: [
       'Enhance product selection for female preferences',
       'Improve store ambiance and cleanliness',
-      'Create female-targeted loyalty program'
+      'Create female-targeted loyalty program',
     ],
     metrics: {
       potential_revenue: 43000,
-      efficiency_gain: 8
-    }
-  }
+      efficiency_gain: 8,
+    },
+  },
 ];
 
 export default function AIRecommendations() {
@@ -131,17 +147,18 @@ export default function AIRecommendations() {
 
   const summaryMetrics = useMemo(() => {
     const totalPotentialRevenue = mockRecommendations.reduce(
-      (sum, rec) => sum + (rec.metrics?.potential_revenue || 0), 0
+      (sum, rec) => sum + (rec.metrics?.potential_revenue || 0),
+      0
     );
-    const avgConfidence = mockRecommendations.reduce(
-      (sum, rec) => sum + rec.confidence, 0
-    ) / mockRecommendations.length;
-    
+    const avgConfidence =
+      mockRecommendations.reduce((sum, rec) => sum + rec.confidence, 0) /
+      mockRecommendations.length;
+
     return {
       totalRecommendations: mockRecommendations.length,
       highPriority: mockRecommendations.filter(r => r.priority === 'high').length,
       totalPotentialRevenue,
-      avgConfidence: avgConfidence.toFixed(1)
+      avgConfidence: avgConfidence.toFixed(1),
     };
   }, []);
 
@@ -161,13 +178,15 @@ Impact: ${rec.impact}
 
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copied to clipboard",
-      description: "Recommendation details have been copied"
+      title: 'Copied to clipboard',
+      description: 'Recommendation details have been copied',
     });
   };
 
   const handleExportAll = () => {
-    const allText = mockRecommendations.map(rec => `
+    const allText = mockRecommendations
+      .map(
+        rec => `
 ${rec.title}
 ${rec.description}
 
@@ -178,7 +197,9 @@ Priority: ${rec.priority.toUpperCase()}
 Confidence: ${rec.confidence}%
 Impact: ${rec.impact}
 ---
-    `).join('\n');
+    `
+      )
+      .join('\n');
 
     const blob = new Blob([allText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -219,19 +240,19 @@ Impact: ${rec.impact}
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 px-4">
+      <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
             <Brain className="h-8 w-8 text-blue-600" />
             AI Recommendations
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="mt-2 text-muted-foreground">
             Data-driven insights and actionable recommendations to optimize your retail operations
           </p>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Recommendations</CardTitle>
@@ -251,10 +272,10 @@ Impact: ${rec.impact}
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₱{summaryMetrics.totalPotentialRevenue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                If all recommendations implemented
-              </p>
+              <div className="text-2xl font-bold">
+                ₱{summaryMetrics.totalPotentialRevenue.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">If all recommendations implemented</p>
             </CardContent>
           </Card>
 
@@ -265,9 +286,7 @@ Impact: ${rec.impact}
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summaryMetrics.avgConfidence}%</div>
-              <p className="text-xs text-muted-foreground">
-                AI confidence level
-              </p>
+              <p className="text-xs text-muted-foreground">AI confidence level</p>
             </CardContent>
           </Card>
 
@@ -315,41 +334,52 @@ Impact: ${rec.impact}
 
         {/* Recommendations List */}
         <div className="space-y-6">
-          {filteredRecommendations.map((rec) => (
-            <Card key={rec.id} className="hover:shadow-lg transition-shadow">
+          {filteredRecommendations.map(rec => (
+            <Card key={rec.id} className="transition-shadow hover:shadow-lg">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
+                  <div className="flex flex-1 items-start gap-3">
                     {getCategoryIcon(rec.category)}
                     <div className="flex-1">
                       <CardTitle className="text-lg">{rec.title}</CardTitle>
-                      <p className="text-muted-foreground mt-1">{rec.description}</p>
+                      <p className="mt-1 text-muted-foreground">{rec.description}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {getPriorityIcon(rec.priority)}
-                    <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        rec.priority === 'high'
+                          ? 'destructive'
+                          : rec.priority === 'medium'
+                            ? 'default'
+                            : 'secondary'
+                      }
+                    >
                       {rec.priority}
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <h4 className="font-medium mb-2">Action Items</h4>
+                    <h4 className="mb-2 font-medium">Action Items</h4>
                     <ul className="space-y-1">
                       {rec.actionItems.map((item, index) => (
-                        <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <CheckCircle className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
+                        <li
+                          key={index}
+                          className="flex items-start gap-2 text-sm text-muted-foreground"
+                        >
+                          <CheckCircle className="mt-0.5 h-3 w-3 flex-shrink-0 text-green-500" />
                           {item}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="mb-4 grid grid-cols-2 gap-4">
                       <div>
                         <div className="text-sm font-medium">Confidence</div>
                         <div className="text-lg font-bold text-blue-600">{rec.confidence}%</div>
@@ -363,19 +393,19 @@ Impact: ${rec.impact}
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="mb-4">
-                      <div className="text-sm font-medium mb-1">Expected Impact</div>
+                      <div className="mb-1 text-sm font-medium">Expected Impact</div>
                       <div className="text-sm text-muted-foreground">{rec.impact}</div>
                     </div>
 
-                    <Button 
+                    <Button
                       onClick={() => handleCopyRecommendation(rec)}
-                      variant="outline" 
+                      variant="outline"
                       size="sm"
                       className="w-full"
                     >
-                      <Copy className="h-4 w-4 mr-2" />
+                      <Copy className="mr-2 h-4 w-4" />
                       Copy Details
                     </Button>
                   </div>

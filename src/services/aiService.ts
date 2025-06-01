@@ -74,8 +74,8 @@ class AIService {
         timestamp: new Date().toISOString(),
         metadata: {
           affectedMetrics: ['revenue'],
-          impact: 'negative'
-        }
+          impact: 'negative',
+        },
       });
     }
 
@@ -94,7 +94,8 @@ class AIService {
         id: `fallback-revenue-${Date.now()}`,
         type: 'recommendation',
         title: 'Revenue Recovery Strategy',
-        content: 'Revenue has declined. Consider promotional campaigns, customer retention programs, or new product introductions to boost sales.',
+        content:
+          'Revenue has declined. Consider promotional campaigns, customer retention programs, or new product introductions to boost sales.',
         confidence: 0.8,
         priority: 'high',
         timestamp: new Date().toISOString(),
@@ -107,7 +108,8 @@ class AIService {
         id: `fallback-growth-${Date.now()}`,
         type: 'recommendation',
         title: 'Scale Operations',
-        content: 'Strong transaction growth detected. Consider expanding inventory, optimizing checkout processes, or hiring additional staff to handle increased demand.',
+        content:
+          'Strong transaction growth detected. Consider expanding inventory, optimizing checkout processes, or hiring additional staff to handle increased demand.',
         confidence: 0.9,
         priority: 'medium',
         timestamp: new Date().toISOString(),
