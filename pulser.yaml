@@ -104,7 +104,21 @@ tasks:
         cacaResponse=$(pulser invoke --agent Caca --function suggest \
           --args '{ "taskName":"vercel-env-check", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
         suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        category=$(echo "$cacaResponse" | jq -r '.category')
+        severity=$(echo "$cacaResponse" | jq -r '.severity')
+        
         echo "→ [Caca] Environment Fix Suggestion: $suggestion"
+        
+        # Auto-execute environment fix if it's an environment issue
+        if [ "$category" = "environment" ]; then
+          echo "🔧 [Auto-Fix] Running automated environment fix..."
+          response=$(pulser invoke --agent BasherExec --function run \
+            --args '{ "cmd": "./scripts/auto-fix-environment.sh --detect-env-issue \"'"$stderr"'\"" }')
+          autoFixOutput=$(echo "$response" | jq -r '.stdout')
+          echo "$autoFixOutput"
+          echo ""
+          echo "📋 SOP Reference: sop/environment-credentials-fix.md"
+        fi
         
         # This is a deployment blocker
         echo "🚨 DEPLOYMENT WILL FAIL - Fix environment variables first"
@@ -341,7 +355,22 @@ tasks:
         stderr=$(echo "$response" | jq -r '.stderr')
         cacaResponse=$(pulser invoke --agent Caca --function suggest \
           --args '{ "taskName":"backend-qa-db", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
-        echo "→ [Caca] $(echo "$cacaResponse" | jq -r '.suggestion')"
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        category=$(echo "$cacaResponse" | jq -r '.category')
+        
+        echo "→ [Caca] $suggestion"
+        
+        # Auto-reference SOP for environment issues
+        if [ "$category" = "environment" ]; then
+          echo ""
+          echo "🔧 [Auto-SOP] Environment issue detected - running automated fix guide..."
+          response=$(pulser invoke --agent BasherExec --function run \
+            --args '{ "cmd": "./scripts/auto-fix-environment.sh --detect-env-issue \"'"$stderr"'\"" }')
+          autoFixOutput=$(echo "$response" | jq -r '.stdout')
+          echo "$autoFixOutput"
+          echo ""
+          echo "📋 SOP Reference: sop/environment-credentials-fix.md"
+        fi
       else
         echo "✅ Database connection test passed"
       fi

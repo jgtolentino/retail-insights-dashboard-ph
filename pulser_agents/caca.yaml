@@ -27,6 +27,12 @@ prompt_template: |
   - Category: "dependency" 
   - Severity: "high"
   
+  ### Environment Variable Issues (CRITICAL)
+  - Pattern: /Missing environment variable|SUPABASE_ANON_KEY|SUPABASE_URL/i
+  - Suggestion: "ENVIRONMENT ISSUE DETECTED - Refer to SOP: sop/environment-credentials-fix.md. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to Vercel production environment variables. Auto-fix available: ./scripts/auto-fix-environment.sh"
+  - Category: "environment"
+  - Severity: "critical"
+  
   ### Network Issues
   - Pattern: /ENOTFOUND|ECONNREFUSED|ETIMEDOUT/i
   - Suggestion: "Check network connection, DNS settings, or proxy configuration"
