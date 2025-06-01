@@ -40,7 +40,7 @@ function SalesByBrandChartComponent({ className = '', height = 400 }: SalesByBra
   }
 
   return (
-    <Card className={className}>
+    <Card className={className} data-testid="sales-by-brand-chart">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
           <TrendingUp className="h-4 w-4" />
@@ -48,7 +48,7 @@ function SalesByBrandChartComponent({ className = '', height = 400 }: SalesByBra
           {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent data-testid="chart-data">
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />

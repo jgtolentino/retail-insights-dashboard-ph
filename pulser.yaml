@@ -16,6 +16,75 @@ agents:
   Patcha: pulser_agents/patcha.yaml
 
 tasks:
+  qa-filters:
+    description: "Run UX/behavioral tests for filter functionality"
+    run: |
+      echo "🔍 Starting Filter UX QA Suite..."
+      
+      # Run filter-specific E2E tests
+      echo "📋 Running E2E Filter Tests..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npx playwright test tests/e2e/filters.spec.ts --reporter=json" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ E2E Filter tests failed"
+        echo "$stderr"
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"qa-filters-e2e", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] E2E Suggestion: $suggestion"
+      else
+        echo "✅ E2E Filter tests passed"
+      fi
+      
+      # Run useBrands hook unit tests
+      echo "🧪 Running Brand Hook Unit Tests..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npx vitest run tests/unit/hooks/useBrands.test.tsx --reporter=json" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Brand hook tests failed"
+        stderr=$(echo "$response" | jq -r '.stderr')
+        echo "$stderr"
+      else
+        echo "✅ Brand hook tests passed"
+      fi
+      
+      # Run chart-filter integration tests
+      echo "🔗 Running Chart-Filter Integration Tests..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npx vitest run tests/integration/chart-filter-integration.test.tsx --reporter=json" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Chart-filter integration tests failed"
+        stderr=$(echo "$response" | jq -r '.stderr')
+        echo "$stderr"
+      else
+        echo "✅ Chart-filter integration tests passed"
+      fi
+      
+      # Test brand count validation (must be > 4 to prove dynamic loading)
+      echo "📊 Validating Dynamic Brand Loading..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "node -e \"fetch(process.env.VITE_SUPABASE_URL + \"/rest/v1/brands?select=name\", { headers: { apikey: process.env.VITE_SUPABASE_ANON_KEY } }).then(r => r.json()).then(d => { const brands = [...new Set(d.map(b => b.name).filter(Boolean))]; console.log(\"Brand count:\", brands.length); if (brands.length <= 4) { console.error(\"FAIL: Only\", brands.length, \"brands found. Expected > 4 for dynamic loading.\"); process.exit(1); } else { console.log(\"PASS: Found\", brands.length, \"brands - dynamic loading confirmed\"); } }).catch(e => { console.error(\"Database connection failed:\", e.message); process.exit(1); })\"" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Brand count validation failed"
+        echo "$stdout"
+      else
+        echo "✅ Brand count validation passed"
+        echo "$stdout"
+      fi
+      
+      echo "📋 Filter QA Suite Complete"
+
   build-css:
     description: "Compile Tailwind CSS"
     run: |
@@ -325,8 +394,9 @@ composite_tasks:
       - backend-qa
   
   qa-full:
-    description: "Run full QA suite (frontend + backend + e2e)"
+    description: "Run full QA suite (frontend + backend + e2e + UX filters)"
     steps:
       - lint
       - test
       - backend-qa
+      - qa-filters

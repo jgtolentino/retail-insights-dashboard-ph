@@ -78,6 +78,7 @@ export function GlobalFiltersPanel() {
           value={toOptions(selectedCategories)}
           onChange={(vals: MultiValue<any>) => setSelectedCategories(vals.map(v => v.value))}
           placeholder="All categories…"
+          data-testid="category-filter"
         />
       </div>
 
@@ -92,6 +93,8 @@ export function GlobalFiltersPanel() {
           placeholder={
             brandsLoading ? 'Loading brands...' : `All brands (${allBrands.length} available)…`
           }
+          data-testid="brand-filter"
+          className="brand-filter"
         />
       </div>
 
