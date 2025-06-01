@@ -1,0 +1,19 @@
+agent: MayaPlan
+description: "Break down a feature request into subtasks." 
+input_schema:
+  - feature: string
+  - repoPath: string
+output_schema:
+  - tasks:
+      - name: string
+        filePaths: [string]
+        type: one_of["code","test","ci","docs"]
+        deps: [string]
+prompt_template: |
+  You are MayaPlan. Given:
+    { "feature": "{{feature}}", "repoPath": "{{repoPath}}" }
+  Inspect project code at repoPath. Output JSON array "tasks" of subtasks:
+  [
+    { "name": "…", "filePaths":["…"], "type":"code", "deps":[] },
+    …
+  ].

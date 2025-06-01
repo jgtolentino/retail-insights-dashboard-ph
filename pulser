@@ -1,0 +1,8 @@
+#!/bin/bash
+# Wrapper script for the Pulser task runner
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Run the task runner with all arguments passed through
+exec node "$SCRIPT_DIR/pulser-task-runner-v2.js" "$@"

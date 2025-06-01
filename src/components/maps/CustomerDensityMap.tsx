@@ -74,7 +74,7 @@ function CustomerDensityMapComponent({
     return { radius, color, fillColor, fillOpacity: 0.6 };
   }, [metric, densityData]);
 
-  const densityCircles = useMemo(() => {
+  const densityCircles = React.useMemo(() => {
     if (!densityData || densityData.length === 0) return [];
     
     return densityData.map((location, index) => {
@@ -108,7 +108,7 @@ function CustomerDensityMapComponent({
         </Circle>
       );
     });
-  }, [densityData, getCircleProps]);
+  }, [densityData, metric]);
 
   if (error) {
     return (
@@ -121,7 +121,6 @@ function CustomerDensityMapComponent({
       </Card>
     );
   }
-
 
   return (
     <Card>

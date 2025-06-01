@@ -1,6 +1,6 @@
-# Retail Insights Dashboard PH
+# Retail Insights Dashboard Philippines
 
-Real-time retail analytics dashboard for sari-sari stores in the Philippines.
+A comprehensive analytics platform for retail performance tracking, consumer insights, and competitive analysis across Philippine markets.
 
 ## 🚀 Quick Start
 

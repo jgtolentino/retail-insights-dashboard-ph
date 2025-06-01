@@ -1,0 +1,193 @@
+/* Design System - Centralized Theme Variables */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #0070f3;
+  --color-primary-hover: #0051cc;
+  --color-primary-light: #e6f3ff;
+  
+  --color-secondary: #6b7280;
+  --color-secondary-hover: #4b5563;
+  --color-secondary-light: #f3f4f6;
+  
+  --color-accent: #10b981;
+  --color-accent-hover: #059669;
+  --color-accent-light: #d1fae5;
+  
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: #fef3c7;
+  
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
+  --color-error-light: #fee2e2;
+  
+  /* TBWA Brand Colors */
+  --color-tbwa-primary: #ff6f61;
+  --color-tbwa-secondary: #2c3e50;
+  --color-tbwa-accent: #3498db;
+  
+  /* Neutral Colors */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  
+  /* Text Colors */
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-muted: var(--color-gray-500);
+  --color-text-inverse: #ffffff;
+  
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--color-gray-50);
+  --color-bg-tertiary: var(--color-gray-100);
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Border Colors */
+  --color-border-primary: var(--color-gray-200);
+  --color-border-secondary: var(--color-gray-300);
+  --color-border-focus: var(--color-primary);
+  
+  /* Typography */
+  --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'Fira Code', 'Monaco', 'Consolas', 'Courier New', monospace;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+  --spacing-3xl: 4rem;     /* 64px */
+  
+  /* Border Radius */
+  --radius-sm: 0.125rem;   /* 2px */
+  --radius-md: 0.25rem;    /* 4px */
+  --radius-lg: 0.5rem;     /* 8px */
+  --radius-xl: 0.75rem;    /* 12px */
+  --radius-2xl: 1rem;      /* 16px */
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  /* Z-index layers */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+}
+
+/* Dark mode theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d1d5db;
+    --color-text-muted: #9ca3af;
+    
+    --color-bg-primary: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-tertiary: #374151;
+    
+    --color-border-primary: #374151;
+    --color-border-secondary: #4b5563;
+  }
+}
+
+/* Responsive breakpoints as CSS custom properties */
+:root {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* Utility classes for consistent spacing */
+.container-padding {
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .container-padding {
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-padding {
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+  }
+}
+
+/* Focus styles for accessibility */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn var(--transition-normal) ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-in {
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}

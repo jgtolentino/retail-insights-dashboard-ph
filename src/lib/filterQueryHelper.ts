@@ -63,27 +63,16 @@ export async function getFilteredTransactionIds() {
 
   let itemQuery = supabase
     .from('transaction_items')
-    .select(`
-      transaction_id,
-      products!inner (
-        id,
-        brand_id,
-        brands!inner (
-          id,
-          name,
-          category
-        )
-      )
-    `);
+    .select('transaction_id, product_id, brand_id, category');
 
   // Apply brand filter
   if (state.selectedBrands && state.selectedBrands.length > 0) {
-    itemQuery = itemQuery.in('products.brand_id', state.selectedBrands);
+    itemQuery = itemQuery.in('brand_id', state.selectedBrands.map(b => parseInt(b)));
   }
 
   // Apply category filter
   if (state.selectedCategories && state.selectedCategories.length > 0) {
-    itemQuery = itemQuery.in('products.brands.category', state.selectedCategories);
+    itemQuery = itemQuery.in('category', state.selectedCategories);
   }
 
   const { data: filteredItems, error } = await itemQuery;
@@ -159,10 +148,16 @@ export function buildFilterQueryWithOptions(filterOptions: FilterOptions) {
  */
 export async function getFilterOptions() {
   // Fetch brands
-  const { data: brands } = await supabase
+  const { data: brands, error: brandsError } = await supabase
     .from('brands')
     .select('id, name')
     .order('name');
+    
+  if (brandsError) {
+    console.error('Error fetching brands:', brandsError);
+  } else {
+    console.log(`📋 Fetched ${brands?.length || 0} brands for filter dropdown`);
+  }
 
   // Fetch categories
   const { data: categoriesRaw } = await supabase

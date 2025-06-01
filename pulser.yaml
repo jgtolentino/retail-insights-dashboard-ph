@@ -1,0 +1,109 @@
+name: retail-insights-dashboard
+version: 1.0.0
+
+environment:
+  required:
+    - node
+    - npm
+    - tailwindcss
+    - vercel
+
+agents:
+  BasherExec: pulser_agents/basher_exec.yaml
+  Caca: pulser_agents/caca.yaml
+  MayaPlan: pulser_agents/maya_plan.yaml
+  Claudia: pulser_agents/claudia.yaml
+
+tasks:
+  build-css:
+    description: "Compile Tailwind CSS"
+    run: |
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npx tailwindcss -i src/index.css -o dist/output.css --minify" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ build-css failed (exit code $exitCode)"
+        echo "$stderr"
+        suggestion=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"build-css", "stderr":"'"$stderr"'" }' | jq -r '.suggestion')
+        echo "→ Suggestion: $suggestion"
+        exit $exitCode
+      fi
+      echo "$response" | jq -r '.stdout'
+
+  lint:
+    description: "Run ESLint"
+    run: |
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npx eslint \"src/**/*.{js,jsx,ts,tsx}\"" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ lint failed (exit code $exitCode)"
+        echo "$stderr"
+        suggestion=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"lint", "stderr":"'"$stderr"'" }' | jq -r '.suggestion')
+        echo "→ Suggestion: $suggestion"
+        exit $exitCode
+      fi
+      echo "$response" | jq -r '.stdout'
+
+  test:
+    description: "Run Jest tests"
+    run: |
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npm test" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ test failed (exit code $exitCode)"
+        echo "$stderr"
+        suggestion=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"test", "stderr":"'"$stderr"'" }' | jq -r '.suggestion')
+        echo "→ Suggestion: $suggestion"
+        exit $exitCode
+      fi
+      echo "$response" | jq -r '.stdout'
+
+  deploy:
+    description: "Deploy to Vercel"
+    run: |
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "vercel --prod --confirm" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ deploy failed (exit code $exitCode)"
+        echo "$stderr"
+        suggestion=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"deploy", "stderr":"'"$stderr"'" }' | jq -r '.suggestion')
+        echo "→ Suggestion: $suggestion"
+        exit $exitCode
+      fi
+      echo "$response" | jq -r '.stdout'
+
+  plan:
+    description: "Generate AI plan for a feature."
+    run: |
+      result=$(pulser invoke --agent MayaPlan --function planFeature \
+        --args '{ "feature":"{{inputFeature}}", "repoPath":"." }')
+      echo "$result" | jq .
+
+  post-plan:
+    description: "Post AI plan to GitHub PR."
+    run: |
+      # Expect two inputs: prNumber and the JSON plan from MayaPlan
+      pr={{inputPRNumber}}
+      planJson='{{inputPlanJson}}'
+      response=$(pulser invoke --agent Claudia --function postPlan \
+        --args '{ "prNumber":'"$pr"', "planTasks":'"$planJson"' }')
+      echo "$response" | jq -r '.commentUrl'
+
+composite_tasks:
+  ci:
+    description: "build → lint → test"
+    steps:
+      - build-css
+      - lint
+      - test

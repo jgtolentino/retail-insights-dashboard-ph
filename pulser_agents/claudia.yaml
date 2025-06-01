@@ -1,0 +1,21 @@
+agent: Claudia
+description: "Post AI‐generated plan as a GitHub PR comment." 
+input_schema:
+  - prNumber: number
+  - planTasks: [ 
+      - name: string
+        filePaths: [string]
+        type: string
+        deps: [string]
+    ]
+output_schema:
+  - commentUrl: string
+prompt_template: |
+  You are Claudia. Given:
+    { "prNumber": {{prNumber}}, "planTasks": {{planTasks}} }
+  Format a Markdown comment:
+    "## AI Plan for PR #{{prNumber}}:
+    1. [ ] {{task1.name}} ({{task1.filePaths | join(", ")}})
+    2. [ ] {{task2.name}} …"
+  Use GitHub API to post or update this comment on PR #{{prNumber}}. Return:
+    { "commentUrl": "<URL of posted comment>" }.

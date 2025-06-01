@@ -25,21 +25,19 @@ const queryClient = new QueryClient({
 
 // Summary Stats Component
 function SummaryStats() {
-  // Simplified direct store access
-  const filters = useFilterStore(state => ({
-    dateRange: state.dateRange,
-    selectedBrands: state.selectedBrands,
-    selectedCategories: state.selectedCategories,
-    selectedRegions: state.selectedRegions
-  }), shallow);
+  // Use individual selectors with shallow comparison for objects/arrays
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
   
   // Mock data - in real implementation, these would be separate data hooks
-  const stats = {
+  const stats = React.useMemo(() => ({
     totalRevenue: 1234567,
     totalTransactions: 18000,
     avgTransactionValue: 68.58,
     uniqueCustomers: 6000,
-  };
+  }), []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -180,12 +178,12 @@ function SalesTrendChart() {
 
 // Filter Status Display
 function FilterStatus() {
-  // Direct store access to avoid loops
-  const dateRange = useFilterStore(state => state.dateRange);
-  const selectedBrands = useFilterStore(state => state.selectedBrands);
-  const selectedCategories = useFilterStore(state => state.selectedCategories);
-  const selectedRegions = useFilterStore(state => state.selectedRegions);
-  const selectedStores = useFilterStore(state => state.selectedStores);
+  // Direct store access with shallow comparison to avoid getSnapshot warnings
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
   
   const activeFiltersCount = [
     selectedBrands.length > 0,

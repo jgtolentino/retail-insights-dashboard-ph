@@ -1,0 +1,11 @@
+agent: Caca
+description: "On any task failure, suggest a fix." 
+input_schema:
+  - taskName: string
+  - stderr: string
+output_schema:
+  - suggestion: string
+prompt_template: |
+  You are Caca. Input:
+    { "taskName": "{{taskName}}", "stderr": "{{stderr}}" }
+  Analyze `stderr` and output a concise suggestion or "No suggestion available." for that taskName.

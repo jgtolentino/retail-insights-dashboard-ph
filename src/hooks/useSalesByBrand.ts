@@ -35,22 +35,10 @@ export function useSalesByBrand() {
       // Get transaction IDs for the next query
       const transactionIds = transactions.map(t => t.id);
 
-      // Now get transaction items with brands for these transactions
+      // Get transaction items without foreign key joins
       const { data: transactionItems, error: itemsError } = await supabase
         .from('transaction_items')
-        .select(`
-          quantity,
-          price,
-          transaction_id,
-          products!inner (
-            id,
-            brand_id,
-            brands!inner (
-              id,
-              name
-            )
-          )
-        `)
+        .select('quantity, price, transaction_id, product_id, brand_id')
         .in('transaction_id', transactionIds);
 
       if (itemsError) {
@@ -61,6 +49,25 @@ export function useSalesByBrand() {
         return [];
       }
 
+      // Get unique brand IDs to fetch brand names
+      const brandIds = [...new Set(transactionItems.map(item => item.brand_id).filter(Boolean))];
+      
+      // Get brand names separately
+      const { data: brands, error: brandsError } = await supabase
+        .from('brands')
+        .select('id, name')
+        .in('id', brandIds);
+
+      if (brandsError) {
+        throw brandsError;
+      }
+
+      // Create brand lookup map
+      const brandLookup = new Map<number, string>();
+      brands?.forEach(brand => {
+        brandLookup.set(brand.id, brand.name);
+      });
+
       // Calculate revenue by brand
       const brandRevenue = new Map<string, { 
         brand_name: string; 
@@ -70,9 +77,9 @@ export function useSalesByBrand() {
       }>();
 
       transactionItems.forEach(item => {
-        if (item.products?.brands) {
-          const brandId = item.products.brands.id.toString();
-          const brandName = item.products.brands.name;
+        if (item.brand_id) {
+          const brandId = item.brand_id.toString();
+          const brandName = brandLookup.get(item.brand_id) || `Brand ${item.brand_id}`;
           const itemRevenue = (item.quantity || 0) * (item.price || 0);
 
           if (brandRevenue.has(brandId)) {
@@ -103,7 +110,7 @@ export function useSalesByBrand() {
 
       return result;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    keepPreviousData: true,
+    staleTime: 1000 * 10, // 10 seconds - refresh more frequently for filtering
+    refetchOnWindowFocus: false,
   });
 }

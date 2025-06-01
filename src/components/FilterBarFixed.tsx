@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Filter, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useFilterStore, loadFiltersFromURL, persistFiltersToURL } from '@/stores/filterStore';
+import { shallow } from 'zustand/shallow';
 import { getFilterOptions } from '@/lib/filterQueryHelper';
 import MultiSelect from './MultiSelect';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
@@ -23,12 +24,12 @@ export default function FilterBarFixed({
 }: FilterBarProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Use the store directly instead of selectors to avoid re-render loops
-  const dateRange = useFilterStore(state => state.dateRange);
-  const selectedBrands = useFilterStore(state => state.selectedBrands);
-  const selectedCategories = useFilterStore(state => state.selectedCategories);
-  const selectedRegions = useFilterStore(state => state.selectedRegions);
-  const selectedStores = useFilterStore(state => state.selectedStores);
+  // Use the store with shallow comparison to avoid getSnapshot warnings
+  const dateRange = useFilterStore(state => state.dateRange, shallow);
+  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
+  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
+  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
   
   const setDateRange = useFilterStore(state => state.setDateRange);
   const setSelectedBrands = useFilterStore(state => state.setSelectedBrands);
@@ -83,7 +84,8 @@ export default function FilterBarFixed({
   const { data: filterOptions, isLoading: optionsLoading } = useQuery({
     queryKey: ['filterOptions'],
     queryFn: getFilterOptions,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 30, // 30 seconds - refresh more frequently
+    refetchOnWindowFocus: false,
   });
 
   // Handle date range change
