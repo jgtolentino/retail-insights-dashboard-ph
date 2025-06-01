@@ -37,8 +37,15 @@ function CustomerDensityMapComponent({
     setAggregationLevel(value as AggregationLevel);
   }, []);
 
-  // Calculate radius and color based on metric value
-  const getCircleProps = (location: any) => {
+  // Memoize metric labels to prevent re-creation
+  const metricLabels = React.useMemo(() => ({
+    transactions: 'Transaction Volume',
+    revenue: 'Revenue Concentration',
+    unique_customers: 'Customer Density'
+  }), []);
+
+  // Memoize getCircleProps to prevent infinite loops
+  const getCircleProps = React.useCallback((location: any) => {
     const value = location[metric] || 0;
     const maxValue = Math.max(...(densityData?.map(d => d[metric]) || [1]));
     
@@ -65,7 +72,7 @@ function CustomerDensityMapComponent({
     }
     
     return { radius, color, fillColor, fillOpacity: 0.6 };
-  };
+  }, [metric, densityData]);
 
   const densityCircles = useMemo(() => {
     if (!densityData || densityData.length === 0) return [];
@@ -101,7 +108,7 @@ function CustomerDensityMapComponent({
         </Circle>
       );
     });
-  }, [densityData, metric]);
+  }, [densityData, getCircleProps]);
 
   if (error) {
     return (
@@ -115,11 +122,6 @@ function CustomerDensityMapComponent({
     );
   }
 
-  const metricLabels = {
-    transactions: 'Transaction Volume',
-    revenue: 'Revenue Concentration',
-    unique_customers: 'Customer Density'
-  };
 
   return (
     <Card>
