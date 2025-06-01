@@ -111,14 +111,14 @@ export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'prov
       if (filters.selectedBrands.length > 0 || filters.selectedCategories.length > 0) {
         let itemsQuery = supabase
           .from('transaction_items')
-          .select('transaction_id, products!inner(brand_id, category)');
+          .select('transaction_id, brand_id, category');
 
         if (filters.selectedBrands.length > 0) {
-          itemsQuery = itemsQuery.in('products.brand_id', filters.selectedBrands.map(b => parseInt(b)));
+          itemsQuery = itemsQuery.in('brand_id', filters.selectedBrands.map(b => parseInt(b)));
         }
 
         if (filters.selectedCategories.length > 0) {
-          itemsQuery = itemsQuery.in('products.category', filters.selectedCategories);
+          itemsQuery = itemsQuery.in('category', filters.selectedCategories);
         }
 
         const { data: filteredItems } = await itemsQuery;

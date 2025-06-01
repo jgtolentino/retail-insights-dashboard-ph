@@ -41,13 +41,13 @@ export function useRegionalSales() {
         query = query.lte('created_at', filters.dateRange.end);
       }
 
-      // Apply brand filter if needed (requires join with transaction_items)
+      // Apply brand filter if needed (using direct column query)
       if (filters.selectedBrands.length > 0) {
-        // For brand filtering, we need to get transactions that have items from selected brands
+        // Query transaction_items directly without foreign key joins
         const { data: brandTransactions } = await supabase
           .from('transaction_items')
-          .select('transaction_id, products!inner(brand_id)')
-          .in('products.brand_id', filters.selectedBrands.map(b => parseInt(b)));
+          .select('transaction_id, brand_id')
+          .in('brand_id', filters.selectedBrands.map(b => parseInt(b)));
         
         if (brandTransactions) {
           const transactionIds = [...new Set(brandTransactions.map(bt => bt.transaction_id))];
@@ -59,8 +59,8 @@ export function useRegionalSales() {
       if (filters.selectedCategories.length > 0) {
         const { data: categoryTransactions } = await supabase
           .from('transaction_items')
-          .select('transaction_id, products!inner(category)')
-          .in('products.category', filters.selectedCategories);
+          .select('transaction_id, category')
+          .in('category', filters.selectedCategories);
         
         if (categoryTransactions) {
           const transactionIds = [...new Set(categoryTransactions.map(ct => ct.transaction_id))];
