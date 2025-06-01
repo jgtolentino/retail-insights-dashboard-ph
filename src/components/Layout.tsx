@@ -3,6 +3,7 @@ import { Navigation } from './Navigation';
 import { GlobalFiltersPanel } from './GlobalFiltersPanel';
 import { Footer } from './layout/Footer';
 import { DatabaseStatus } from './DatabaseStatus';
+import { StatusBanner } from './StatusBanner';
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,7 +15,10 @@ export function Layout({ children }: LayoutProps) {
       <Navigation />
 
       <div className="mx-auto mt-4 w-full max-w-7xl px-4">
-        <GlobalFiltersPanel />
+        <StatusBanner />
+        <div className="mt-4">
+          <GlobalFiltersPanel />
+        </div>
       </div>
 
       <main className="mx-auto w-full max-w-7xl flex-1 p-4">{children}</main>
