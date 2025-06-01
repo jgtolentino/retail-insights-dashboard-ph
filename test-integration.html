@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend QA Integration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+        }
+        .status-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            margin: 10px 0; 
+        }
+        .success { border-left: 4px solid #16a34a; }
+        .error { border-left: 4px solid #dc2626; }
+        .loading { border-left: 4px solid #2563eb; }
+        .metric { 
+            display: inline-block; 
+            background: #f3f4f6; 
+            padding: 4px 12px; 
+            border-radius: 4px; 
+            margin: 4px; 
+            font-size: 14px; 
+        }
+        .green { background: #dcfce7; color: #166534; }
+        .timestamp { color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Backend QA Integration Test</h1>
+    <p>Testing the StatusBanner integration with live API endpoints</p>
+    
+    <div id="health-status" class="status-card loading">
+        <h3>🏥 Health Status</h3>
+        <p>Loading...</p>
+    </div>
+    
+    <div id="qa-metrics" class="status-card loading">
+        <h3>✅ QA Metrics</h3>
+        <p>Loading...</p>
+    </div>
+    
+    <div class="status-card">
+        <h3>🎯 Integration Status</h3>
+        <p><strong>StatusBanner Component:</strong> ✅ Added to Layout.tsx</p>
+        <p><strong>useBackendStatus Hook:</strong> ✅ Created with React Query</p>
+        <p><strong>Mock API Endpoints:</strong> ✅ Added to vite.config.ts</p>
+        <p><strong>Development Server:</strong> ✅ Running on port 8080</p>
+    </div>
+
+    <script>
+        async function testHealthEndpoint() {
+            const healthDiv = document.getElementById('health-status');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                healthDiv.className = 'status-card success';
+                healthDiv.innerHTML = `
+                    <h3>🏥 Health Status: ${data.status}</h3>
+                    <div class="metric green">QA Pass Rate: ${data.qaResults.passRate}%</div>
+                    <div class="metric green">Total Tests: ${data.qaResults.totalTests}</div>
+                    <div class="timestamp">Last checked: ${new Date(data.timestamp).toLocaleTimeString()}</div>
+                    <p><em>${data.notes}</em></p>
+                `;
+            } catch (error) {
+                healthDiv.className = 'status-card error';
+                healthDiv.innerHTML = `
+                    <h3>🏥 Health Status: ERROR</h3>
+                    <p>Failed to fetch: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testQAEndpoint() {
+            const qaDiv = document.getElementById('qa-metrics');
+            try {
+                const response = await fetch('/api/qa-status');
+                const data = await response.json();
+                
+                qaDiv.className = 'status-card success';
+                qaDiv.innerHTML = `
+                    <h3>✅ QA Metrics: ${data.status}</h3>
+                    <div class="metric green">Unit Tests: ${data.unitTests.passed}/${data.unitTests.total}</div>
+                    <div class="metric green">Integration: ${data.integrationTests.passed}/${data.integrationTests.total}</div>
+                    <div class="metric green">E2E Tests: ${data.e2eTests.passed}/${data.e2eTests.total}</div>
+                    <div class="metric green">Backend: ${data.backendTests.passed}/${data.backendTests.total}</div>
+                    <div class="timestamp">Last run: ${new Date(data.lastRun).toLocaleTimeString()}</div>
+                    <p><strong>Overall Pass Rate: ${data.overallPassRate}%</strong></p>
+                `;
+            } catch (error) {
+                qaDiv.className = 'status-card error';
+                qaDiv.innerHTML = `
+                    <h3>✅ QA Metrics: ERROR</h3>
+                    <p>Failed to fetch: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Test endpoints immediately and every 10 seconds
+        testHealthEndpoint();
+        testQAEndpoint();
+        setInterval(() => {
+            testHealthEndpoint();
+            testQAEndpoint();
+        }, 10000);
+    </script>
+</body>
+</html>

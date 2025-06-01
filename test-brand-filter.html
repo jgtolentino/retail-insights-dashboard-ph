@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Filter Fix Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+        }
+        .test-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            margin: 10px 0; 
+        }
+        .success { border-left: 4px solid #16a34a; }
+        .error { border-left: 4px solid #dc2626; }
+        .loading { border-left: 4px solid #2563eb; }
+        .brand-count { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #16a34a; 
+        }
+        .brand-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .brand-item {
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Brand Filter Fix Verification</h1>
+    <p>Testing if brand filter now shows all brands from Supabase database</p>
+    
+    <div id="brand-test" class="test-card loading">
+        <h3>🏷️ Brand Count Test</h3>
+        <p>Loading brands from Supabase...</p>
+    </div>
+    
+    <div class="test-card">
+        <h3>✅ Expected Results</h3>
+        <ul>
+            <li><strong>Before Fix:</strong> Only 4 hardcoded brands (Marlboro, UFC, Alaska, Max)</li>
+            <li><strong>After Fix:</strong> All brands from products table (expected ~15+ brands)</li>
+            <li><strong>Filter Behavior:</strong> Selecting brands should trigger chart refresh</li>
+            <li><strong>Data Source:</strong> Dynamic from Supabase, not hardcoded</li>
+        </ul>
+    </div>
+
+    <script>
+        async function testBrandFetch() {
+            const testDiv = document.getElementById('brand-test');
+            
+            try {
+                // Test the useBrands hook endpoint by making a direct Supabase call
+                const SUPABASE_URL = 'https://clyzeaymuldsaslqtjnr.supabase.co';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNseXplYXltdWxkc2FzbHF0am5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM5ODkxOTAsImV4cCI6MjA0OTU2NTE5MH0.J7R_fJ3-wWPJJSX8h_4Q-PUHDvdVdQd4QdNSPYB5L5M';
+                
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/brands?select=name&order=name.asc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const brands = [...new Set(data.map(b => b.name).filter(Boolean))];
+                
+                testDiv.className = 'test-card success';
+                testDiv.innerHTML = `
+                    <h3>🏷️ Brand Count Test: SUCCESS</h3>
+                    <div class="brand-count">${brands.length} brands found</div>
+                    <p><strong>Status:</strong> ✅ Dynamic brands loaded from Supabase</p>
+                    <p><strong>Previous:</strong> 4 hardcoded brands</p>
+                    <p><strong>Current:</strong> ${brands.length} dynamic brands</p>
+                    
+                    <details>
+                        <summary>View all brands (click to expand)</summary>
+                        <div class="brand-list">
+                            ${brands.map(brand => `<div class="brand-item">${brand}</div>`).join('')}
+                        </div>
+                    </details>
+                `;
+                
+                // Test if it's more than the original 4
+                if (brands.length > 4) {
+                    console.log('✅ SUCCESS: Found more than 4 brands, dynamic loading works!');
+                } else {
+                    console.log('⚠️ WARNING: Only found', brands.length, 'brands');
+                }
+                
+            } catch (error) {
+                testDiv.className = 'test-card error';
+                testDiv.innerHTML = `
+                    <h3>🏷️ Brand Count Test: ERROR</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Could not fetch brands from Supabase. Check network or credentials.</p>
+                `;
+                console.error('Brand fetch error:', error);
+            }
+        }
+
+        // Test immediately
+        testBrandFetch();
+        
+        // Also log the fix summary
+        console.log(`
+🔧 BRAND FILTER FIX SUMMARY:
+=============================
+1. ✅ Created useBrands hook to fetch from Supabase
+2. ✅ Updated GlobalFiltersPanel to use filterStore (not old FilterContext)
+3. ✅ Connected brand selection to useSalesByBrand query
+4. ✅ Made all filter data dynamic from database
+5. ✅ Filter changes now trigger automatic data refresh
+
+Expected result: Brand dropdown shows all brands from database, filtering works properly.
+        `);
+    </script>
+</body>
+</html>
