@@ -10,7 +10,30 @@ echo ""
 # Initialize counters
 TESTS_PASSED=0
 TESTS_FAILED=0
-TOTAL_TESTS=0
+
+# Environment Variable Validation
+echo "🔍 Validating Environment Variables..."
+ENV_CHECK_PASSED=true
+
+if [[ -z "$VITE_SUPABASE_URL" ]]; then
+  echo -e "${RED}❌ Missing VITE_SUPABASE_URL${NC}"
+  ENV_CHECK_PASSED=false
+fi
+
+if [[ -z "$VITE_SUPABASE_ANON_KEY" ]]; then
+  echo -e "${RED}❌ Missing VITE_SUPABASE_ANON_KEY${NC}"
+  ENV_CHECK_PASSED=false
+fi
+
+if [[ "$ENV_CHECK_PASSED" == "true" ]]; then
+  echo -e "${GREEN}✅ Environment variables validated${NC}"
+  TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+  echo -e "${RED}❌ Environment validation failed - deployment will fail${NC}"
+  TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+TOTAL_TESTS=$((TOTAL_TESTS + 1))
+echo ""
 
 # Color codes
 GREEN='\033[0;32m'
@@ -88,7 +111,7 @@ run_test "Filter Tests" \
 
 # 6. API Health Check
 run_test "API Health Check" \
-  "curl -s http://localhost:8080/api/health > /dev/null 2>&1" \
+  "./check-api-health.sh" \
   ""
 
 # Summary Report

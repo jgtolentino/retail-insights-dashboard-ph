@@ -85,6 +85,34 @@ tasks:
       
       echo "📋 Filter QA Suite Complete"
 
+  vercel-env-check:
+    description: "Validate Vercel environment variables for production deployment"
+    run: |
+      echo "🔍 Vercel Environment Check..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "./check-vercel-env.sh" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      
+      echo "$stdout"
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Environment variables missing for Vercel deployment"
+        echo "$stderr"
+        
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"vercel-env-check", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] Environment Fix Suggestion: $suggestion"
+        
+        # This is a deployment blocker
+        echo "🚨 DEPLOYMENT WILL FAIL - Fix environment variables first"
+        exit 1
+      else
+        echo "✅ Vercel environment validation passed"
+      fi
+
   build-css:
     description: "Compile Tailwind CSS"
     run: |
@@ -394,8 +422,9 @@ composite_tasks:
       - backend-qa
   
   qa-full:
-    description: "Run full QA suite (frontend + backend + e2e + UX filters)"
+    description: "Run full QA suite (frontend + backend + e2e + UX filters + env check)"
     steps:
+      - vercel-env-check
       - lint
       - test
       - backend-qa
