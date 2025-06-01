@@ -8,12 +8,14 @@ import {
   ShoppingCart,
   Brain,
   Settings,
-  Zap
+  Zap,
+  Filter
 } from "lucide-react"
 import { FEATURE_FLAGS } from "@/config/features"
 
 const navItems = [
   { href: "/", label: "Overview", icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
+  { href: "/dashboard-preview", label: "Filter Preview", icon: Filter, feature: null, highlight: true },
   { href: "/sprint4", label: "Advanced Analytics", icon: Zap, feature: null, highlight: true },
   { href: "/trends", label: "Trends Explorer", icon: TrendingUp, feature: 'TRENDS_PAGE' },
   { href: "/product-insights", label: "Product Insights", icon: Package, feature: 'PRODUCT_INSIGHTS' },
@@ -37,7 +39,8 @@ export function Navigation() {
             {navItems.map(item => {
               const Icon = item.icon
               const isActive = location.pathname === item.href || 
-                (item.href === '/sprint4' && location.pathname === '/advanced-analytics')
+                (item.href === '/sprint4' && location.pathname === '/advanced-analytics') ||
+                (item.href === '/dashboard-preview' && location.pathname === '/filter-preview')
               const isHighlight = item.highlight
               return (
                 <Link

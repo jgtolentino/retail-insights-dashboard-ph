@@ -7,6 +7,8 @@ import { Calendar, Users, TrendingUp, Heart, Filter } from 'lucide-react';
 import { AgeDistribution } from '@/components/charts/AgeDistribution';
 import { GenderDistribution } from '@/components/charts/GenderDistribution';
 import { PurchasePatterns } from '@/components/charts/PurchasePatterns';
+import { SuggestionFunnel } from '@/components/charts/SuggestionFunnel';
+import { HierarchicalSubstitutions } from '@/components/charts/HierarchicalSubstitutions';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { FilterSummary } from '@/components/FilterSummary';
@@ -270,9 +272,10 @@ export default function ConsumerInsights() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="demographics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="demographics">Demographics</TabsTrigger>
             <TabsTrigger value="behavior">Purchase Behavior</TabsTrigger>
+            <TabsTrigger value="substitutions">Substitutions</TabsTrigger>
             <TabsTrigger value="segmentation">Customer Segments</TabsTrigger>
             <TabsTrigger value="loyalty">Loyalty Metrics</TabsTrigger>
           </TabsList>
@@ -359,6 +362,13 @@ export default function ConsumerInsights() {
                 </CardContent>
               </Card>
 
+              {/* Suggestion Funnel */}
+              <SuggestionFunnel 
+                startDate={startDate}
+                endDate={endDate}
+                className=""
+              />
+
               {/* Purchase Behavior Summary */}
               <Card>
                 <CardHeader>
@@ -391,6 +401,16 @@ export default function ConsumerInsights() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Substitutions Tab */}
+          <TabsContent value="substitutions" className="space-y-4">
+            <HierarchicalSubstitutions 
+              startDate={startDate}
+              endDate={endDate}
+              storeId={undefined}
+              className=""
+            />
           </TabsContent>
 
           {/* Customer Segmentation Tab */}

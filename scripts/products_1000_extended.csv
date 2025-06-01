@@ -1,0 +1,22 @@
+id,brand_id,name,category
+1,1,Alaska Beverages Product 1,beverages
+2,1,Alaska Beverages Product 2,beverages
+3,1,Alaska Beverages Product 3,beverages
+4,1,Alaska Beverages Product 4,beverages
+5,2,Bear Brand Beverages Product 1,beverages
+6,2,Bear Brand Beverages Product 2,beverages
+7,2,Bear Brand Beverages Product 3,beverages
+8,2,Bear Brand Beverages Product 4,beverages
+9,3,Champion Household Product 1,household
+10,3,Champion Household Product 2,household
+11,3,Champion Household Product 3,household
+12,4,Fortune Tobacco Product 1,tobacco
+13,4,Fortune Tobacco Product 2,tobacco
+14,5,Hope Tobacco Product 1,tobacco
+15,5,Hope Tobacco Product 2,tobacco
+16,6,Marlboro Tobacco Product 1,tobacco
+17,6,Marlboro Tobacco Product 2,tobacco
+18,7,More Tobacco Product 1,tobacco
+19,7,More Tobacco Product 2,tobacco
+20,8,Philip Morris Tobacco Product 1,tobacco
+21,8,Philip Morris Tobacco Product 2,tobacco

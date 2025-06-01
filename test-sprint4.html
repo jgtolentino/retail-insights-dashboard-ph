@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sprint 4 Test</title>
+</head>
+<body>
+    <h1>Sprint 4 Route Test</h1>
+    <p>Testing if the Sprint 4 route works...</p>
+    
+    <script>
+        // Test the Sprint 4 route
+        fetch('http://localhost:8080/sprint4')
+            .then(response => {
+                if (response.ok) {
+                    document.body.innerHTML += '<p style="color: green;">✅ Sprint 4 route is working!</p>';
+                    document.body.innerHTML += '<p><a href="http://localhost:8080/sprint4" target="_blank">Open Sprint 4 Dashboard</a></p>';
+                } else {
+                    document.body.innerHTML += '<p style="color: red;">❌ Sprint 4 route failed</p>';
+                }
+            })
+            .catch(error => {
+                document.body.innerHTML += '<p style="color: red;">❌ Connection error: ' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html>

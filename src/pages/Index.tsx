@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Store } from "lucide-react"
 // LineChart removed - now exclusively in Trends Explorer
 import { simpleDashboardService } from '@/services/simple-dashboard'
+import { behavioralDashboardService } from '@/services/behavioral-dashboard'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { TransactionCounter } from '@/components/TransactionCounter'
@@ -22,11 +24,22 @@ import { QuickDataCheck } from '@/components/QuickDataCheck'
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom'
 // ChartMetric type removed - charts moved to Trends Explorer
 
+interface Store {
+  id: number
+  name: string
+  location: string
+}
+
 export default function Index() {
   const [data, setData] = useState({
     totalRevenue: 0,
     totalTransactions: 0,
     avgTransaction: 0,
+    uniqueCustomers: 0,
+    suggestionAcceptanceRate: 0,
+    substitutionRate: 0,
+    suggestionsOffered: 0,
+    suggestionsAccepted: 0,
     topBrands: []
   })
   // timeSeriesData removed - charts moved to Trends Explorer
@@ -41,6 +54,11 @@ export default function Index() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
+  
+  // Store filtering state
+  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null)
+  const [stores, setStores] = useState<Store[]>([])
+  const [loadingStores, setLoadingStores] = useState(true)
 
 
   // Derive top brand from existing data instead of making duplicate API call
@@ -50,33 +68,158 @@ export default function Index() {
     transaction_count: null
   } : null;
 
-  // Derive bundle data from existing transaction data instead of useQuery
-  const topBundleData = data.totalTransactions > 0 ? {
-    product_1: 'NCR Purchase',
-    product_2: 'Weekend Sale',
-    frequency: Math.floor(data.totalTransactions * 0.15), // 15% of total
-    confidence: 42
-  } : null;
+  // Calculate real bundle data from transaction_items
+  const [bundleData, setBundleData] = useState<{product_1: string, product_2: string, frequency: number, confidence: number} | null>(null)
+  
+  useEffect(() => {
+    const calculateRealBundle = async () => {
+      try {
+        const { data: items, error } = await supabase
+          .from('transaction_items')
+          .select(`
+            transaction_id,
+            products!inner(name)
+          `)
+          .order('transaction_id')
+        
+        if (error || !items || items.length === 0) {
+          setBundleData(null)
+          return
+        }
+
+        // Group items by transaction
+        const transactionGroups = items.reduce((acc: Record<number, string[]>, item) => {
+          if (!acc[item.transaction_id]) acc[item.transaction_id] = []
+          acc[item.transaction_id].push(item.products.name)
+          return acc
+        }, {})
+
+        // Find most common product pairs
+        const bundleCounts: Record<string, number> = {}
+        Object.values(transactionGroups).forEach(products => {
+          if (products.length >= 2) {
+            products.sort()
+            for (let i = 0; i < products.length - 1; i++) {
+              for (let j = i + 1; j < products.length; j++) {
+                const bundle = `${products[i]} + ${products[j]}`
+                bundleCounts[bundle] = (bundleCounts[bundle] || 0) + 1
+              }
+            }
+          }
+        })
+
+        const topBundle = Object.entries(bundleCounts)
+          .sort(([,a], [,b]) => b - a)[0]
+
+        if (topBundle) {
+          const [product1, product2] = topBundle[0].split(' + ')
+          setBundleData({
+            product_1: product1,
+            product_2: product2,
+            frequency: topBundle[1],
+            confidence: Math.round((topBundle[1] / Object.keys(transactionGroups).length) * 100)
+          })
+        } else {
+          setBundleData(null)
+        }
+      } catch (error) {
+        console.error('Error calculating bundle data:', error)
+        setBundleData(null)
+      }
+    }
+
+    if (data.totalTransactions > 0) {
+      calculateRealBundle()
+    }
+  }, [data.totalTransactions])
+
+  const topBundleData = bundleData
+
+  useEffect(() => {
+    fetchStores()
+  }, [])
 
   useEffect(() => {
     fetchData()
-  }, [dateRange, customStartDate, customEndDate])
+  }, [dateRange, customStartDate, customEndDate, selectedStoreId])
+
+  const fetchStores = async () => {
+    try {
+      setLoadingStores(true)
+      const { data: storesData, error } = await supabase
+        .from('transactions')
+        .select('store_id, store_location')
+        .not('store_id', 'is', null)
+        .not('store_location', 'is', null)
+
+      if (error) throw error
+
+      // Group by store_id and get unique stores
+      const uniqueStores = new Map<number, Store>()
+      storesData?.forEach(item => {
+        if (item.store_id && item.store_location) {
+          uniqueStores.set(item.store_id, {
+            id: item.store_id,
+            name: `Store ${item.store_id}`,
+            location: item.store_location
+          })
+        }
+      })
+
+      setStores(Array.from(uniqueStores.values()).sort((a, b) => a.id - b.id))
+    } catch (error) {
+      console.error('❌ Error fetching stores:', error)
+      setStores([])
+    } finally {
+      setLoadingStores(false)
+    }
+  }
 
   const fetchData = async () => {
     setLoading(true)
     setError(null)
     try {
       let dashboardData
+      let startDate, endDate
       
+      // Calculate date range
+      const now = new Date()
       if (dateRange === 'custom' && customStartDate && customEndDate) {
-        // Use fallback for dashboard data only
-        dashboardData = await simpleDashboardService.getDashboardData()
+        startDate = customStartDate
+        endDate = customEndDate
       } else if (dateRange !== 'custom') {
-        // Use existing preset methods for dashboard data only
-        dashboardData = await simpleDashboardService.getDashboardData()
+        switch(dateRange) {
+          case '1d':
+            startDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0]
+            break
+          case '7d':
+            startDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0]
+            break
+          case '30d':
+            startDate = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0]
+            break
+          case '90d':
+            startDate = new Date(now.setDate(now.getDate() - 90)).toISOString().split('T')[0]
+            break
+          default:
+            startDate = undefined
+            endDate = undefined
+        }
+        if (startDate && !endDate) {
+          endDate = new Date().toISOString().split('T')[0]
+        }
       } else {
         // Custom range selected but dates not set yet
         return
+      }
+      
+      // Try behavioral dashboard first, fallback to simple dashboard
+      try {
+        dashboardData = await behavioralDashboardService.getDashboardSummary(startDate, endDate, selectedStoreId || undefined)
+        console.log('🧠 Using behavioral dashboard data', selectedStoreId ? `for store ${selectedStoreId}` : 'for all stores')
+      } catch (error) {
+        console.warn('⚠️ Behavioral dashboard unavailable, falling back to simple dashboard')
+        dashboardData = await simpleDashboardService.getDashboardData()
       }
       
       console.log('📊 Dashboard data received:', dashboardData)
@@ -94,6 +237,11 @@ export default function Index() {
         totalRevenue: 0,
         totalTransactions: 0,
         avgTransaction: 0,
+        uniqueCustomers: 0,
+        suggestionAcceptanceRate: 0,
+        substitutionRate: 0,
+        suggestionsOffered: 0,
+        suggestionsAccepted: 0,
         topBrands: []
       })
       
@@ -152,10 +300,15 @@ export default function Index() {
   // Chart functions removed - charts moved to Trends Explorer
 
   const getDateRangeLabel = () => {
-    if (dateRange === 'custom' && customStartDate && customEndDate) {
-      return `${customStartDate} to ${customEndDate}`
-    }
-    return dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown'
+    const baseLabel = dateRange === 'custom' && customStartDate && customEndDate
+      ? `${customStartDate} to ${customEndDate}`
+      : dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown'
+    
+    const storeLabel = selectedStoreId 
+      ? ` • ${stores.find(s => s.id === selectedStoreId)?.name || `Store ${selectedStoreId}`}`
+      : ' • All Stores'
+    
+    return baseLabel + storeLabel
   }
 
   // renderChart function removed - charts moved to Trends Explorer
@@ -255,17 +408,41 @@ export default function Index() {
               </Button>
             ))}
           </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+
+          <div className="flex items-center gap-2">
+            {/* Store Filter */}
+            <Select
+              value={selectedStoreId?.toString() || 'all'}
+              onValueChange={(value) => setSelectedStoreId(value === 'all' ? null : parseInt(value))}
+              disabled={loading || loadingStores}
+            >
+              <SelectTrigger className="w-[180px] h-8">
+                <div className="flex items-center gap-1">
+                  <Store className="h-3 w-3" />
+                  <SelectValue placeholder="All Stores" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stores</SelectItem>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={store.id.toString()}>
+                    {store.name} - {store.location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Custom Date Picker */}
@@ -309,8 +486,8 @@ export default function Index() {
         )}
       </div>
 
-      {/* KPI Cards - All 5 in one row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      {/* KPI Cards - Enhanced with behavioral metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {/* Total Revenue Card */}
         <Card className="border-gray-200">
           <CardHeader className="pb-3">
@@ -348,6 +525,36 @@ export default function Index() {
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">
               {loading ? '...' : `₱${Math.round(data.avgTransaction || 0)}`}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Suggestion Acceptance Rate Card */}
+        <Card className="border-green-200 bg-green-50/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-green-700">Suggestion Acceptance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-900">
+              {loading ? '...' : `${(data.suggestionAcceptanceRate || 0).toFixed(1)}%`}
+            </div>
+            <div className="text-xs text-green-600 mt-1">
+              {loading ? '...' : `${data.suggestionsAccepted || 0} of ${data.suggestionsOffered || 0}`}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Substitution Rate Card */}
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-blue-700">Substitution Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-900">
+              {loading ? '...' : `${(data.substitutionRate || 0).toFixed(1)}%`}
+            </div>
+            <div className="text-xs text-blue-600 mt-1">
+              {loading ? '...' : `${data.uniqueCustomers || 0} unique customers`}
             </div>
           </CardContent>
         </Card>

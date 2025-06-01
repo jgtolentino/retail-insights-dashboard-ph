@@ -18,6 +18,7 @@ import AIRecommendations from "./pages/AIRecommendations";
 import Trends from "./pages/Trends";
 import Settings from "./pages/Settings";
 import Sprint4Dashboard from "./pages/Sprint4Dashboard";
+import DashboardPreview from "./pages/DashboardPreview";
 import { FEATURE_FLAGS } from "@/config/features";
 // import EnvTest from "./pages/EnvTest";
 
@@ -48,6 +49,10 @@ const App = () => (
                 {FEATURE_FLAGS.BASKET_BEHAVIOR && <Route path="/basket-behavior" element={<BasketBehavior />} />}
                 {FEATURE_FLAGS.AI_RECOMMENDATIONS && <Route path="/ai-recommendations" element={<AIRecommendations />} />}
                 {FEATURE_FLAGS.SETTINGS_PAGE && <Route path="/settings" element={<Settings />} />}
+                
+                {/* New Filter System Preview */}
+                <Route path="/dashboard-preview" element={<DashboardPreview />} />
+                <Route path="/filter-preview" element={<DashboardPreview />} />
                 
                 {/* Sprint 4: Advanced Analytics Dashboard */}
                 <Route path="/sprint4" element={<Sprint4Dashboard />} />
