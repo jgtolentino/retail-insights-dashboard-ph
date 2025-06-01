@@ -85,6 +85,102 @@ tasks:
       
       echo "📋 Filter QA Suite Complete"
 
+  qa-finalize:
+    description: "Final post-deployment QA - DOM, console errors, screenshot validation"
+    run: |
+      echo "🔍 Starting Post-Deployment Finalization QA..."
+      echo "============================================="
+      
+      # Set deployment URL
+      DEPLOYMENT_URL=${DEPLOYMENT_URL:-"https://retail-insights-dashboard-ph.vercel.app"}
+      echo "📍 Target URL: $DEPLOYMENT_URL"
+      echo ""
+      
+      # Run comprehensive post-deployment verification
+      echo "🧪 Running Post-Deployment Verification..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "DEPLOYMENT_URL=\"'"$DEPLOYMENT_URL"'\" node scripts/postdeploy-verify.js" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      
+      echo "$stdout"
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo ""
+        echo "⨯ Post-deployment verification FAILED"
+        echo "$stderr"
+        
+        # Get Caca's analysis of the failure
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"qa-finalize", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        category=$(echo "$cacaResponse" | jq -r '.category')
+        severity=$(echo "$cacaResponse" | jq -r '.severity')
+        
+        echo "→ [Caca] Post-Deploy Analysis: $suggestion ($category/$severity)"
+        
+        # Auto-reference SOP for environment issues
+        if [ "$category" = "environment" ]; then
+          echo ""
+          echo "🔧 [Auto-SOP] Environment issue in production - running fix guide..."
+          response=$(pulser invoke --agent BasherExec --function run \
+            --args '{ "cmd": "./scripts/auto-fix-environment.sh --detect-env-issue \"'"$stderr"'\"" }')
+          autoFixOutput=$(echo "$response" | jq -r '.stdout')
+          echo "$autoFixOutput"
+        fi
+        
+        # CRITICAL: Trigger auto-rollback for severe failures
+        if [ "$severity" = "critical" ] || [ "$severity" = "high" ]; then
+          echo ""
+          echo "🚨 CRITICAL DEPLOYMENT FAILURE DETECTED"
+          echo "Triggering automatic rollback..."
+          
+          rollbackResponse=$(pulser invoke --agent BasherExec --function run \
+            --args '{ "cmd": "./scripts/auto-rollback.sh \"Post-deployment QA failed: '"$suggestion"'\"" }')
+          rollbackOutput=$(echo "$rollbackResponse" | jq -r '.stdout')
+          rollbackExitCode=$(echo "$rollbackResponse" | jq -r '.exitCode')
+          
+          echo "$rollbackOutput"
+          
+          if [ "$rollbackExitCode" -eq 0 ]; then
+            echo "✅ Automatic rollback completed successfully"
+          else
+            echo "❌ Automatic rollback failed - manual intervention required"
+          fi
+        fi
+        
+        echo ""
+        echo "🚨 DEPLOYMENT FAILED POST-QA VALIDATION"
+        exit 1
+      else
+        echo ""
+        echo "✅ Post-deployment verification PASSED"
+        
+        # Validate screenshot if available
+        if [ -f "e2e-snapshots/postdeploy-verification.png" ]; then
+          echo ""
+          echo "📸 Validating Screenshot..."
+          screenshotResponse=$(pulser invoke --agent BasherExec --function run \
+            --args '{ "cmd": "node scripts/screenshot-validator.js e2e-snapshots/postdeploy-verification.png" }')
+          screenshotExitCode=$(echo "$screenshotResponse" | jq -r '.exitCode')
+          screenshotOutput=$(echo "$screenshotResponse" | jq -r '.stdout')
+          
+          echo "$screenshotOutput"
+          
+          if [ "$screenshotExitCode" -eq 0 ]; then
+            echo "✅ Screenshot validation passed"
+          else
+            echo "⚠️ Screenshot validation failed (non-critical)"
+          fi
+        fi
+        
+        echo ""
+        echo "🎉 DEPLOYMENT FINALIZED SUCCESSFULLY"
+        echo "✅ All post-deployment checks passed"
+        echo "📍 Live URL: $DEPLOYMENT_URL"
+      fi
+
   vercel-env-check:
     description: "Validate Vercel environment variables for production deployment"
     run: |
@@ -458,3 +554,13 @@ composite_tasks:
       - test
       - backend-qa
       - qa-filters
+  
+  deploy-safe:
+    description: "Deploy with comprehensive QA validation and auto-rollback"
+    steps:
+      - vercel-env-check
+      - lint
+      - test
+      - backend-qa
+      - qa-filters
+      - qa-finalize
