@@ -14,6 +14,7 @@ agents:
   MayaPlan: pulser_agents/maya_plan.yaml
   Claudia: pulser_agents/claudia.yaml
   Patcha: pulser_agents/patcha.yaml
+  ClaudeDirect: pulser_agents/claude_direct.yaml
 
 tasks:
   qa-filters:
@@ -651,6 +652,170 @@ tasks:
     tags: [ai, diagnostics]
     critical: true
 
+  claude:analyze:
+    description: "Analyze codebase with Claude for issues and improvements"
+    run: |
+      echo "🤖 Running Claude code analysis..."
+      
+      # Get list of React components to analyze
+      componentFiles=$(find src/components -name "*.tsx" -not -path "*/ui/*" | head -10)
+      
+      response=$(pulser invoke --agent ClaudeDirect --function analyze \
+        --args '{ "task":"Analyze React components for performance and best practices", "operation":"analyze", "context":"Retail dashboard components with Zustand and React hooks", "files":'"$(echo "$componentFiles" | jq -R -s 'split("\n")[:-1]')"' }')
+      
+      result=$(echo "$response" | jq -r '.result')
+      suggestions=$(echo "$response" | jq -r '.suggestions[]')
+      explanation=$(echo "$response" | jq -r '.explanation')
+      
+      echo "📊 Analysis Result: $result"
+      echo ""
+      echo "💡 Suggestions:"
+      echo "$suggestions"
+      echo ""
+      echo "📝 Detailed Explanation:"
+      echo "$explanation"
+    tags: [analysis, claude, code-quality]
+    critical: false
+
+  claude:optimize:
+    description: "Get optimization suggestions from Claude for performance improvements"
+    run: |
+      echo "⚡ Running Claude optimization analysis..."
+      
+      # Focus on chart components that might have performance issues
+      chartFiles=$(find src/components/charts -name "*.tsx" 2>/dev/null || echo "")
+      hookFiles=$(find src/hooks -name "*.ts" -o -name "*.tsx" | head -5)
+      
+      allFiles="$chartFiles $hookFiles"
+      
+      response=$(pulser invoke --agent ClaudeDirect --function optimize \
+        --args '{ "task":"Identify performance bottlenecks and optimization opportunities", "operation":"optimize", "context":"React dashboard with charts and data visualization", "files":'"$(echo "$allFiles" | tr ' ' '\n' | jq -R -s 'split("\n")[:-1]')"' }')
+      
+      result=$(echo "$response" | jq -r '.result')
+      suggestions=$(echo "$response" | jq -r '.suggestions[]')
+      explanation=$(echo "$response" | jq -r '.explanation')
+      
+      echo "🎯 Optimization Result: $result"
+      echo ""
+      echo "⚡ Performance Suggestions:"
+      echo "$suggestions"
+      echo ""
+      echo "📈 Implementation Guide:"
+      echo "$explanation"
+    tags: [optimization, claude, performance]
+    critical: false
+
+  claude:fix:
+    description: "Use Claude to fix specific code issues or errors"
+    run: |
+      echo "🔧 Running Claude error fixing..."
+      
+      # This can be used with specific error context
+      errorContext="${ERROR_CONTEXT:-No specific error provided}"
+      targetFiles="${TARGET_FILES:-src/components}"
+      
+      response=$(pulser invoke --agent ClaudeDirect --function fix \
+        --args '{ "task":"Fix identified code issues and errors", "operation":"fix", "context":"'"$errorContext"'", "files":["'"$targetFiles"'"] }')
+      
+      result=$(echo "$response" | jq -r '.result')
+      suggestions=$(echo "$response" | jq -r '.suggestions[]')
+      code=$(echo "$response" | jq -r '.code')
+      explanation=$(echo "$response" | jq -r '.explanation')
+      
+      echo "🔨 Fix Result: $result"
+      echo ""
+      if [ "$code" != "null" ] && [ -n "$code" ]; then
+        echo "💻 Generated Code:"
+        echo "$code"
+        echo ""
+      fi
+      echo "🔍 Fix Explanation:"
+      echo "$explanation"
+      echo ""
+      echo "✅ Next Steps:"
+      echo "$suggestions"
+    tags: [fix, claude, debugging]
+    critical: false
+
+  claude:review:
+    description: "Comprehensive code review with Claude for quality assurance"
+    run: |
+      echo "📋 Running Claude code review..."
+      
+      # Review recently modified files
+      recentFiles=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(tsx?|jsx?)$' | head -5)
+      
+      if [ -z "$recentFiles" ]; then
+        echo "No recent TypeScript/React files to review"
+        exit 0
+      fi
+      
+      response=$(pulser invoke --agent ClaudeDirect --function review \
+        --args '{ "task":"Comprehensive code review for quality, bugs, and best practices", "operation":"review", "context":"Recent changes in retail dashboard project", "files":'"$(echo "$recentFiles" | jq -R -s 'split("\n")[:-1]')"' }')
+      
+      result=$(echo "$response" | jq -r '.result')
+      suggestions=$(echo "$response" | jq -r '.suggestions[]')
+      explanation=$(echo "$response" | jq -r '.explanation')
+      
+      echo "📊 Review Result: $result"
+      echo ""
+      echo "🔍 Code Quality Issues Found:"
+      echo "$suggestions"
+      echo ""
+      echo "📝 Detailed Review:"
+      echo "$explanation"
+      
+      # If critical issues found, integrate with Caca for follow-up
+      if echo "$result" | grep -i "critical\|error\|bug"; then
+        echo ""
+        echo "🚨 Critical issues detected - getting Caca analysis..."
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"claude:review", "stderr":"'"$result"'", "exitCode":1 }')
+        cacaSuggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] Follow-up: $cacaSuggestion"
+      fi
+    tags: [review, claude, quality-assurance]
+    critical: false
+
+  claude:generate:
+    description: "Generate new code components using Claude"
+    run: |
+      echo "🎨 Running Claude code generation..."
+      
+      # This can be used with specific component requests
+      componentType="${COMPONENT_TYPE:-generic component}"
+      componentName="${COMPONENT_NAME:-NewComponent}"
+      requirements="${REQUIREMENTS:-Basic React component}"
+      
+      response=$(pulser invoke --agent ClaudeDirect --function generate \
+        --args '{ "task":"Generate '"$componentType"' named '"$componentName"'", "operation":"generate", "context":"'"$requirements"' following project patterns", "files":["src/components/", "src/types/", "src/hooks/"] }')
+      
+      result=$(echo "$response" | jq -r '.result')
+      suggestions=$(echo "$response" | jq -r '.suggestions[]')
+      code=$(echo "$response" | jq -r '.code')
+      explanation=$(echo "$response" | jq -r '.explanation')
+      
+      echo "🎯 Generation Result: $result"
+      echo ""
+      if [ "$code" != "null" ] && [ -n "$code" ]; then
+        echo "💻 Generated Code:"
+        echo "$code"
+        echo ""
+        
+        # Optionally save to file if SAVE_TO_FILE is set
+        if [ -n "$SAVE_TO_FILE" ]; then
+          echo "$code" > "$SAVE_TO_FILE"
+          echo "💾 Code saved to: $SAVE_TO_FILE"
+        fi
+      fi
+      echo "📝 Implementation Guide:"
+      echo "$explanation"
+      echo ""
+      echo "✅ Next Steps:"
+      echo "$suggestions"
+    tags: [generate, claude, scaffolding]
+    critical: false
+
 composite_tasks:
   ci:
     description: "build → lint → test"
@@ -688,3 +853,39 @@ composite_tasks:
       - qa-filters
       - ai:diagnostics
       - qa-finalize
+
+  claude-analysis:
+    description: "Comprehensive Claude-powered code analysis and optimization"
+    steps:
+      - claude:analyze
+      - claude:optimize
+      - claude:review
+    tags: [claude, analysis, comprehensive]
+    critical: false
+
+  claude-development:
+    description: "Full development cycle with Claude assistance"
+    steps:
+      - claude:generate
+      - claude:review
+      - claude:optimize
+      - lint
+      - test
+    tags: [claude, development, full-cycle]
+    critical: false
+
+  qa-claude-enhanced:
+    description: "Enhanced QA with Claude integration for deep code analysis"
+    steps:
+      - claude:analyze
+      - vercel-env-check
+      - lint
+      - test
+      - backend-qa
+      - claude:review
+      - qa-filters
+      - claude:optimize
+      - ai:diagnostics
+      - qa-finalize
+    tags: [qa, claude, enhanced, comprehensive]
+    critical: true
