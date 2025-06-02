@@ -24,7 +24,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setIsLoading } = useState(true);
 
   // Check for existing session on mount
   useEffect(() => {

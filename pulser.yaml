@@ -533,6 +533,124 @@ tasks:
       
       echo "📊 Backend QA Suite Complete!"
 
+  qa:check-orphans:
+    description: "Check for orphaned test files that don't correspond to a component."
+    run: |
+      echo "🧠 Running Orphaned Test Detection..."
+      npm run qa:check-orphans
+    tags: [qa, integrity, test, orphan]
+    critical: true
+
+  qa:generate-scaffolds:
+    description: "Auto-generate test files for uncovered components using LLM."
+    run: |
+      echo "🤖 Generating test scaffolds with Rabbit..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npm run qa:generate-scaffolds" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      
+      echo "$stdout"
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Test scaffold generation failed"
+        echo "$stderr"
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"qa:generate-scaffolds", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] Suggestion: $suggestion"
+        exit 1
+      else
+        echo "✅ Test scaffolds generated successfully"
+      fi
+    tags: [qa, scaffold, llm]
+    critical: false
+
+  qa:update-matrix:
+    description: "Update QA test coverage matrix with current component status"
+    run: |
+      echo "📊 Updating QA Matrix..."
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "npm run qa:update-matrix" }')
+      exitCode=$(echo "$response" | jq -r '.exitCode')
+      stdout=$(echo "$response" | jq -r '.stdout')
+      stderr=$(echo "$response" | jq -r '.stderr')
+      
+      echo "$stdout"
+      
+      if [ "$exitCode" -ne 0 ]; then
+        echo "⨯ Matrix update failed"
+        echo "$stderr"
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"qa:update-matrix", "stderr":"'"$stderr"'", "exitCode":'$exitCode' }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] Suggestion: $suggestion"
+        exit 1
+      else
+        echo "✅ QA Matrix updated successfully"
+        
+        # Analyze coverage and suggest improvements
+        matrixContent=$(cat qa-matrix.yaml)
+        cacaResponse=$(pulser invoke --agent Caca --function suggest \
+          --args '{ "taskName":"qa:coverage-analysis", "matrix":"'"$matrixContent"'", "exitCode":0 }')
+        suggestion=$(echo "$cacaResponse" | jq -r '.suggestion')
+        echo "→ [Caca] Coverage Analysis: $suggestion"
+      fi
+    tags: [qa, matrix, coverage]
+    critical: false
+
+  ai:diagnostics:
+    description: "Run GitHub-Actions AI diagnostic workflow with one-time auto-patch"
+    run: |
+      echo "🤖 Running AI diagnostics and auto-patch cycle..."
+      
+      # First run diagnostics locally
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "node scripts/ai-diagnostics.js" }')
+      diagnosticsExitCode=$(echo "$response" | jq -r '.exitCode')
+      
+      if [ "$diagnosticsExitCode" -eq 0 ]; then
+        echo "✅ AI diagnostics passed - no issues found"
+        exit 0
+      fi
+      
+      echo "⚠️ AI diagnostics found issues - attempting auto-fix..."
+      
+      # Apply auto-fixes
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "node scripts/ai-autofix.js" }')
+      fixExitCode=$(echo "$response" | jq -r '.exitCode')
+      
+      if [ "$fixExitCode" -ne 0 ]; then
+        echo "❌ Auto-fix failed - manual intervention required"
+        exit 1
+      fi
+      
+      echo "🔄 Re-running diagnostics after auto-fix..."
+      
+      # Re-run diagnostics to verify fixes
+      response=$(pulser invoke --agent BasherExec --function run \
+        --args '{ "cmd": "node scripts/ai-diagnostics.js" }')
+      retryExitCode=$(echo "$response" | jq -r '.exitCode')
+      
+      if [ "$retryExitCode" -eq 0 ]; then
+        echo "✅ AI auto-patch successful - all issues resolved"
+        echo "📝 Creating commit with fixes..."
+        
+        # Commit the fixes
+        response=$(pulser invoke --agent BasherExec --function run \
+          --args '{ "cmd": "git add -A && git commit -m \"fix: AI automated production-readiness fixes\" || true" }')
+        
+        exit 0
+      else
+        echo "❌ Issues persist after auto-patch - escalating to human review"
+        echo "📋 See ai-diagnostic-report.json for details"
+        exit 1
+      fi
+    tags: [ai, diagnostics]
+    critical: true
+
 composite_tasks:
   ci:
     description: "build → lint → test"
@@ -547,20 +665,26 @@ composite_tasks:
       - backend-qa
   
   qa-full:
-    description: "Run full QA suite (frontend + backend + e2e + UX filters + env check)"
+    description: "Run full QA suite with AI diagnostics (frontend + backend + e2e + UX filters + env check + AI)"
     steps:
       - vercel-env-check
       - lint
       - test
       - backend-qa
       - qa-filters
+      - qa:check-orphans
+      - ai:diagnostics
+      - qa-finalize
+    tags: [qa, full, test, integrity]
+    critical: true
   
   deploy-safe:
-    description: "Deploy with comprehensive QA validation and auto-rollback"
+    description: "Deploy with comprehensive QA validation, AI diagnostics, and auto-rollback"
     steps:
       - vercel-env-check
       - lint
       - test
       - backend-qa
       - qa-filters
+      - ai:diagnostics
       - qa-finalize

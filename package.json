@@ -47,7 +47,12 @@
     "docs:changelog": "tsx scripts/generate-visual-changelog.ts",
     "commit:task": "npm run capture:visuals && git add visual-docs/* && git commit",
     "setup:visual-hooks": "chmod +x scripts/setup-visual-hooks.sh && ./scripts/setup-visual-hooks.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "qa:check-orphans": "ts-node scripts/qa/check_orphan_tests.ts",
+    "qa:generate-scaffolds": "ts-node scripts/qa/generate_test_scaffold.ts",
+    "qa:update-matrix": "ts-node scripts/qa/update_matrix.ts",
+    "ai:diagnostics": "node scripts/ai-diagnostics.js",
+    "ai:autofix": "node scripts/ai-autofix.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

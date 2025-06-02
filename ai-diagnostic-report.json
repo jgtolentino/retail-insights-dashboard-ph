@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-06-02T03:47:27.619Z",
+  "totalIssues": 1,
+  "criticalCount": 1,
+  "autoFixableCount": 0,
+  "issues": [
+    {
+      "file": "qa-results.log",
+      "type": "qa-failure",
+      "severity": "critical",
+      "message": "QA tests report critical failures"
+    }
+  ],
+  "autoFixable": [],
+  "productionReadinessScore": 90
+}
