@@ -1,6 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfDay, subDays } from 'date-fns';
+
+// Simple debounce utility to avoid external dependency
+function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
+  let timeoutId: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  }) as T;
+}
 
 interface DashboardMetrics {
   totalRevenue: number;
@@ -151,6 +161,9 @@ export function useRealtimeDashboard() {
     end: new Date(),
   });
 
+  // Create debounced refetch function
+  const debounceRefetch = useMemo(() => debounce(() => refetch(), 5000), [refetch]);
+
   // Subscribe to real-time updates
   useEffect(() => {
     const channel = supabase
@@ -172,9 +185,7 @@ export function useRealtimeDashboard() {
     return () => {
       channel.unsubscribe();
     };
-  }, []);
-
-  const debounceRefetch = useMemo(() => debounce(() => refetch(), 5000), [refetch]);
+  }, [debounceRefetch]);
 
   return data;
 }
