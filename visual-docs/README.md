@@ -1,14 +1,8 @@
 # Visual Documentation
 
-**Generated:** 2025-06-04T20:35:58.240Z
-**Commit:** `51c6ac040268296ca5432ca555f784adcd747ce1`
-**Message:** CRITICAL FIX: Resolve React Rules of Hooks violation causing error #185
-
-- Fixed useFilters hook that was calling hooks in a loop (Object.entries.forEach)
-- This was violating React's fundamental Rules of Hooks
-- Replaced with proper hook calls at top level for brands, categories, locations, regions
-- Added useMemo to optimize filter object creation
-- This should eliminate the root cause of React error #185
+**Generated:** 2025-06-04T20:47:16.218Z
+**Commit:** `3c3f0db007ecf81d36cada897e37405c7f41bf41`
+**Message:** fix: DONE - add hidden dialog title for accessibility (#16)
 
 ## 📱 Screenshots
 
@@ -27,35 +21,17 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brand Revenue Analysis - Hierarchical View
+### Brands Page
 
-New hierarchical brand visualization with category drill-down
+Brand analytics and performance tracking
 
-![Brand Revenue Analysis - Hierarchical View](./brand-revenue-analysis---hierarchical-view.png)
+![Brands Page](./brands-page.png)
 
-<details>
-<summary>Component Details</summary>
+### Product Mix Page
 
-#### kpi metrics
+Product performance analysis
 
-![kpi-metrics](./brand-revenue-analysis---hierarchical-view-kpi-metrics.png)
-
-</details>
-
-### Brand Revenue Analysis - Filtered View
-
-Smart filtering system with TBWA client highlighting
-
-![Brand Revenue Analysis - Filtered View](./brand-revenue-analysis---filtered-view.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-
-![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
-
-</details>
+![Product Mix Page](./product-mix-page.png)
 
 ---
 
