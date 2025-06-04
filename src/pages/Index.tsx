@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RefreshCw, TrendingUp, Calendar, BarChart3, CalendarDays, Store } from 'lucide-react';
-// LineChart removed - now exclusively in Trends Explorer
 import { simpleDashboardService } from '@/services/simple-dashboard';
 import { behavioralDashboardService } from '@/services/behavioral-dashboard';
 import { useQuery } from '@tanstack/react-query';
@@ -23,14 +23,9 @@ import { HierarchicalBrandView } from '@/components/charts/HierarchicalBrandView
 import { SmartBrandFilter } from '@/components/charts/SmartBrandFilter';
 import { DebugDataLoader } from '@/components/DebugDataLoader';
 import { QuickDataCheck } from '@/components/QuickDataCheck';
-// AI Panel disabled for production
-// import { AIPanel } from '@/components/AIPanel'
-// import { type DashboardData } from '@/services/aiService'
 import { useBundleData } from '@/hooks/useBundleData';
-import { warnInfiniteLoop } from '@/utils/devWarnings';
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom';
-// ChartMetric type removed - charts moved to Trends Explorer
 
 interface Store {
   id: number;
@@ -50,17 +45,11 @@ export default function Index() {
     suggestionsAccepted: 0,
     topBrands: [],
   });
-  // timeSeriesData removed - charts moved to Trends Explorer
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>('all');
-  // chartMetric state removed - charts moved to Trends Explorer
   const [filteredBrands, setFilteredBrands] = useState<any[]>([]);
-
-  // Stabilize the callback to prevent unnecessary re-renders
-  const handleFilteredDataChange = useCallback((brands: any[]) => {
-    setFilteredBrands(brands);
-  }, []);
   const [viewMode, setViewMode] = useState<'hierarchical' | 'filtered'>('hierarchical');
 
   // Custom date range state
@@ -73,35 +62,32 @@ export default function Index() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loadingStores, setLoadingStores] = useState(true);
 
-  // Derive top brand from existing data instead of making duplicate API call
-  const topBrandData =
-    data.topBrands && data.topBrands.length > 0
-      ? {
-          brand_name: data.topBrands[0].name,
-          revenue: data.topBrands[0].sales,
-          transaction_count: null,
-        }
-      : null;
+  // Prevent infinite re-renders with refs
+  const fetchDataRef = useRef<() => Promise<void>>();
+  const isInitialized = useRef(false);
 
-  // Replace bundleData state and useEffect with useBundleData hook
-  const { data: bundleData, isLoading: bundleLoading } = useBundleData(!loading);
-
-  // Add development warnings for other useEffect hooks
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      warnInfiniteLoop('Index', 'data.totalTransactions');
-    }
-    fetchStores();
+  // Stabilize the filtered data change handler
+  const handleFilteredDataChange = useCallback((brands: any[]) => {
+    setFilteredBrands(brands);
   }, []);
 
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      warnInfiniteLoop('Index', 'dateRange, customStartDate, customEndDate, selectedStoreId');
+  // Derive top brand from existing data
+  const topBrandData = useMemo(() => {
+    if (data.topBrands && data.topBrands.length > 0) {
+      return {
+        brand_name: data.topBrands[0].name,
+        revenue: data.topBrands[0].sales,
+        transaction_count: null,
+      };
     }
-    fetchData();
-  }, [dateRange, customStartDate, customEndDate, selectedStoreId]);
+    return null;
+  }, [data.topBrands]);
 
-  const fetchStores = async () => {
+  // Use bundle data hook
+  const { data: bundleData, isLoading: bundleLoading } = useBundleData(!loading);
+
+  // Stable fetch stores function
+  const fetchStores = useCallback(async () => {
     try {
       setLoadingStores(true);
       const { data: storesData, error } = await supabase
@@ -112,7 +98,6 @@ export default function Index() {
 
       if (error) throw error;
 
-      // Group by store_id and get unique stores
       const uniqueStores = new Map<number, Store>();
       storesData?.forEach(item => {
         if (item.store_id && item.store_location) {
@@ -131,11 +116,15 @@ export default function Index() {
     } finally {
       setLoadingStores(false);
     }
-  };
+  }, []);
 
+  // Stable fetch data function
   const fetchData = useCallback(async () => {
+    if (loading) return; // Prevent concurrent calls
+    
     setLoading(true);
     setError(null);
+    
     try {
       let dashboardData;
       let startDate, endDate;
@@ -145,191 +134,133 @@ export default function Index() {
       if (dateRange === 'custom' && customStartDate && customEndDate) {
         startDate = customStartDate;
         endDate = customEndDate;
-      } else if (dateRange !== 'custom') {
-        switch (dateRange) {
-          case '1d':
-            startDate = new Date(now.setDate(now.getDate() - 1)).toISOString().split('T')[0];
-            break;
-          case '7d':
-            startDate = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
-            break;
-          case '30d':
-            startDate = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
-            break;
-          case '90d':
-            startDate = new Date(now.setDate(now.getDate() - 90)).toISOString().split('T')[0];
-            break;
-          default:
-            startDate = undefined;
-            endDate = undefined;
-        }
-        if (startDate && !endDate) {
-          endDate = new Date().toISOString().split('T')[0];
-        }
-      } else {
-        // Custom range selected but dates not set yet
+      } else if (dateRange !== 'custom' && dateRange !== 'all') {
+        const days = dateRange === '1d' ? 1 : dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+        const calculatedStartDate = new Date();
+        calculatedStartDate.setDate(calculatedStartDate.getDate() - days);
+        startDate = calculatedStartDate.toISOString().split('T')[0];
+        endDate = new Date().toISOString().split('T')[0];
+      }
+
+      // Skip if custom range selected but dates not set
+      if (dateRange === 'custom' && (!customStartDate || !customEndDate)) {
+        setLoading(false);
         return;
       }
 
-      // Try behavioral dashboard first, fallback to simple dashboard
       try {
         dashboardData = await behavioralDashboardService.getDashboardSummary(
           startDate,
           endDate,
           selectedStoreId || undefined
         );
-        console.log(
-          '🧠 Using behavioral dashboard data',
-          selectedStoreId ? `for store ${selectedStoreId}` : 'for all stores'
-        );
+        console.log('🧠 Using behavioral dashboard data');
       } catch (error) {
         console.warn('⚠️ Behavioral dashboard unavailable, falling back to simple dashboard');
         dashboardData = await simpleDashboardService.getDashboardData();
       }
 
-      console.log('📊 Dashboard data received:', dashboardData);
-      console.log('📈 Time series data:', dashboardData?.timeSeriesData?.length || 0, 'records');
-      console.log('🔢 TRANSACTION COUNT DEBUG:', {
-        totalTransactions: dashboardData?.totalTransactions,
-        totalRevenue: dashboardData?.totalRevenue,
-        avgTransaction: dashboardData?.avgTransaction,
-        dateRange,
-        dateRangeUsed: dateRange,
+      setData(dashboardData || {
+        totalRevenue: 0,
+        totalTransactions: 0,
+        avgTransaction: 0,
+        uniqueCustomers: 0,
+        suggestionAcceptanceRate: 0,
+        substitutionRate: 0,
+        suggestionsOffered: 0,
+        suggestionsAccepted: 0,
+        topBrands: [],
       });
 
-      // Ensure we have valid data with fallbacks
-      setData(
-        dashboardData || {
-          totalRevenue: 0,
-          totalTransactions: 0,
-          avgTransaction: 0,
-          uniqueCustomers: 0,
-          suggestionAcceptanceRate: 0,
-          substitutionRate: 0,
-          suggestionsOffered: 0,
-          suggestionsAccepted: 0,
-          topBrands: [],
-        }
-      );
-
-      // timeSeriesData removed - charts moved to Trends Explorer
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       setError('Failed to load dashboard data. Please check your connection.');
-      // Set fallback data
       setData({
         totalRevenue: 0,
         totalTransactions: 0,
         avgTransaction: 0,
         topBrands: [],
       });
-      // timeSeriesData cleanup removed
     } finally {
       setLoading(false);
     }
+  }, [dateRange, customStartDate, customEndDate, selectedStoreId, loading]);
+
+  // Store the fetch function in ref to prevent dependency issues
+  fetchDataRef.current = fetchData;
+
+  // Initialize stores only once
+  useEffect(() => {
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      fetchStores();
+    }
+  }, [fetchStores]);
+
+  // Fetch data when dependencies change
+  useEffect(() => {
+    if (isInitialized.current && fetchDataRef.current) {
+      fetchDataRef.current();
+    }
   }, [dateRange, customStartDate, customEndDate, selectedStoreId]);
 
-  const handleRefresh = () => {
-    fetchData();
-  };
-
-  const handleDateRangeChange = useCallback(
-    (newRange: DateRange) => {
-      setDateRange(newRange);
-      if (newRange === 'custom') {
-        setShowCustomDatePicker(true);
-        // Set default custom dates to last 30 days but don't trigger fetch yet
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 30);
-
-        // Only set dates if they're not already set to prevent unnecessary re-renders
-        const newEndDate = endDate.toISOString().split('T')[0];
-        const newStartDate = startDate.toISOString().split('T')[0];
-
-        if (customEndDate !== newEndDate) setCustomEndDate(newEndDate);
-        if (customStartDate !== newStartDate) setCustomStartDate(newStartDate);
-      } else {
-        setShowCustomDatePicker(false);
-        // Clear custom dates when not in custom mode to prevent stale data
-        if (customStartDate) setCustomStartDate('');
-        if (customEndDate) setCustomEndDate('');
-      }
-    },
-    [customStartDate, customEndDate]
-  );
-
-  const handleCustomDateApply = () => {
-    if (customStartDate && customEndDate) {
-      fetchData();
+  const handleRefresh = useCallback(() => {
+    if (fetchDataRef.current) {
+      fetchDataRef.current();
     }
-  };
+  }, []);
 
-  const dateRangeOptions = [
+  const handleDateRangeChange = useCallback((newRange: DateRange) => {
+    setDateRange(newRange);
+    if (newRange === 'custom') {
+      setShowCustomDatePicker(true);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 30);
+
+      const newEndDate = endDate.toISOString().split('T')[0];
+      const newStartDate = startDate.toISOString().split('T')[0];
+
+      setCustomEndDate(newEndDate);
+      setCustomStartDate(newStartDate);
+    } else {
+      setShowCustomDatePicker(false);
+      setCustomStartDate('');
+      setCustomEndDate('');
+    }
+  }, []);
+
+  const handleCustomDateApply = useCallback(() => {
+    if (customStartDate && customEndDate && fetchDataRef.current) {
+      fetchDataRef.current();
+    }
+  }, [customStartDate, customEndDate]);
+
+  const dateRangeOptions = useMemo(() => [
     { value: 'all' as DateRange, label: 'All Time' },
     { value: '1d' as DateRange, label: 'Today' },
     { value: '7d' as DateRange, label: '7 Days' },
     { value: '30d' as DateRange, label: '30 Days' },
     { value: '90d' as DateRange, label: '90 Days' },
     { value: 'custom' as DateRange, label: 'Custom Range' },
-  ];
+  ], []);
 
-  // Chart functions removed - charts moved to Trends Explorer
-
-  const getDateRangeLabel = () => {
-    const baseLabel =
-      dateRange === 'custom' && customStartDate && customEndDate
-        ? `${customStartDate} to ${customEndDate}`
-        : dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown';
+  const getDateRangeLabel = useCallback(() => {
+    const baseLabel = dateRange === 'custom' && customStartDate && customEndDate
+      ? `${customStartDate} to ${customEndDate}`
+      : dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown';
 
     const storeLabel = selectedStoreId
       ? ` • ${stores.find(s => s.id === selectedStoreId)?.name || `Store ${selectedStoreId}`}`
       : ' • All Stores';
 
     return baseLabel + storeLabel;
-  };
-
-  // renderChart function removed - charts moved to Trends Explorer
-
-  // AI dashboard data - Disabled for production
-  /*
-  const aiDashboardData: DashboardData = {
-    transactions: {
-      total: data.totalTransactions,
-      growth: timeSeriesData.length > 1 ? 
-        ((timeSeriesData[timeSeriesData.length - 1]?.transactions - timeSeriesData[0]?.transactions) / timeSeriesData[0]?.transactions * 100) || 0 : 0,
-      avgBasketSize: data.avgTransaction,
-    },
-    revenue: {
-      total: data.totalRevenue,
-      growth: timeSeriesData.length > 1 ? 
-        ((timeSeriesData[timeSeriesData.length - 1]?.revenue - timeSeriesData[0]?.revenue) / timeSeriesData[0]?.revenue * 100) || 0 : 0,
-      trend: timeSeriesData.map(d => d.revenue),
-    },
-    products: {
-      topSellers: data.topBrands.map(brand => ({ name: brand.name, sales: brand.total_sales })),
-      categories: categories.map(cat => ({ name: cat.name, performance: cat.count })),
-    },
-    customers: {
-      ageDistribution: [
-        { age: '18-24', count: 120 },
-        { age: '25-34', count: 350 },
-        { age: '35-44', count: 280 },
-        { age: '45-54', count: 180 },
-        { age: '55+', count: 70 },
-      ],
-      genderDistribution: [
-        { gender: 'Female', count: 520 },
-        { gender: 'Male', count: 480 },
-      ],
-    },
-  };
-  */
+  }, [dateRange, customStartDate, customEndDate, selectedStoreId, stores, dateRangeOptions]);
 
   return (
     <DashboardErrorBoundary>
       <div className="space-y-6">
-        {/* Data Check - Development only to avoid duplicate API calls */}
+        {/* Data Check - Development only */}
         {process.env.NODE_ENV === 'development' && <QuickDataCheck />}
 
         {/* Header with Transaction Counter */}
@@ -341,18 +272,12 @@ export default function Index() {
             </p>
           </div>
 
-          {/* Transaction Counter */}
           <TransactionCounter
             currentCount={data.totalTransactions || 0}
             dateRange={dateRange}
             isLoading={loading}
           />
         </div>
-
-        {/* Product Categories - Moved to Product Mix page */}
-
-        {/* AI Insights Panel - Disabled for production */}
-        {/* <AIPanel dashboardData={aiDashboardData} className="lg:max-w-md" /> */}
 
         {/* Error Alert */}
         {error && (
@@ -394,7 +319,6 @@ export default function Index() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Store Filter */}
               <Select
                 value={selectedStoreId?.toString() || 'all'}
                 onValueChange={value =>
@@ -472,7 +396,7 @@ export default function Index() {
           )}
         </div>
 
-        {/* KPI Cards - Enhanced with behavioral metrics */}
+        {/* KPI Cards */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {/* Total Revenue Card */}
           <Card className="border-gray-200">
@@ -497,9 +421,6 @@ export default function Index() {
               <div className="text-2xl font-bold text-gray-900">
                 {loading ? '...' : (data.totalTransactions || 0).toLocaleString()}
               </div>
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-1 text-xs text-gray-400">Raw: {data.totalTransactions}</div>
-              )}
             </CardContent>
           </Card>
 
@@ -644,7 +565,6 @@ export default function Index() {
                 </p>
               </div>
 
-              {/* View Mode Toggle */}
               <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
                 <Button
                   variant={viewMode === 'hierarchical' ? 'default' : 'ghost'}
@@ -722,7 +642,6 @@ export default function Index() {
                       onFilteredDataChange={handleFilteredDataChange}
                     />
 
-                    {/* Filtered Results */}
                     <div className="space-y-2">
                       {filteredBrands.slice(0, 15).map((brand, index) => {
                         const maxSales = Math.max(...filteredBrands.map(b => b.sales));
