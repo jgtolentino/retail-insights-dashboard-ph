@@ -265,7 +265,7 @@ export const dashboardService = {
     }
   },
 
-  async getDashboardData(timeRange: string): Promise<DashboardData> {
+  async getDashboardDataEnhanced(timeRange: string): Promise<DashboardData> {
     logger.info('Fetching dashboard data', { timeRange });
 
     try {
