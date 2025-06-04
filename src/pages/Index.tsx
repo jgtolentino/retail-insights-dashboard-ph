@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,8 @@ import { QuickDataCheck } from '@/components/QuickDataCheck';
 // AI Panel disabled for production
 // import { AIPanel } from '@/components/AIPanel'
 // import { type DashboardData } from '@/services/aiService'
+import { useBundleData } from '@/hooks/useBundleData';
+import { warnInfiniteLoop } from '@/utils/devWarnings';
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom';
 // ChartMetric type removed - charts moved to Trends Explorer
@@ -76,86 +78,21 @@ export default function Index() {
         }
       : null;
 
-  // Calculate real bundle data from transaction_items
-  const [bundleData, setBundleData] = useState<{
-    product_1: string;
-    product_2: string;
-    frequency: number;
-    confidence: number;
-  } | null>(null);
+  // Replace bundleData state and useEffect with useBundleData hook
+  const { data: bundleData, isLoading: bundleLoading } = useBundleData(!loading);
 
+  // Add development warnings for other useEffect hooks
   useEffect(() => {
-    const calculateRealBundle = async () => {
-      try {
-        const { data: items, error } = await supabase
-          .from('transaction_items')
-          .select(
-            `
-            transaction_id,
-            products!inner(name)
-          `
-          )
-          .order('transaction_id');
-
-        if (error || !items || items.length === 0) {
-          setBundleData(null);
-          return;
-        }
-
-        // Group items by transaction
-        const transactionGroups = items.reduce((acc: Record<number, string[]>, item) => {
-          if (!acc[item.transaction_id]) acc[item.transaction_id] = [];
-          acc[item.transaction_id].push(item.products.name);
-          return acc;
-        }, {});
-
-        // Find most common product pairs
-        const bundleCounts: Record<string, number> = {};
-        Object.values(transactionGroups).forEach(products => {
-          if (products.length >= 2) {
-            products.sort();
-            for (let i = 0; i < products.length - 1; i++) {
-              for (let j = i + 1; j < products.length; j++) {
-                const bundle = `${products[i]} + ${products[j]}`;
-                bundleCounts[bundle] = (bundleCounts[bundle] || 0) + 1;
-              }
-            }
-          }
-        });
-
-        const topBundle = Object.entries(bundleCounts).sort(([, a], [, b]) => b - a)[0];
-
-        if (topBundle) {
-          const [product1, product2] = topBundle[0].split(' + ');
-          setBundleData({
-            product_1: product1,
-            product_2: product2,
-            frequency: topBundle[1],
-            confidence: Math.round((topBundle[1] / Object.keys(transactionGroups).length) * 100),
-          });
-        } else {
-          setBundleData(null);
-        }
-      } catch (error) {
-        console.error('Error calculating bundle data:', error);
-        setBundleData(null);
-      }
-    };
-
-    // Only calculate bundle data once when component mounts or when manually refreshed
-    // Remove dependency on data.totalTransactions to prevent infinite loops
-    if (!loading && !bundleData) {
-      calculateRealBundle();
+    if (process.env.NODE_ENV === 'development') {
+      warnInfiniteLoop('Index', 'data.totalTransactions');
     }
-  }, [loading, bundleData]);
-
-  const topBundleData = bundleData;
-
-  useEffect(() => {
     fetchStores();
   }, []);
 
   useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      warnInfiniteLoop('Index', 'dateRange, customStartDate, customEndDate, selectedStoreId');
+    }
     fetchData();
   }, [dateRange, customStartDate, customEndDate, selectedStoreId]);
 
@@ -191,7 +128,7 @@ export default function Index() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -285,27 +222,37 @@ export default function Index() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange, customStartDate, customEndDate, selectedStoreId]);
 
   const handleRefresh = () => {
     fetchData();
   };
 
-  const handleDateRangeChange = (newRange: DateRange) => {
-    setDateRange(newRange);
-    if (newRange === 'custom') {
-      setShowCustomDatePicker(true);
-      // Set default custom dates to last 30 days
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 30);
+  const handleDateRangeChange = useCallback(
+    (newRange: DateRange) => {
+      setDateRange(newRange);
+      if (newRange === 'custom') {
+        setShowCustomDatePicker(true);
+        // Set default custom dates to last 30 days but don't trigger fetch yet
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
 
-      setCustomEndDate(endDate.toISOString().split('T')[0]);
-      setCustomStartDate(startDate.toISOString().split('T')[0]);
-    } else {
-      setShowCustomDatePicker(false);
-    }
-  };
+        // Only set dates if they're not already set to prevent unnecessary re-renders
+        const newEndDate = endDate.toISOString().split('T')[0];
+        const newStartDate = startDate.toISOString().split('T')[0];
+
+        if (customEndDate !== newEndDate) setCustomEndDate(newEndDate);
+        if (customStartDate !== newStartDate) setCustomStartDate(newStartDate);
+      } else {
+        setShowCustomDatePicker(false);
+        // Clear custom dates when not in custom mode to prevent stale data
+        if (customStartDate) setCustomStartDate('');
+        if (customEndDate) setCustomEndDate('');
+      }
+    },
+    [customStartDate, customEndDate]
+  );
 
   const handleCustomDateApply = () => {
     if (customStartDate && customEndDate) {
@@ -628,17 +575,17 @@ export default function Index() {
             <CardContent>
               <div className="space-y-1">
                 <div className="truncate text-base font-bold text-gray-900">
-                  {loading
+                  {bundleLoading || loading
                     ? '...'
-                    : topBundleData
-                      ? `${topBundleData.product_1} + ${topBundleData.product_2}`
+                    : bundleData
+                      ? `${bundleData.product_1} + ${bundleData.product_2}`
                       : 'No bundles'}
                 </div>
                 <div className="text-xs text-gray-500">
-                  {loading
+                  {bundleLoading || loading
                     ? '...'
-                    : topBundleData
-                      ? `${topBundleData.frequency}x • ${topBundleData.confidence}%`
+                    : bundleData
+                      ? `${bundleData.frequency}x • ${bundleData.confidence}%`
                       : 'No data'}
                 </div>
               </div>

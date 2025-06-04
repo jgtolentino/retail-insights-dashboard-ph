@@ -63,4 +63,25 @@ export default defineConfig(({ mode }) => ({
   define: {
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toISOString()),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Create a chunk for react and react-dom
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            // You can add more conditions here to split other libraries
+            // For example, to split supabase:
+            // if (id.includes('@supabase/supabase-js')) {
+            //   return 'supabase-vendor';
+            // }
+            // To create a single vendor chunk for all node_modules:
+            // return 'vendor';
+          }
+        },
+      },
+    },
+  },
 }));
