@@ -30,16 +30,19 @@ export function GlobalFiltersPanel() {
   const [allStores, setAllStores] = useState<string[]>([]);
 
   useEffect(() => {
-    // Fetch dynamic categories from Supabase
+    // Fetch dynamic categories from brands table instead (products table has no category column)
     const fetchCategories = async () => {
       const { data, error } = await supabase
-        .from('products')
+        .from('brands')
         .select('category')
         .neq('category', null);
 
       if (!error && data) {
-        const uniqueCategories = [...new Set(data.map(p => p.category).filter(Boolean))].sort();
+        const uniqueCategories = [...new Set(data.map(b => b.category).filter(Boolean))].sort();
         setAllCategories(uniqueCategories);
+      } else {
+        // Fallback to common categories if brands query fails
+        setAllCategories(['Dairy', 'Beverages', 'Snacks', 'Personal Care', 'Household']);
       }
     };
 
