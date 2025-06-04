@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -85,7 +85,7 @@ export function SmartBrandFilter({
   }, [brands, filterMode, selectedCategory, performanceThreshold, performanceThresholds]);
 
   // Update parent component when filtered data changes
-  useMemo(() => {
+  useEffect(() => {
     onFilteredDataChange(filteredBrands);
   }, [filteredBrands, onFilteredDataChange]);
 
