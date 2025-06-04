@@ -1,0 +1,61 @@
+{
+  "project_scout": {
+    "version": "1.0.0",
+    "updated": "2025-06-04T13:19:27.647512",
+    "environment": "production"
+  },
+  "endpoints": {
+    "supabase": {
+      "base_url": "https://lcoxtanyckjzyxxcsjzz.supabase.co",
+      "api_url": "https://lcoxtanyckjzyxxcsjzz.supabase.co/rest/v1",
+      "realtime_url": "wss://lcoxtanyckjzyxxcsjzz.supabase.co/realtime/v1",
+      "auth_url": "https://lcoxtanyckjzyxxcsjzz.supabase.co/auth/v1"
+    },
+    "dashboard": {
+      "web_url": "https://retail-insights-dashboard-ph-jakes-projects-e9f46c30.vercel.app",
+      "api_url": "https://retail-insights-dashboard-ph-jakes-projects-e9f46c30.vercel.app/api"
+    },
+    "azure_iot": {
+      "hub_hostname": "ProjectScoutAutoRegHub.azure-devices.net",
+      "event_hub_endpoint": "sb://projectscoutautoreghub.servicebus.windows.net/"
+    }
+  },
+  "device_settings": {
+    "device_type": "RaspberryPi5",
+    "firmware_version": "2.1.0",
+    "collection_interval_seconds": 30,
+    "sync_interval_minutes": 5,
+    "retry_attempts": 3,
+    "timeout_seconds": 10,
+    "max_offline_hours": 24
+  },
+  "data_tables": {
+    "transactions": "transactions",
+    "transaction_items": "transaction_items",
+    "products": "products",
+    "brands": "brands",
+    "stores": "stores",
+    "device_health": "device_health",
+    "edge_logs": "edge_logs"
+  },
+  "security": {
+    "enable_tls": true,
+    "certificate_validation": true,
+    "api_rate_limit": 60,
+    "auth_required": true
+  },
+  "features": {
+    "auto_registration": true,
+    "real_time_sync": true,
+    "batch_upload": true,
+    "health_monitoring": true,
+    "wifi_fallback": true,
+    "cellular_backup": false
+  },
+  "logging": {
+    "level": "INFO",
+    "retention_days": 7,
+    "telemetry_enabled": true,
+    "local_storage_mb": 100
+  }
+}

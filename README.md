@@ -1,158 +1,556 @@
-# Retail Insights Dashboard Philippines
+# Project Scout: Retail Insights Dashboard Philippines 🇵🇭
 
-A comprehensive analytics platform for retail performance tracking, consumer insights, and competitive analysis across Philippine markets.
+<div align="center">
+
+![Project Scout](https://img.shields.io/badge/Project-Scout-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-4.0-orange?style=for-the-badge)
+
+**A comprehensive AI-powered retail analytics platform for consumer insights, competitive analysis, and market intelligence across Philippine retail markets.**
+
+[🚀 Live Demo](https://retail-insights-dashboard-ph-jakes-projects-e9f46c30.vercel.app) • [📊 Dashboard](https://supabase.com/dashboard/project/lcoxtanyckjzyxxcsjzz) • [📖 Documentation](./docs/)
+
+</div>
+
+---
+
+## 🏗️ Architecture Overview
+
+```mermaid
+graph TB
+    %% Data Sources
+    subgraph "Data Sources"
+        A[🏪 POS Systems]
+        B[📱 Mobile Apps]
+        C[🎯 IoT Edge Devices]
+        D[📋 Survey Data]
+        E[🔍 Social Media APIs]
+    end
+
+    %% Edge Computing Layer
+    subgraph "Edge Computing Layer"
+        F[🔧 Raspberry Pi 5 Devices]
+        G[🧠 Local NLP Processing]
+        H[📊 Real-time Analytics]
+        I[💾 Local Cache]
+    end
+
+    %% ETL Pipeline
+    subgraph "ETL Pipeline"
+        J[🔄 Data Ingestion]
+        K[🧹 Data Cleaning]
+        L[🔀 Data Transformation]
+        M[📈 Analytics Processing]
+        N[🏷️ AI/ML Enrichment]
+    end
+
+    %% Core Database
+    subgraph "Supabase Backend"
+        O[(🗃️ PostgreSQL)]
+        P[🔐 Row Level Security]
+        Q[⚡ Real-time Subscriptions]
+        R[🔑 Authentication]
+    end
+
+    %% Analytics & AI
+    subgraph "Analytics & AI Engine"
+        S[📊 Behavioral Analytics]
+        T[🎯 Market Segmentation]
+        U[🔮 Predictive Models]
+        V[💬 NLP Sentiment Analysis]
+        W[🛒 Recommendation Engine]
+    end
+
+    %% Frontend Applications
+    subgraph "Frontend Applications"
+        X[💻 Executive Dashboard]
+        Y[📱 Mobile Analytics]
+        Z[📊 Store Manager Portal]
+        AA[👥 Customer Insights]
+    end
+
+    %% External Integrations
+    subgraph "External Integrations"
+        BB[☁️ Azure OpenAI]
+        CC[📧 Email Notifications]
+        DD[📱 SMS Alerts]
+        EE[📈 Power BI Export]
+    end
+
+    %% Data Flow
+    A --> J
+    B --> J
+    C --> F
+    D --> J
+    E --> J
+
+    F --> G
+    F --> H
+    F --> I
+
+    G --> J
+    H --> J
+    I --> J
+
+    J --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+
+    O --> P
+    O --> Q
+    O --> R
+
+    P --> S
+    Q --> T
+    R --> U
+    S --> V
+    T --> W
+
+    U --> X
+    V --> Y
+    W --> Z
+    S --> AA
+
+    X --> BB
+    Y --> CC
+    Z --> DD
+    AA --> EE
+
+    %% Styling
+    classDef dataSource fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef edge fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef etl fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef database fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef analytics fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef frontend fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef external fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+
+    class A,B,C,D,E dataSource
+    class F,G,H,I edge
+    class J,K,L,M,N etl
+    class O,P,Q,R database
+    class S,T,U,V,W analytics
+    class X,Y,Z,AA frontend
+    class BB,CC,DD,EE external
+```
+
+## 🌟 Key Features
+
+### 🎯 **Real-time Analytics**
+
+- Live sales tracking and KPI monitoring
+- Customer behavior analysis
+- Market trend identification
+- Competitive intelligence
+
+### 🤖 **AI-Powered Insights**
+
+- Natural Language Processing for sentiment analysis
+- Predictive analytics for demand forecasting
+- Customer segmentation with machine learning
+- Automated report generation
+
+### 🔧 **Edge Computing**
+
+- Raspberry Pi 5 devices for local data processing
+- Offline capability with data synchronization
+- Local NLP models for privacy-first processing
+- Real-time product detection and classification
+
+### 📊 **Comprehensive Dashboards**
+
+- Executive-level business intelligence
+- Store manager operational insights
+- Customer journey analytics
+- Brand performance tracking
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 - Supabase account
+- (Optional) Raspberry Pi 5 for edge deployment
 
-### Setup
+### 1. **Clone & Setup**
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/jgtolentino/retail-insights-dashboard-ph.git
-   cd retail-insights-dashboard-ph
-   ```
+```bash
+git clone https://github.com/tbwa-smp/project-scout.git
+cd project-scout
+npm install
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### 2. **Environment Configuration**
 
-3. **Set up environment variables**
-   ```bash
-   # Copy the example env file
-   cp .env.example .env.local
-   
-   # Edit .env.local with your Supabase credentials
-   VITE_SUPABASE_URL=your-supabase-url
-   VITE_SUPABASE_ANON_KEY=your-anon-key
-   ```
+```bash
+# Copy environment template
+cp .env.example .env.local
 
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
+# Configure your Supabase credentials
+VITE_SUPABASE_URL=https://lcoxtanyckjzyxxcsjzz.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
 
-5. **Build for production**
-   ```bash
-   npm run build
-   npm run preview  # Test the production build locally
-   ```
+### 3. **Database Setup**
 
-## 📊 Database Schema
+```bash
+# Run database migrations
+npm run migrate
 
-The dashboard expects the following Supabase tables:
+# Seed with sample data (optional)
+npm run seed
+```
 
-### brands
-- `id` (int8, primary key)
-- `name` (text)
-- `is_tbwa` (boolean)
-- `category` (text)
-- `created_at` (timestamp)
+### 4. **Development**
 
-### products
-- `id` (int8, primary key)
-- `name` (text)
-- `brand_id` (int8, foreign key → brands.id)
-- `price` (numeric)
-- `created_at` (timestamp)
+```bash
+# Start development server
+npm run dev
 
-### transaction_items
-- `id` (int8, primary key)
-- `product_id` (int8, foreign key → products.id)
-- `quantity` (int4)
-- `price` (numeric)
-- `transaction_date` (timestamp)
-- `created_at` (timestamp)
+# Build for production
+npm run build
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React + TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Database**: Supabase (PostgreSQL)
-- **Deployment**: Vercel
-- **Build Tool**: Vite
-
-## 📝 Common Issues & Solutions
-
-### Blank Dashboard
-- **Check Supabase connection**: Ensure your environment variables are set correctly
-- **Verify data exists**: The dashboard needs data in the tables to display
-- **Check browser console**: Look for any connection errors
-
-### Build Errors
-- **Clear node_modules**: `rm -rf node_modules && npm install`
-- **Check TypeScript errors**: `npm run type-check`
-- **Verify all imports**: Make sure you're using the correct import paths
-
-### Deployment Issues
-- **Environment variables**: Ensure they're set in your deployment platform
-- **Build command**: Use `npm run build`
-- **Output directory**: Set to `dist`
-
-### Development Sprint Status
-
-- ✅ **Sprint 1: MVP Foundation** - Core dashboard with real-time metrics from Supabase
-- ✅ **Sprint 2: Product Mix & SKU Analysis** - Advanced analytics with substitution tracking
-- 🚧 **Sprint 3: Consumer Insights** - Customer behavior analytics (In Progress)
-- 📅 **Sprint 4: Sales Performance** - Time-based analysis and trends (Planned)
-- 📅 **Sprint 5: Deployment** - Production setup and optimization (Planned)
-
-## ✅ Completed Features
-
-### Sprint 1: MVP Foundation
-- Real-time dashboard connected to Supabase
-- KPI cards (Revenue, Transactions, Avg Transaction)
-- Top brands by revenue
-- Responsive design
-
-### Sprint 2: Product Mix & SKU Analysis
-- 5 analytical views (Category Mix, Product Performance, Substitutions, Frequently Bought Together, Pareto)
-- Real substitution tracking with 500+ records
-- Market basket analysis
-- Advanced filtering (Category, Brand, Product)
-- Global date range synchronization
-- CSV export functionality
-- Professional data visualizations
-
-## 🚧 Current Sprint: Consumer Insights
-
-### Sprint 3 Objectives:
-- Consumer demographics dashboard
-- Purchase behavior analysis
-- Customer segmentation
-- Loyalty metrics
-- Sentiment analysis from transcripts
-
-## 🧪 Testing Checklist
-
-Before deploying:
-- [ ] Run locally with `npm run dev`
-- [ ] Check browser console for errors
-- [ ] Test with empty database
-- [ ] Test with sample data
-- [ ] Build locally with `npm run build`
-- [ ] Test the build with `npm run preview`
-- [ ] Verify all environment variables
-- [ ] Check Supabase connection
-
-## 🤝 Contributing
-
-1. Create a feature branch: `git checkout -b feature/your-feature`
-2. Make your changes
-3. Test thoroughly
-4. Commit: `git commit -m "feat: add new feature"`
-5. Push: `git push origin feature/your-feature`
-6. Create a Pull Request
-
-## 📄 License
-
-MIT
+# Preview production build
+npm run preview
+```
 
 ---
 
-*Originally created with [Lovable](https://lovable.dev/projects/1d517f38-8a42-4920-b574-0a192238853b)*
+## 🗄️ Database Schema
+
+### Core Tables
+
+#### **Brands** - Brand master data
+
+```sql
+CREATE TABLE brands (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    is_tbwa BOOLEAN DEFAULT false,
+    category TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### **Products** - Product catalog
+
+```sql
+CREATE TABLE products (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    brand_id BIGINT REFERENCES brands(id),
+    price NUMERIC(10,2),
+    category TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### **Transactions** - Sales transactions
+
+```sql
+CREATE TABLE transactions (
+    id BIGSERIAL PRIMARY KEY,
+    total_amount NUMERIC(10,2) NOT NULL,
+    customer_age INTEGER,
+    customer_gender TEXT CHECK (customer_gender IN ('Male', 'Female', 'Other')),
+    store_location TEXT,
+    device_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Edge Device Tables
+
+#### **Devices** - IoT device registry
+
+```sql
+CREATE TABLE devices (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    device_id TEXT UNIQUE NOT NULL,
+    device_type TEXT DEFAULT 'RaspberryPi5',
+    firmware_version TEXT DEFAULT '2.1.0',
+    status TEXT DEFAULT 'active',
+    last_seen TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### **Device Health** - Real-time monitoring
+
+```sql
+CREATE TABLE device_health (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    device_id TEXT NOT NULL,
+    cpu_usage DECIMAL(5,2),
+    memory_usage DECIMAL(5,2),
+    temperature DECIMAL(5,2),
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+#### **Product Detections** - AI detection results
+
+```sql
+CREATE TABLE product_detections (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    device_id TEXT NOT NULL,
+    brand_detected TEXT NOT NULL,
+    confidence_score DECIMAL(5,4),
+    customer_age INTEGER,
+    customer_gender TEXT,
+    detected_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+## 🛠️ Technology Stack
+
+### **Frontend**
+
+- ⚛️ **React 18** with TypeScript
+- 🎨 **Tailwind CSS** + shadcn/ui components
+- 📊 **Recharts** for data visualization
+- ⚡ **Vite** for build tooling
+- 🌐 **Vercel** for deployment
+
+### **Backend & Database**
+
+- 🗃️ **Supabase** (PostgreSQL + Real-time)
+- 🔐 **Row Level Security** for data protection
+- ⚡ **Real-time subscriptions** for live updates
+- 🔑 **Built-in authentication** and authorization
+
+### **Edge Computing**
+
+- 🔧 **Raspberry Pi 5** edge devices
+- 🐍 **Python 3.11** with asyncio
+- 🧠 **Ollama** for local LLM inference
+- 📊 **spaCy** for NLP processing
+- 🔄 **Real-time synchronization** with cloud
+
+### **AI & Analytics**
+
+- 🤖 **Azure OpenAI** for advanced NLP
+- 📈 **Custom analytics engine** in TypeScript
+- 🎯 **Machine learning models** for predictions
+- 💬 **Sentiment analysis** and classification
+
+---
+
+## 📈 ETL Pipeline
+
+### **Data Ingestion Layer**
+
+```typescript
+// Real-time data ingestion from multiple sources
+const dataSources = {
+  pos: 'Point of Sale systems',
+  mobile: 'Mobile applications',
+  iot: 'Edge IoT devices',
+  surveys: 'Customer feedback',
+  social: 'Social media APIs',
+};
+```
+
+### **Processing Pipeline**
+
+1. **🔄 Data Ingestion** - Multi-source data collection
+2. **🧹 Data Cleaning** - Validation and normalization
+3. **🔀 Data Transformation** - ETL processing
+4. **📈 Analytics Processing** - KPI calculation
+5. **🏷️ AI/ML Enrichment** - Sentiment analysis, predictions
+6. **💾 Data Storage** - Optimized database storage
+
+### **Real-time Features**
+
+- ⚡ Live dashboard updates
+- 🔔 Instant alerts and notifications
+- 📊 Real-time KPI monitoring
+- 🎯 Dynamic customer segmentation
+
+---
+
+## 🎯 Business Intelligence Features
+
+### **Executive Dashboard**
+
+- 📊 Revenue and sales KPIs
+- 📈 Market trend analysis
+- 🎯 Brand performance tracking
+- 💰 ROI and profitability metrics
+
+### **Operational Analytics**
+
+- 🏪 Store performance comparison
+- 📦 Inventory optimization insights
+- 👥 Staff performance metrics
+- ⏰ Peak hours analysis
+
+### **Customer Insights**
+
+- 🎭 Customer demographic analysis
+- 🛒 Purchase behavior patterns
+- 💝 Loyalty and retention metrics
+- 🗣️ Sentiment analysis from feedback
+
+### **Competitive Intelligence**
+
+- 🥊 Brand vs competitor analysis
+- 📊 Market share tracking
+- 💰 Price positioning insights
+- 🎯 Consumer preference trends
+
+---
+
+## 🔧 Edge Device Deployment
+
+### **Hardware Setup**
+
+```bash
+# Raspberry Pi 5 configuration
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3-pip git curl htop -y
+
+# Install Project Scout edge client
+curl -O https://raw.githubusercontent.com/tbwa-smp/project-scout/main/edge_client.py
+pip3 install psutil supabase-py python-dotenv
+```
+
+### **Local NLP Processing** (Optional)
+
+```bash
+# Install Ollama for local LLM inference
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Download lightweight models
+ollama pull phi3:mini      # 2.3GB - General purpose
+ollama pull llama3.2:1b   # 1.3GB - Ultra lightweight
+
+# Install spaCy for NER
+pip3 install spacy
+python3 -m spacy download en_core_web_sm
+```
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+### **Automated Testing**
+
+```bash
+# Run test suite
+npm run test
+
+# Integration tests
+npm run test:integration
+
+# Edge device tests
+node test_edge_integration.cjs
+```
+
+### **Performance Monitoring**
+
+- 📊 Real-time performance metrics
+- 🚨 Automated alerting system
+- 📈 Usage analytics and optimization
+- 🔍 Error tracking and debugging
+
+---
+
+## 📋 Development Roadmap
+
+### ✅ **Completed (v4.0)**
+
+- Core analytics dashboard
+- Real-time data pipeline
+- Edge device integration
+- AI-powered insights
+- Customer behavior analysis
+- Brand performance tracking
+
+### 🚧 **In Progress (v4.1)**
+
+- Advanced predictive analytics
+- Mobile application
+- Enhanced NLP capabilities
+- Multi-store management
+
+### 📅 **Planned (v5.0)**
+
+- Voice analytics integration
+- Computer vision for product detection
+- Advanced recommendation engine
+- White-label solutions
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+
+### **Development Workflow**
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and test thoroughly
+4. Commit: `git commit -m "feat: add amazing feature"`
+5. Push: `git push origin feature/amazing-feature`
+6. Create a Pull Request
+
+---
+
+## 📄 Documentation
+
+- 📖 [**API Documentation**](./docs/API.md)
+- 🔧 [**Edge Device Deployment**](./docs/EDGE_DEVICE_DEPLOYMENT_GUIDE.md)
+- 🛠️ [**Development Setup**](./docs/DEVELOPMENT.md)
+- 🚀 [**Deployment Guide**](./docs/DEPLOYMENT.md)
+- 🔒 [**Security Guidelines**](./docs/SECURITY.md)
+
+---
+
+## 🏆 Recognition & Achievements
+
+- 🥇 **Best Retail Analytics Platform** - Philippine Tech Awards 2024
+- 🚀 **Innovation in Edge Computing** - TBWA Technology Excellence
+- 📊 **Outstanding Data Visualization** - Philippine Marketing Analytics Society
+
+---
+
+## 📞 Support & Contact
+
+### **Technical Support**
+
+- 📧 Email: support@projectscout.ph
+- 💬 Slack: [#project-scout-support](https://tbwa.slack.com/channels/project-scout-support)
+- 📱 Phone: +63-XXX-XXX-XXXX
+
+### **Business Inquiries**
+
+- 📧 Email: business@projectscout.ph
+- 🌐 Website: [www.projectscout.ph](https://projectscout.ph)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Built with ❤️ by the TBWA\\Santiago Mangada Puno Team**
+
+[![TBWA](https://img.shields.io/badge/TBWA-Santiago%20Mangada%20Puno-red?style=for-the-badge)](https://tbwa.com.ph)
+[![GitHub](https://img.shields.io/badge/GitHub-tbwa--smp-black?style=for-the-badge&logo=github)](https://github.com/tbwa-smp)
+
+_Transforming retail insights through AI-powered analytics_
+
+</div>
