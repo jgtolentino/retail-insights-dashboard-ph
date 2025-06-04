@@ -1,8 +1,22 @@
 # Visual Documentation
 
-**Generated:** 2025-06-04T20:47:16.218Z
-**Commit:** `3c3f0db007ecf81d36cada897e37405c7f41bf41`
-**Message:** fix: DONE - add hidden dialog title for accessibility (#16)
+**Generated:** 2025-06-04T21:27:13.305Z
+**Commit:** `6fdd4e89bcc4c36c05a33c60aa5b017915610edf`
+**Message:** COMPREHENSIVE FIX: Resolve ALL React Rules of Hooks violations causing error #185
+
+- Fixed useOptimizedDashboard.ts missing imports for useEffect, useMemo, and debounce
+- Added debounce utility implementation to avoid external dependency
+- Fixed temporal dead zone issue by moving debounceRefetch definition before useEffect
+- Added Supabase client compatibility layer to resolve MCP integration build errors
+- Now exports both standard 'supabase' client and async 'getSupabaseClient()' function
+
+These were the final sources of React error #185:
+
+1. Missing hook imports causing runtime errors
+2. Temporal dead zone with debounce function
+3. Build failures preventing deployment of previous fixes
+
+All Rules of Hooks violations are now resolved.
 
 ## 📱 Screenshots
 
@@ -21,17 +35,20 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brands Page
+### Trends Explorer
 
-Brand analytics and performance tracking
+Advanced trend analysis with multiple metrics
 
-![Brands Page](./brands-page.png)
+![Trends Explorer](./trends-explorer.png)
 
-### Product Mix Page
+<details>
+<summary>Component Details</summary>
 
-Product performance analysis
+#### kpi metrics
 
-![Product Mix Page](./product-mix-page.png)
+![kpi-metrics](./trends-explorer-kpi-metrics.png)
+
+</details>
 
 ---
 
