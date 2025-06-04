@@ -1,7 +1,6 @@
-
--- =====================================
--- Migration: sprint4_schema_updates.sql
--- =====================================
+-- ========================================
+-- Migration from: /Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/migrations/sprint4_schema_updates.sql
+-- ========================================
 
 -- ===================================================================
 -- Sprint 4: Critical Schema Updates for Retail Insights Dashboard PH
@@ -175,9 +174,10 @@ END;
 $;
 
 
--- =====================================
--- Migration: sprint4_rpc_functions.sql
--- =====================================
+
+-- ========================================
+-- Migration from: /Users/tbwa/Documents/GitHub/retail-insights-dashboard-ph/migrations/sprint4_rpc_functions.sql
+-- ========================================
 
 -- ===================================================================
 -- Sprint 4: Advanced Analytics RPC Functions
@@ -495,4 +495,5 @@ BEGIN
   RAISE NOTICE 'Created 7 advanced analytics functions for substitution patterns, request behaviors, and enhanced insights.';
 END;
 $;
+
 

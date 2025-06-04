@@ -4,7 +4,8 @@
 
 ![Project Scout](https://img.shields.io/badge/Project-Scout-blue?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-4.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-4.1-orange?style=for-the-badge)
+![Edge](https://img.shields.io/badge/Edge%20Computing-Enabled-purple?style=for-the-badge)
 
 **A comprehensive AI-powered retail analytics platform for consumer insights, competitive analysis, and market intelligence across Philippine retail markets.**
 

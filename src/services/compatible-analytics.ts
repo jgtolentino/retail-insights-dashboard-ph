@@ -230,8 +230,8 @@ export const compatibleAnalyticsService = {
       .limit(30);
 
     // Group by date and enhance with mock Sprint 4 data
-    const dailyData: Record<string, { count: number; revenue: number }> = {};
-    transactions?.forEach((t: any) => {
+    const dailyData = {};
+    transactions?.forEach(t => {
       const date = new Date(t.transaction_date).toISOString().split('T')[0];
       if (!dailyData[date]) {
         dailyData[date] = { count: 0, revenue: 0 };
@@ -255,10 +255,10 @@ export const compatibleAnalyticsService = {
     // Get real brand data
     const { data: brands } = await supabase.from('products').select('brand').limit(50);
 
-    const uniqueBrands = Array.from(new Set(brands?.map((b: any) => b.brand) || []));
+    const uniqueBrands = [...new Set(brands?.map(b => b.brand) || [])];
 
     // Generate mock substitution impact
-    return uniqueBrands.slice(0, limit).map((brand: string) => ({
+    return uniqueBrands.slice(0, limit).map(brand => ({
       brand,
       total_sales: Math.floor(Math.random() * 500000) + 100000,
       transaction_count: Math.floor(Math.random() * 2000) + 500,
@@ -329,7 +329,7 @@ export const compatibleAnalyticsService = {
 
     const { data: revenueData } = await supabase.from('transactions').select('total_amount');
 
-    const totalRevenue = revenueData?.reduce((sum: number, t: any) => sum + t.total_amount, 0) || 0;
+    const totalRevenue = revenueData?.reduce((sum, t) => sum + t.total_amount, 0) || 0;
 
     return {
       totalTransactions,
