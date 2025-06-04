@@ -1,27 +1,14 @@
 # Visual Documentation
 
-**Generated:** 2025-06-04T16:17:29.963Z
-**Commit:** `36774ade51b3c995247a6da733f12ef08470936e`
-**Message:** Complete API fixes - all endpoints working
+**Generated:** 2025-06-04T20:35:58.240Z
+**Commit:** `51c6ac040268296ca5432ca555f784adcd747ce1`
+**Message:** CRITICAL FIX: Resolve React Rules of Hooks violation causing error #185
 
-- Added products.category column fix SQL script
-- All 7 API endpoints now return 200 OK
-- Products category queries no longer return 400 errors
-- Database schema fully aligned with frontend expectations
-
-✅ API Status:
-
-- Basic transactions: OK (1 records)
-- Products with category: OK (109 records) ← FIXED
-- Products basic: OK (1 records)
-- Brands with category: OK (89 records)
-- Customers basic: OK (1 records)
-- Customers regions: OK (5 records)
-- Stores: OK (4 records)
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
+- Fixed useFilters hook that was calling hooks in a loop (Object.entries.forEach)
+- This was violating React's fundamental Rules of Hooks
+- Replaced with proper hook calls at top level for brands, categories, locations, regions
+- Added useMemo to optimize filter object creation
+- This should eliminate the root cause of React error #185
 
 ## 📱 Screenshots
 
@@ -69,12 +56,6 @@ Smart filtering system with TBWA client highlighting
 ![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
 
 </details>
-
-### Product Mix Analysis
-
-Product performance and substitution patterns
-
-![Product Mix Analysis](./product-mix-analysis.png)
 
 ---
 
