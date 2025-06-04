@@ -1,194 +1,169 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Filter, Calendar } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import {
-  useFilterStore,
-  useAllFilters,
-  useFilterActions,
-  useActiveFiltersCount,
-  useFilterSummary,
-  loadFiltersFromURL,
-  persistFiltersToURL,
-} from '@/stores/filterStore';
-import { getFilterOptions } from '@/lib/filterQueryHelper';
-import MultiSelect from './MultiSelect';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
-import { DateRange } from 'react-day-picker';
+import { X, Calendar, RefreshCw } from 'lucide-react';
+import { useFilters } from '@/contexts/FilterContext';
 
-interface FilterBarProps {
-  className?: string;
-  compact?: boolean;
-  sticky?: boolean;
-}
+export const FilterBar = () => {
+  const {
+    selectedCategories,
+    selectedBrands,
+    selectedRegions,
+    selectedStores,
+    dateRange,
+    setSelectedCategories,
+    setSelectedBrands,
+    setSelectedRegions,
+    setSelectedStores,
+    setDateRange,
+    resetAllFilters
+  } = useFilters();
 
-export default function FilterBar({
-  className = '',
-  compact = false,
-  sticky = true,
-}: FilterBarProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Get filter state and actions
-  const filters = useAllFilters();
-  const actions = useFilterActions();
-  const activeFiltersCount = useActiveFiltersCount();
-  const filterSummary = useFilterSummary();
-
-  // Load filters from URL on mount
-  useEffect(() => {
-    if (!isInitialized) {
-      loadFiltersFromURL();
-      setIsInitialized(true);
-    }
-  }, [isInitialized]);
-
-  // Persist filters to URL when they change
-  useEffect(() => {
-    if (isInitialized) {
-      persistFiltersToURL();
-    }
-  }, [filters, isInitialized]);
-
-  // Fetch filter options
-  const { data: filterOptions, isLoading: optionsLoading } = useQuery({
-    queryKey: ['filterOptions'],
-    queryFn: getFilterOptions,
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  });
-
-  // Handle date range change
-  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
-    if (dateRange?.from && dateRange?.to) {
-      actions.setDateRange({
-        start: dateRange.from.toISOString().split('T')[0],
-        end: dateRange.to.toISOString().split('T')[0],
-      });
-    } else {
-      actions.setDateRange({
-        start: null,
-        end: null,
-      });
-    }
+  const handleDateChange = (type: 'start' | 'end', value: string) => {
+    setDateRange({
+      ...dateRange,
+      [type]: value
+    });
   };
 
-  // Convert date strings back to DateRange for the picker
-  const getDateRange = (): DateRange | undefined => {
-    if (filters.dateRange.start && filters.dateRange.end) {
-      return {
-        from: new Date(filters.dateRange.start),
-        to: new Date(filters.dateRange.end),
-      };
-    }
-    return undefined;
+  const removeBrand = (brandToRemove: string) => {
+    setSelectedBrands(selectedBrands.filter(brand => brand !== brandToRemove));
   };
 
-  const handleReset = () => {
-    actions.resetAllFilters();
+  const removeCategory = (categoryToRemove: string) => {
+    setSelectedCategories(selectedCategories.filter(cat => cat !== categoryToRemove));
   };
 
-  const FilterContent = () => (
-    <div className="space-y-4">
-      {/* Date Range */}
-      <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-gray-500" />
-        <DatePickerWithRange date={getDateRange()} onDateChange={handleDateRangeChange} />
-      </div>
+  const removeRegion = (regionToRemove: string) => {
+    setSelectedRegions(selectedRegions.filter(region => region !== regionToRemove));
+  };
 
-      {/* Filter Controls */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MultiSelect
-          label="Brands"
-          options={filterOptions?.brandOptions || []}
-          value={filters.selectedBrands}
-          onChange={actions.setSelectedBrands}
-          placeholder="All Brands"
-          searchPlaceholder="Search brands..."
-          disabled={optionsLoading}
-        />
+  const removeStore = (storeToRemove: string) => {
+    setSelectedStores(selectedStores.filter(store => store !== storeToRemove));
+  };
 
-        <MultiSelect
-          label="Categories"
-          options={filterOptions?.categoryOptions || []}
-          value={filters.selectedCategories}
-          onChange={actions.setSelectedCategories}
-          placeholder="All Categories"
-          searchPlaceholder="Search categories..."
-          disabled={optionsLoading}
-        />
+  const hasActiveFilters = 
+    selectedCategories.length > 0 ||
+    selectedBrands.length > 0 ||
+    selectedRegions.length > 0 ||
+    selectedStores.length > 0 ||
+    dateRange.start ||
+    dateRange.end;
 
-        <MultiSelect
-          label="Regions"
-          options={filterOptions?.regionOptions || []}
-          value={filters.selectedRegions}
-          onChange={actions.setSelectedRegions}
-          placeholder="All Regions"
-          searchPlaceholder="Search regions..."
-          disabled={optionsLoading}
-        />
-
-        <MultiSelect
-          label="Stores"
-          options={filterOptions?.storeOptions || []}
-          value={filters.selectedStores}
-          onChange={actions.setSelectedStores}
-          placeholder="All Stores"
-          searchPlaceholder="Search stores..."
-          disabled={optionsLoading}
-        />
-      </div>
-
-      {/* Active Filters Summary */}
-      {activeFiltersCount > 0 && (
-        <div className="flex items-center gap-2 border-t pt-2">
-          <span className="text-sm text-gray-600">Active filters:</span>
-          <div className="flex flex-wrap gap-1">
-            {filterSummary.map((summary, index) => (
-              <Badge key={index} variant="default" className="text-xs">
-                {summary}
-              </Badge>
-            ))}
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleReset} className="ml-auto text-xs">
-            <RefreshCw className="mr-1 h-3 w-3" />
-            Reset All
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  if (compact) {
-    return (
-      <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Filter className="h-4 w-4" />
-            Filters
-            {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FilterContent />
-        </CardContent>
-      </Card>
-    );
+  if (!hasActiveFilters) {
+    return null;
   }
 
   return (
-    <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Filter className="h-4 w-4" />
-          Filters
-          {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FilterContent />
+    <Card className="mb-6">
+      <CardContent className="pt-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-medium">Active Filters</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetAllFilters}
+            className="text-red-600 hover:text-red-700"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Reset All
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {/* Date Range */}
+          {(dateRange.start || dateRange.end) && (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <Badge variant="secondary" className="gap-1">
+                {dateRange.start} to {dateRange.end}
+                <button
+                  onClick={() => setDateRange({ start: '', end: '' })}
+                  className="ml-1 hover:text-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            </div>
+          )}
+
+          {/* Selected Brands */}
+          {selectedBrands.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700">Brands:</span>
+              {selectedBrands.map(brand => (
+                <Badge key={brand} variant="outline" className="gap-1">
+                  {brand}
+                  <button
+                    onClick={() => removeBrand(brand)}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Selected Categories */}
+          {selectedCategories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700">Categories:</span>
+              {selectedCategories.map(category => (
+                <Badge key={category} variant="outline" className="gap-1">
+                  {category}
+                  <button
+                    onClick={() => removeCategory(category)}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Selected Regions */}
+          {selectedRegions.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700">Regions:</span>
+              {selectedRegions.map(region => (
+                <Badge key={region} variant="outline" className="gap-1">
+                  {region}
+                  <button
+                    onClick={() => removeRegion(region)}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Selected Stores */}
+          {selectedStores.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-gray-700">Stores:</span>
+              {selectedStores.map(store => (
+                <Badge key={store} variant="outline" className="gap-1">
+                  {store}
+                  <button
+                    onClick={() => removeStore(store)}
+                    className="ml-1 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
-}
+};

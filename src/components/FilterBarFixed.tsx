@@ -1,230 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Filter, Calendar } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { useFilterStore, loadFiltersFromURL, persistFiltersToURL } from '@/stores/filterStore';
-import { shallow } from 'zustand/shallow';
-import { getFilterOptions } from '@/lib/filterQueryHelper';
-import MultiSelect from './MultiSelect';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
-import { DateRange } from 'react-day-picker';
+import { X, RefreshCw, Calendar } from 'lucide-react';
+import { useFilters } from '@/contexts/FilterContext';
 
-interface FilterBarProps {
-  className?: string;
-  compact?: boolean;
-  sticky?: boolean;
-}
-
-export default function FilterBarFixed({
-  className = '',
-  compact = false,
-  sticky = true,
-}: FilterBarProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Use the store with shallow comparison to avoid getSnapshot warnings
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
-  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
-
-  const setDateRange = useFilterStore(state => state.setDateRange);
-  const setSelectedBrands = useFilterStore(state => state.setSelectedBrands);
-  const setSelectedCategories = useFilterStore(state => state.setSelectedCategories);
-  const setSelectedRegions = useFilterStore(state => state.setSelectedRegions);
-  const setSelectedStores = useFilterStore(state => state.setSelectedStores);
-  const resetAllFilters = useFilterStore(state => state.resetAllFilters);
-
-  // Calculate active filters count
-  const activeFiltersCount = [
-    selectedBrands.length > 0,
-    selectedCategories.length > 0,
-    selectedRegions.length > 0,
-    selectedStores.length > 0,
-    dateRange.start && dateRange.end,
-  ].filter(Boolean).length;
-
-  // Build filter summary
-  const filterSummary: string[] = [];
-  if (dateRange.start && dateRange.end) {
-    filterSummary.push(`Date: ${dateRange.start} to ${dateRange.end}`);
-  }
-  if (selectedBrands.length > 0) {
-    filterSummary.push(`${selectedBrands.length} brands`);
-  }
-  if (selectedCategories.length > 0) {
-    filterSummary.push(`${selectedCategories.length} categories`);
-  }
-  if (selectedRegions.length > 0) {
-    filterSummary.push(`${selectedRegions.length} regions`);
-  }
-  if (selectedStores.length > 0) {
-    filterSummary.push(`${selectedStores.length} stores`);
-  }
-
-  // Load filters from URL on mount
-  useEffect(() => {
-    if (!isInitialized) {
-      loadFiltersFromURL();
-      setIsInitialized(true);
-    }
-  }, [isInitialized]);
-
-  // Persist filters to URL when they change
-  useEffect(() => {
-    if (isInitialized) {
-      persistFiltersToURL();
-    }
-  }, [
-    dateRange,
-    selectedBrands,
+export const FilterBarFixed = () => {
+  const {
     selectedCategories,
+    selectedBrands,
     selectedRegions,
     selectedStores,
-    isInitialized,
-  ]);
+    dateRange,
+    setSelectedCategories,
+    setSelectedBrands,
+    setSelectedRegions,
+    setSelectedStores,
+    setDateRange,
+    resetAllFilters
+  } = useFilters();
 
-  // Fetch filter options
-  const { data: filterOptions, isLoading: optionsLoading } = useQuery({
-    queryKey: ['filterOptions'],
-    queryFn: getFilterOptions,
-    staleTime: 1000 * 30, // 30 seconds - refresh more frequently
-    refetchOnWindowFocus: false,
-  });
-
-  // Handle date range change
-  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
-    if (dateRange?.from && dateRange?.to) {
-      setDateRange({
-        start: dateRange.from.toISOString().split('T')[0],
-        end: dateRange.to.toISOString().split('T')[0],
-      });
-    } else {
-      setDateRange({
-        start: null,
-        end: null,
-      });
+  const removeItem = (type: 'categories' | 'brands' | 'regions' | 'stores', item: string) => {
+    switch (type) {
+      case 'categories':
+        setSelectedCategories(selectedCategories.filter(cat => cat !== item));
+        break;
+      case 'brands':
+        setSelectedBrands(selectedBrands.filter(brand => brand !== item));
+        break;
+      case 'regions':
+        setSelectedRegions(selectedRegions.filter(region => region !== item));
+        break;
+      case 'stores':
+        setSelectedStores(selectedStores.filter(store => store !== item));
+        break;
     }
   };
 
-  // Convert date strings back to DateRange for the picker
-  const getDateRange = (): DateRange | undefined => {
-    if (dateRange.start && dateRange.end) {
-      return {
-        from: new Date(dateRange.start),
-        to: new Date(dateRange.end),
-      };
-    }
-    return undefined;
+  const clearDateRange = () => {
+    setDateRange({ start: '', end: '' });
   };
 
-  const handleReset = () => {
-    resetAllFilters();
-  };
+  const hasFilters = 
+    selectedCategories.length > 0 ||
+    selectedBrands.length > 0 ||
+    selectedRegions.length > 0 ||
+    selectedStores.length > 0 ||
+    (dateRange.start && dateRange.end);
 
-  const FilterContent = () => (
-    <div className="space-y-4">
-      {/* Date Range */}
-      <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-gray-500" />
-        <DatePickerWithRange date={getDateRange()} onDateChange={handleDateRangeChange} />
-      </div>
-
-      {/* Filter Controls */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MultiSelect
-          label="Brands"
-          options={filterOptions?.brandOptions || []}
-          value={selectedBrands}
-          onChange={setSelectedBrands}
-          placeholder="All Brands"
-          searchPlaceholder="Search brands..."
-          disabled={optionsLoading}
-        />
-
-        <MultiSelect
-          label="Categories"
-          options={filterOptions?.categoryOptions || []}
-          value={selectedCategories}
-          onChange={setSelectedCategories}
-          placeholder="All Categories"
-          searchPlaceholder="Search categories..."
-          disabled={optionsLoading}
-        />
-
-        <MultiSelect
-          label="Regions"
-          options={filterOptions?.regionOptions || []}
-          value={selectedRegions}
-          onChange={setSelectedRegions}
-          placeholder="All Regions"
-          searchPlaceholder="Search regions..."
-          disabled={optionsLoading}
-        />
-
-        <MultiSelect
-          label="Stores"
-          options={filterOptions?.storeOptions || []}
-          value={selectedStores}
-          onChange={setSelectedStores}
-          placeholder="All Stores"
-          searchPlaceholder="Search stores..."
-          disabled={optionsLoading}
-        />
-      </div>
-
-      {/* Active Filters Summary */}
-      {activeFiltersCount > 0 && (
-        <div className="flex items-center gap-2 border-t pt-2">
-          <span className="text-sm text-gray-600">Active filters:</span>
-          <div className="flex flex-wrap gap-1">
-            {filterSummary.map((summary, index) => (
-              <Badge key={index} variant="default" className="text-xs">
-                {summary}
-              </Badge>
-            ))}
-          </div>
-          <Button variant="ghost" size="sm" onClick={handleReset} className="ml-auto text-xs">
-            <RefreshCw className="mr-1 h-3 w-3" />
-            Reset All
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  if (compact) {
-    return (
-      <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Filter className="h-4 w-4" />
-            Filters
-            {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FilterContent />
-        </CardContent>
-      </Card>
-    );
+  if (!hasFilters) {
+    return null;
   }
 
+  const filterSummary = `${selectedCategories.length + selectedBrands.length + selectedRegions.length + selectedStores.length} filters`;
+  const dateRangeText = dateRange.start && dateRange.end ? 
+    `${dateRange.start} to ${dateRange.end}` : '';
+
   return (
-    <Card className={`${sticky ? 'sticky top-4 z-10' : ''} ${className}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Filter className="h-4 w-4" />
-          Filters
-          {activeFiltersCount > 0 && <Badge variant="default">{activeFiltersCount}</Badge>}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FilterContent />
+    <Card className="sticky top-0 z-10 mb-4 border-blue-200 bg-blue-50/50">
+      <CardContent className="py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-blue-900">
+              Active: {filterSummary}
+              {dateRangeText && (
+                <span className="ml-2 text-blue-700">
+                  <Calendar className="inline h-3 w-3 mr-1" />
+                  {dateRangeText}
+                </span>
+              )}
+            </span>
+            
+            <div className="flex flex-wrap gap-1">
+              {selectedCategories.map(category => (
+                <Badge key={category} variant="secondary" className="text-xs gap-1">
+                  Cat: {category}
+                  <button onClick={() => removeItem('categories', category)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              
+              {selectedBrands.map(brand => (
+                <Badge key={brand} variant="secondary" className="text-xs gap-1">
+                  Brand: {brand}
+                  <button onClick={() => removeItem('brands', brand)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              
+              {selectedRegions.map(region => (
+                <Badge key={region} variant="secondary" className="text-xs gap-1">
+                  Region: {region}
+                  <button onClick={() => removeItem('regions', region)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              
+              {selectedStores.map(store => (
+                <Badge key={store} variant="secondary" className="text-xs gap-1">
+                  Store: {store}
+                  <button onClick={() => removeItem('stores', store)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              
+              {dateRangeText && (
+                <Badge variant="secondary" className="text-xs gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Date Range
+                  <button onClick={clearDateRange}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetAllFilters}
+            className="text-blue-700 hover:text-blue-800 border-blue-300"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Clear All
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
-}
+};

@@ -1,40 +1,54 @@
-/**
- * Enhanced Analytics Service for Sprint 4
- * Automatically uses compatibility layer when Sprint 4 tables don't exist
- */
 
-import { supabase } from '@/integrations/supabase/client';
-import { compatibleAnalyticsService } from './compatible-analytics';
-
-// Check if Sprint 4 tables exist
-let useCompatibilityMode = true;
-
-// Test for Sprint 4 schema
-async function checkSpring4Schema() {
-  try {
-    const { error } = await supabase.from('substitutions').select('id').limit(1);
-
-    useCompatibilityMode = !!error;
-  } catch {
-    useCompatibilityMode = true;
-  }
+export interface AIRecommendation {
+  id: string;
+  type: 'upsell' | 'cross-sell' | 'substitution';
+  title: string;
+  description: string;
+  confidence: number;
+  products: string[];
+  expectedLift: number;
 }
 
-checkSpring4Schema();
+export interface TranscriptionInsight {
+  id: string;
+  timestamp: string;
+  transcription: string;
+  intent: string;
+  confidence: number;
+  extractedEntities: Record<string, any>;
+}
 
-// Export the service - will use compatibility mode if needed
-export const enhancedAnalyticsService = new Proxy(
-  {},
-  {
-    get(target, prop) {
-      if (useCompatibilityMode) {
-        return compatibleAnalyticsService[prop];
+export interface DateRange {
+  start: string;
+  end: string;
+}
+
+// Mock enhanced analytics service
+export const enhancedAnalyticsService = {
+  async generateAIRecommendations(dateRange: DateRange): Promise<AIRecommendation[]> {
+    return [
+      {
+        id: '1',
+        type: 'upsell',
+        title: 'Bundle Opportunity',
+        description: 'Customers buying cigarettes often purchase coffee',
+        confidence: 85,
+        products: ['Cigarettes', 'Coffee'],
+        expectedLift: 15
       }
-      // Original service methods would go here
-      return compatibleAnalyticsService[prop]; // For now, always use compatible version
-    },
-  }
-);
+    ];
+  },
 
-// Re-export types
-export * from './enhanced-analytics-types';
+  async getTranscriptionInsights(dateRange: DateRange): Promise<TranscriptionInsight[]> {
+    return [
+      {
+        id: '1',
+        timestamp: new Date().toISOString(),
+        transcription: 'Customer asked for Marlboro',
+        intent: 'product_request',
+        confidence: 0.9,
+        extractedEntities: { brand: 'Marlboro', category: 'cigarettes' }
+      }
+    ];
+  }
+};

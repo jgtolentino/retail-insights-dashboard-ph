@@ -35,7 +35,7 @@ const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
 const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
 const TBWADashboard = React.lazy(() => import('./pages/TBWADashboard'));
 
-// Enhanced Query Client with better defaults
+// Enhanced Query Client with better defaults - Fixed deprecated cacheTime
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -48,7 +48,7 @@ const queryClient = new QueryClient({
       },
       refetchOnWindowFocus: process.env.NODE_ENV === 'production',
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
       refetchOnReconnect: true,
       refetchInterval: false,
     },
@@ -58,20 +58,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Setup network monitoring on app load
-// React.useEffect(() => {
-//   const cleanup = setupNetworkMonitoring();
-//   return cleanup;
-// }, []);
-
 // Main App Component with all improvements
 const App = () => {
-  // Setup network monitoring
-  // React.useEffect(() => {
-  //   const cleanup = setupNetworkMonitoring();
-  //   return cleanup;
-  // }, []);
-
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -134,11 +122,6 @@ const App = () => {
                   </Suspense>
                 </main>
               </Layout>
-
-              {/* React Query DevTools (only in development) */}
-              {/* {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools initialIsOpen={false} />
-              )} */}
             </BrowserRouter>
           </TooltipProvider>
         </FilterProvider>
