@@ -142,10 +142,12 @@ export default function Index() {
       }
     };
 
-    if (data.totalTransactions > 0) {
+    // Only calculate bundle data once when component mounts or when manually refreshed
+    // Remove dependency on data.totalTransactions to prevent infinite loops
+    if (!loading && !bundleData) {
       calculateRealBundle();
     }
-  }, [data.totalTransactions]);
+  }, [loading, bundleData]);
 
   const topBundleData = bundleData;
 
