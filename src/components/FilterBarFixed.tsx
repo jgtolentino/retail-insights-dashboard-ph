@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, RefreshCw, Calendar } from 'lucide-react';
 import { useFilters } from '@/contexts/FilterContext';
 
-export const FilterBarFixed = () => {
+const FilterBarFixed = () => {
   const {
     selectedCategories,
     selectedBrands,
@@ -18,7 +17,7 @@ export const FilterBarFixed = () => {
     setSelectedRegions,
     setSelectedStores,
     setDateRange,
-    resetAllFilters
+    resetAllFilters,
   } = useFilters();
 
   const removeItem = (type: 'categories' | 'brands' | 'regions' | 'stores', item: string) => {
@@ -42,7 +41,7 @@ export const FilterBarFixed = () => {
     setDateRange({ start: '', end: '' });
   };
 
-  const hasFilters = 
+  const hasFilters =
     selectedCategories.length > 0 ||
     selectedBrands.length > 0 ||
     selectedRegions.length > 0 ||
@@ -54,8 +53,8 @@ export const FilterBarFixed = () => {
   }
 
   const filterSummary = `${selectedCategories.length + selectedBrands.length + selectedRegions.length + selectedStores.length} filters`;
-  const dateRangeText = dateRange.start && dateRange.end ? 
-    `${dateRange.start} to ${dateRange.end}` : '';
+  const dateRangeText =
+    dateRange.start && dateRange.end ? `${dateRange.start} to ${dateRange.end}` : '';
 
   return (
     <Card className="sticky top-0 z-10 mb-4 border-blue-200 bg-blue-50/50">
@@ -66,51 +65,51 @@ export const FilterBarFixed = () => {
               Active: {filterSummary}
               {dateRangeText && (
                 <span className="ml-2 text-blue-700">
-                  <Calendar className="inline h-3 w-3 mr-1" />
+                  <Calendar className="mr-1 inline h-3 w-3" />
                   {dateRangeText}
                 </span>
               )}
             </span>
-            
+
             <div className="flex flex-wrap gap-1">
               {selectedCategories.map(category => (
-                <Badge key={category} variant="secondary" className="text-xs gap-1">
+                <Badge key={category} variant="secondary" className="gap-1 text-xs">
                   Cat: {category}
                   <button onClick={() => removeItem('categories', category)}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
-              
+
               {selectedBrands.map(brand => (
-                <Badge key={brand} variant="secondary" className="text-xs gap-1">
+                <Badge key={brand} variant="secondary" className="gap-1 text-xs">
                   Brand: {brand}
                   <button onClick={() => removeItem('brands', brand)}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
-              
+
               {selectedRegions.map(region => (
-                <Badge key={region} variant="secondary" className="text-xs gap-1">
+                <Badge key={region} variant="secondary" className="gap-1 text-xs">
                   Region: {region}
                   <button onClick={() => removeItem('regions', region)}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
-              
+
               {selectedStores.map(store => (
-                <Badge key={store} variant="secondary" className="text-xs gap-1">
+                <Badge key={store} variant="secondary" className="gap-1 text-xs">
                   Store: {store}
                   <button onClick={() => removeItem('stores', store)}>
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
               ))}
-              
+
               {dateRangeText && (
-                <Badge variant="secondary" className="text-xs gap-1">
+                <Badge variant="secondary" className="gap-1 text-xs">
                   <Calendar className="h-3 w-3" />
                   Date Range
                   <button onClick={clearDateRange}>
@@ -120,14 +119,14 @@ export const FilterBarFixed = () => {
               )}
             </div>
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
             onClick={resetAllFilters}
-            className="text-blue-700 hover:text-blue-800 border-blue-300"
+            className="border-blue-300 text-blue-700 hover:text-blue-800"
           >
-            <RefreshCw className="h-3 w-3 mr-1" />
+            <RefreshCw className="mr-1 h-3 w-3" />
             Clear All
           </Button>
         </div>
@@ -135,3 +134,5 @@ export const FilterBarFixed = () => {
     </Card>
   );
 };
+
+export default FilterBarFixed;

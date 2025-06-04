@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Calendar, RefreshCw } from 'lucide-react';
 import { useFilters } from '@/contexts/FilterContext';
 
-export const FilterBar = () => {
+const FilterBar = () => {
   const {
     selectedCategories,
     selectedBrands,
@@ -20,13 +19,13 @@ export const FilterBar = () => {
     setSelectedRegions,
     setSelectedStores,
     setDateRange,
-    resetAllFilters
+    resetAllFilters,
   } = useFilters();
 
   const handleDateChange = (type: 'start' | 'end', value: string) => {
     setDateRange({
       ...dateRange,
-      [type]: value
+      [type]: value,
     });
   };
 
@@ -46,7 +45,7 @@ export const FilterBar = () => {
     setSelectedStores(selectedStores.filter(store => store !== storeToRemove));
   };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     selectedCategories.length > 0 ||
     selectedBrands.length > 0 ||
     selectedRegions.length > 0 ||
@@ -61,7 +60,7 @@ export const FilterBar = () => {
   return (
     <Card className="mb-6">
       <CardContent className="pt-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="font-medium">Active Filters</h3>
           <Button
             variant="outline"
@@ -69,7 +68,7 @@ export const FilterBar = () => {
             onClick={resetAllFilters}
             className="text-red-600 hover:text-red-700"
           >
-            <RefreshCw className="h-4 w-4 mr-1" />
+            <RefreshCw className="mr-1 h-4 w-4" />
             Reset All
           </Button>
         </div>
@@ -98,10 +97,7 @@ export const FilterBar = () => {
               {selectedBrands.map(brand => (
                 <Badge key={brand} variant="outline" className="gap-1">
                   {brand}
-                  <button
-                    onClick={() => removeBrand(brand)}
-                    className="ml-1 hover:text-red-600"
-                  >
+                  <button onClick={() => removeBrand(brand)} className="ml-1 hover:text-red-600">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -134,10 +130,7 @@ export const FilterBar = () => {
               {selectedRegions.map(region => (
                 <Badge key={region} variant="outline" className="gap-1">
                   {region}
-                  <button
-                    onClick={() => removeRegion(region)}
-                    className="ml-1 hover:text-red-600"
-                  >
+                  <button onClick={() => removeRegion(region)} className="ml-1 hover:text-red-600">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -152,10 +145,7 @@ export const FilterBar = () => {
               {selectedStores.map(store => (
                 <Badge key={store} variant="outline" className="gap-1">
                   {store}
-                  <button
-                    onClick={() => removeStore(store)}
-                    className="ml-1 hover:text-red-600"
-                  >
+                  <button onClick={() => removeStore(store)} className="ml-1 hover:text-red-600">
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -167,3 +157,5 @@ export const FilterBar = () => {
     </Card>
   );
 };
+
+export default FilterBar;
