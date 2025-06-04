@@ -87,7 +87,7 @@ export function SmartBrandFilter({
   // Update parent component when filtered data changes
   useEffect(() => {
     onFilteredDataChange(filteredBrands);
-  }, [filteredBrands, onFilteredDataChange]);
+  }, [filteredBrands]); // Remove onFilteredDataChange from dependencies to prevent infinite loop
 
   const getFilterStats = () => {
     const total = brands.length;

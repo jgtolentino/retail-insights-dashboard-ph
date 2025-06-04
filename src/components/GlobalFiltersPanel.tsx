@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useFilterStore, useFilterActions } from '@/stores/filterStore';
 import { useBrands } from '@/hooks/useBrands';
 import Select, { MultiValue, Options } from 'react-select';
@@ -28,6 +28,27 @@ export function GlobalFiltersPanel() {
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [allRegions, setAllRegions] = useState<string[]>([]);
   const [allStores, setAllStores] = useState<string[]>([]);
+
+  // Stabilize callback functions to prevent unnecessary re-renders
+  const handleCategoriesChange = useCallback(
+    (vals: MultiValue<any>) => setSelectedCategories(vals.map(v => v.value)),
+    [setSelectedCategories]
+  );
+
+  const handleBrandsChange = useCallback(
+    (vals: MultiValue<any>) => setSelectedBrands(vals.map(v => v.value)),
+    [setSelectedBrands]
+  );
+
+  const handleRegionsChange = useCallback(
+    (vals: MultiValue<any>) => setSelectedRegions(vals.map(v => v.value)),
+    [setSelectedRegions]
+  );
+
+  const handleStoresChange = useCallback(
+    (vals: MultiValue<any>) => setSelectedStores(vals.map(v => v.value)),
+    [setSelectedStores]
+  );
 
   useEffect(() => {
     // Fetch dynamic categories from brands table instead (products table has no category column)
@@ -79,7 +100,7 @@ export function GlobalFiltersPanel() {
           isMulti
           options={toOptions(allCategories)}
           value={toOptions(selectedCategories)}
-          onChange={(vals: MultiValue<any>) => setSelectedCategories(vals.map(v => v.value))}
+          onChange={handleCategoriesChange}
           placeholder="All categories…"
           data-testid="category-filter"
         />
@@ -92,7 +113,7 @@ export function GlobalFiltersPanel() {
           isLoading={brandsLoading}
           options={toOptions(allBrands)}
           value={toOptions(selectedBrands)}
-          onChange={(vals: MultiValue<any>) => setSelectedBrands(vals.map(v => v.value))}
+          onChange={handleBrandsChange}
           placeholder={
             brandsLoading ? 'Loading brands...' : `All brands (${allBrands.length} available)…`
           }
@@ -107,7 +128,7 @@ export function GlobalFiltersPanel() {
           isMulti
           options={toOptions(allRegions)}
           value={toOptions(selectedRegions)}
-          onChange={(vals: MultiValue<any>) => setSelectedRegions(vals.map(v => v.value))}
+          onChange={handleRegionsChange}
           placeholder="All regions…"
         />
       </div>
@@ -118,7 +139,7 @@ export function GlobalFiltersPanel() {
           isMulti
           options={toOptions(allStores)}
           value={toOptions(selectedStores)}
-          onChange={(vals: MultiValue<any>) => setSelectedStores(vals.map(v => v.value))}
+          onChange={handleStoresChange}
           placeholder="All stores…"
         />
       </div>

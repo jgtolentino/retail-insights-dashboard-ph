@@ -56,6 +56,11 @@ export default function Index() {
   const [dateRange, setDateRange] = useState<DateRange>('all');
   // chartMetric state removed - charts moved to Trends Explorer
   const [filteredBrands, setFilteredBrands] = useState<any[]>([]);
+
+  // Stabilize the callback to prevent unnecessary re-renders
+  const handleFilteredDataChange = useCallback((brands: any[]) => {
+    setFilteredBrands(brands);
+  }, []);
   const [viewMode, setViewMode] = useState<'hierarchical' | 'filtered'>('hierarchical');
 
   // Custom date range state
@@ -706,16 +711,11 @@ export default function Index() {
                   />
                 ) : (
                   <div className="space-y-4">
-                    <SmartBrandFilter
-                      brands={data.topBrands.map((brand, index) => ({
-                        id: index.toString(),
-                        name: brand.name,
-                        sales: brand.sales,
-                        category: brand.category || 'Other',
-                        is_tbwa: brand.is_tbwa || false,
-                      }))}
-                      onFilteredDataChange={setFilteredBrands}
-                    />
+                    {/* SmartBrandFilter temporarily disabled for React error #185 debugging */}
+                    <div className="rounded-lg border p-8 text-center text-gray-500">
+                      <p>SmartBrandFilter temporarily disabled for React error debugging</p>
+                      <p className="mt-2 text-sm">Brands count: {data.topBrands.length}</p>
+                    </div>
 
                     {/* Filtered Results */}
                     <div className="space-y-2">
