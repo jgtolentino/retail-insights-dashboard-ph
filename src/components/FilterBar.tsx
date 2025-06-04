@@ -6,7 +6,10 @@ import { RefreshCw, Filter, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {
   useFilterStore,
-  useFilterSelectors,
+  useAllFilters,
+  useFilterActions,
+  useActiveFiltersCount,
+  useFilterSummary,
   loadFiltersFromURL,
   persistFiltersToURL,
 } from '@/stores/filterStore';
@@ -29,10 +32,10 @@ export default function FilterBar({
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Get filter state and actions
-  const filters = useFilterSelectors.allFilters();
-  const actions = useFilterSelectors.actions();
-  const activeFiltersCount = useFilterSelectors.activeFiltersCount();
-  const filterSummary = useFilterSelectors.filterSummary();
+  const filters = useAllFilters();
+  const actions = useFilterActions();
+  const activeFiltersCount = useActiveFiltersCount();
+  const filterSummary = useFilterSummary();
 
   // Load filters from URL on mount
   useEffect(() => {

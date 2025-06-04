@@ -17,7 +17,8 @@ import { FEATURE_FLAGS } from '@/config/features';
 // import { setupNetworkMonitoring } from "@/stores/errorStore";
 
 // Import theme CSS
-// import "@/styles/theme.css";
+import '@/styles/theme.css';
+import '@/styles/tbwa-theme.css';
 
 // Lazy loaded pages for better performance
 const Index = React.lazy(() => import('./pages/Index'));
@@ -32,6 +33,7 @@ const Trends = React.lazy(() => import('./pages/Trends'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
 const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
+const TBWADashboard = React.lazy(() => import('./pages/TBWADashboard'));
 
 // Enhanced Query Client with better defaults
 const queryClient = new QueryClient({
@@ -115,6 +117,10 @@ const App = () => {
                       {/* Sprint 4: Advanced Analytics Dashboard */}
                       <Route path="/sprint4" element={<Sprint4Dashboard />} />
                       <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
+
+                      {/* TBWA Integrated Dashboard */}
+                      <Route path="/tbwa" element={<TBWADashboard />} />
+                      <Route path="/tbwa-dashboard" element={<TBWADashboard />} />
 
                       {/* Legacy routes (deprecated but kept for compatibility) */}
                       {FEATURE_FLAGS.PRODUCT_MIX && (

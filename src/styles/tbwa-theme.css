@@ -1,0 +1,383 @@
+/* TBWA Brand Theme Integration */
+/* Based on Project Scout design system */
+
+:root {
+  /* TBWA Brand Colors */
+  --tbwa-blue: #0078d4;
+  --tbwa-orange: #f89e1b;
+  --tbwa-gray: #2e2f33;
+  --tbwa-light-gray: #f5f5f5;
+  --tbwa-dark-blue: #002b49;
+
+  /* Extended Color Palette */
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+
+  /* Chart Colors */
+  --chart-1: #0078d4;
+  --chart-2: #f89e1b;
+  --chart-3: #28a745;
+  --chart-4: #dc3545;
+  --chart-5: #6f42c1;
+
+  /* Shadows and Effects */
+  --tbwa-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --tbwa-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --tbwa-border-radius: 8px;
+}
+
+/* TBWA CSS Custom Properties for Tailwind */
+.bg-tbwa-blue {
+  background-color: var(--tbwa-blue);
+}
+.bg-tbwa-orange {
+  background-color: var(--tbwa-orange);
+}
+.bg-tbwa-gray {
+  background-color: var(--tbwa-gray);
+}
+.bg-tbwa-light-gray {
+  background-color: var(--tbwa-light-gray);
+}
+.bg-tbwa-dark-blue {
+  background-color: var(--tbwa-dark-blue);
+}
+
+.text-tbwa-blue {
+  color: var(--tbwa-blue);
+}
+.text-tbwa-orange {
+  color: var(--tbwa-orange);
+}
+.text-tbwa-gray {
+  color: var(--tbwa-gray);
+}
+.text-tbwa-dark-blue {
+  color: var(--tbwa-dark-blue);
+}
+
+.border-tbwa-blue {
+  border-color: var(--tbwa-blue);
+}
+.border-tbwa-orange {
+  border-color: var(--tbwa-orange);
+}
+
+.from-tbwa-blue {
+  --tw-gradient-from: var(--tbwa-blue) var(--tw-gradient-from-position);
+}
+.to-tbwa-orange {
+  --tw-gradient-to: var(--tbwa-orange) var(--tw-gradient-to-position);
+}
+
+/* TBWA Card Styles */
+.tbwa-card {
+  background-color: white;
+  border-radius: var(--tbwa-border-radius);
+  box-shadow: var(--tbwa-shadow);
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.tbwa-card:hover {
+  box-shadow: var(--tbwa-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.tbwa-card.featured {
+  border: 2px solid var(--tbwa-orange);
+  position: relative;
+}
+
+.tbwa-card.featured::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, var(--tbwa-blue), var(--tbwa-orange));
+  border-radius: var(--tbwa-border-radius);
+  z-index: -1;
+}
+
+/* TBWA Metric Card Enhancements */
+.tbwa-metric-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.tbwa-metric-card .metric-icon {
+  background: linear-gradient(135deg, var(--tbwa-blue), var(--tbwa-orange));
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tbwa-metric-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--tbwa-gray);
+  line-height: 1.2;
+}
+
+.tbwa-metric-trend.positive {
+  color: var(--success);
+}
+
+.tbwa-metric-trend.negative {
+  color: var(--danger);
+}
+
+.tbwa-metric-trend.neutral {
+  color: #6b7280;
+}
+
+/* TBWA Brand Badge */
+.tbwa-brand-badge {
+  background: linear-gradient(135deg, var(--tbwa-orange), #ff7b00);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.025em;
+  box-shadow: 0 1px 3px rgba(248, 158, 27, 0.3);
+}
+
+/* TBWA Accent Lines */
+.tbwa-accent-line {
+  height: 3px;
+  background: linear-gradient(90deg, var(--tbwa-blue), var(--tbwa-orange));
+  border-radius: 1.5px;
+}
+
+.tbwa-accent-line.thin {
+  height: 1px;
+}
+
+/* TBWA Button Styles */
+.tbwa-button {
+  background: linear-gradient(135deg, var(--tbwa-blue), var(--tbwa-orange));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--tbwa-border-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tbwa-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+}
+
+.tbwa-button.secondary {
+  background: white;
+  color: var(--tbwa-blue);
+  border: 2px solid var(--tbwa-blue);
+}
+
+.tbwa-button.secondary:hover {
+  background: var(--tbwa-light-gray);
+}
+
+/* TBWA Progress Bar */
+.tbwa-progress {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tbwa-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--tbwa-blue), var(--tbwa-orange));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* TBWA Chart Enhancements */
+.tbwa-chart-container {
+  background: white;
+  border-radius: var(--tbwa-border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--tbwa-shadow);
+}
+
+.tbwa-chart-title {
+  color: var(--tbwa-gray);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* TBWA Status Indicators */
+.tbwa-status-online {
+  color: var(--success);
+}
+
+.tbwa-status-warning {
+  color: var(--warning);
+}
+
+.tbwa-status-error {
+  color: var(--danger);
+}
+
+.tbwa-status-info {
+  color: var(--info);
+}
+
+/* TBWA Animation Classes */
+.tbwa-fade-in {
+  animation: tbwaFadeIn 0.5s ease-in-out;
+}
+
+@keyframes tbwaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tbwa-pulse {
+  animation: tbwaPulse 2s infinite;
+}
+
+@keyframes tbwaPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* TBWA Dark Mode Support */
+.dark .tbwa-card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .tbwa-metric-value {
+  color: #f9fafb;
+}
+
+.dark .tbwa-chart-container {
+  background-color: #1f2937;
+}
+
+/* TBWA Mobile Responsive */
+@media (max-width: 768px) {
+  .tbwa-metric-value {
+    font-size: 1.5rem;
+  }
+
+  .tbwa-button {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+  }
+
+  .tbwa-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* TBWA Focus States for Accessibility */
+.tbwa-button:focus,
+.tbwa-card:focus {
+  outline: 2px solid var(--tbwa-blue);
+  outline-offset: 2px;
+}
+
+/* TBWA Loading States */
+.tbwa-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: tbwaLoading 1.5s infinite;
+}
+
+@keyframes tbwaLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* TBWA Brand Specific Component Styles */
+.brand-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.brand-card {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: var(--tbwa-border-radius);
+  background: white;
+  box-shadow: var(--tbwa-shadow);
+  transition: all 0.3s ease;
+}
+
+.brand-card.tbwa-brand {
+  border-left: 4px solid var(--tbwa-orange);
+}
+
+.brand-card.competitor-brand {
+  border-left: 4px solid #6b7280;
+}
+
+.brand-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tbwa-shadow-hover);
+}
+
+/* Performance Indicator Styles */
+.performance-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.performance-indicator.excellent {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.performance-indicator.good {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.performance-indicator.average {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.performance-indicator.below-average {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}

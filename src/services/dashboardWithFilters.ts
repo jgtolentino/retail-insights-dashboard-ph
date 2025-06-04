@@ -220,12 +220,14 @@ export const dashboardServiceWithFilters = {
       }
 
       // For brand/category filters, we need to check transaction items
-      const { data: transactions, error } = await query;
+      const { data: transactionData, error } = await query;
 
       if (error) {
         logger.error('Error fetching time series data:', error);
         throw error;
       }
+
+      let transactions = transactionData;
 
       // If we have brand or category filters, filter transactions based on items
       if (

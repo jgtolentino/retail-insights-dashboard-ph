@@ -19,6 +19,13 @@ export default {
 		},
 		extend: {
 			colors: {
+				// TBWA Brand Colors
+				'tbwa-blue': '#0078d4',
+				'tbwa-orange': '#F89E1B',
+				'tbwa-gray': '#2E2F33',
+				'tbwa-light-gray': '#F5F5F5',
+				'tbwa-dark-blue': '#002b49',
+				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

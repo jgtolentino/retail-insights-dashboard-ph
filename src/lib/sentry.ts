@@ -1,9 +1,10 @@
-import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/react';
+// Sentry is optional for this build - using console logging instead
+const Sentry = null;
+const BrowserTracing = null;
 
 export function initSentry() {
-  // Only initialize in production
-  if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
+  // Only initialize in production and if Sentry is available
+  if (Sentry && import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
     Sentry.init({
       dsn: import.meta.env.VITE_SENTRY_DSN,
       integrations: [
@@ -45,7 +46,7 @@ export function initSentry() {
 export function logError(error: Error, context?: Record<string, any>) {
   console.error('Error:', error, context);
 
-  if (import.meta.env.PROD) {
+  if (Sentry && import.meta.env.PROD) {
     Sentry.captureException(error, {
       contexts: {
         custom: context || {},

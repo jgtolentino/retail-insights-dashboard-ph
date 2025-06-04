@@ -9,11 +9,20 @@ import {
   Settings,
   Zap,
   Filter,
+  Target,
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '@/config/features';
 
 const navItems = [
   { href: '/', label: 'Overview', icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
+  {
+    href: '/tbwa',
+    label: 'TBWA Dashboard',
+    icon: Target,
+    feature: null,
+    highlight: true,
+    tbwa: true,
+  },
   {
     href: '/dashboard-preview',
     label: 'Filter Preview',
@@ -59,8 +68,10 @@ export function Navigation() {
               const isActive =
                 location.pathname === item.href ||
                 (item.href === '/sprint4' && location.pathname === '/advanced-analytics') ||
-                (item.href === '/dashboard-preview' && location.pathname === '/filter-preview');
+                (item.href === '/dashboard-preview' && location.pathname === '/filter-preview') ||
+                (item.href === '/tbwa' && location.pathname === '/tbwa-dashboard');
               const isHighlight = item.highlight;
+              const isTBWA = (item as any).tbwa;
               return (
                 <Link
                   key={item.href}
@@ -68,12 +79,16 @@ export function Navigation() {
                   className={
                     `relative flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ` +
                     (isActive
-                      ? isHighlight
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                        : 'bg-blue-50 text-blue-700'
-                      : isHighlight
-                        ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 hover:from-blue-200 hover:to-purple-200'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900')
+                      ? isTBWA
+                        ? 'bg-gradient-to-r from-tbwa-blue to-tbwa-orange text-white'
+                        : isHighlight
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                          : 'bg-blue-50 text-blue-700'
+                      : isTBWA
+                        ? 'bg-gradient-to-r from-orange-100 to-blue-100 text-orange-800 hover:from-orange-200 hover:to-blue-200'
+                        : isHighlight
+                          ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 hover:from-blue-200 hover:to-purple-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900')
                   }
                 >
                   <Icon className="h-4 w-4" />
