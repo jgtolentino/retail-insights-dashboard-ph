@@ -1,17 +1,23 @@
 # Visual Documentation
 
-**Generated:** 2025-06-04T14:30:00.669Z
-**Commit:** `12a3b56cc854a06b41d4dae592c9692319ae4a59`
-**Message:** feat: Add comprehensive edge device deployment system
+**Generated:** 2025-06-04T16:17:29.963Z
+**Commit:** `36774ade51b3c995247a6da733f12ef08470936e`
+**Message:** Complete API fixes - all endpoints working
 
-- Add complete edge device deployment guide for field technicians
-- Create automated provisioning script for Raspberry Pi setup
-- Implement local NLP/NLU processing capabilities with Ollama
-- Add comprehensive integration testing with 6/6 tests passing
-- Update README with full architecture diagram and ETL pipeline
-- Include edge device schema with 4 new tables for IoT integration
-- Add troubleshooting procedures and diagnostic tools
-- Support for offline edge computing with cloud sync
+- Added products.category column fix SQL script
+- All 7 API endpoints now return 200 OK
+- Products category queries no longer return 400 errors
+- Database schema fully aligned with frontend expectations
+
+✅ API Status:
+
+- Basic transactions: OK (1 records)
+- Products with category: OK (109 records) ← FIXED
+- Products basic: OK (1 records)
+- Brands with category: OK (89 records)
+- Customers basic: OK (1 records)
+- Customers regions: OK (5 records)
+- Stores: OK (4 records)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -34,17 +40,41 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brands Page
+### Brand Revenue Analysis - Hierarchical View
 
-Brand analytics and performance tracking
+New hierarchical brand visualization with category drill-down
 
-![Brands Page](./brands-page.png)
+![Brand Revenue Analysis - Hierarchical View](./brand-revenue-analysis---hierarchical-view.png)
 
-### Product Mix Page
+<details>
+<summary>Component Details</summary>
 
-Product performance analysis
+#### kpi metrics
 
-![Product Mix Page](./product-mix-page.png)
+![kpi-metrics](./brand-revenue-analysis---hierarchical-view-kpi-metrics.png)
+
+</details>
+
+### Brand Revenue Analysis - Filtered View
+
+Smart filtering system with TBWA client highlighting
+
+![Brand Revenue Analysis - Filtered View](./brand-revenue-analysis---filtered-view.png)
+
+<details>
+<summary>Component Details</summary>
+
+#### kpi metrics
+
+![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
+
+</details>
+
+### Product Mix Analysis
+
+Product performance and substitution patterns
+
+![Product Mix Analysis](./product-mix-analysis.png)
 
 ---
 
