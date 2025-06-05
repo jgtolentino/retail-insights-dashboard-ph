@@ -1,37 +1,8 @@
 # Visual Documentation
 
-**Generated:** 2025-06-05T08:11:42.824Z
-**Commit:** `d9cdf12c38bb4575d65af810878e058693705d6b`
-**Message:** 🔧 Add legacy compatibility layer for smooth migration
-
-✅ **Critical Fix: Build Working**
-
-**🛠️ Changes:**
-
-- Add temporary filterStore.ts compatibility layer
-- Migrate useSalesTrend.ts to new dashboardStore
-- Migrate useSalesByBrand.ts to new dashboardStore
-- Update filterQueryHelper.ts to accept parameters instead of store access
-
-**🎯 Strategy:**
-
-- Main components (GlobalFiltersPanel, FilterBar, etc.) → ✅ Migrated to Zustand
-- Legacy hooks → Temporary compatibility layer prevents build failures
-- New architecture → Fully functional for user-facing features
-- React Error #185 → Fixed with new store architecture
-
-**📊 Status:**
-
-- ✅ Build successful (8.87s)
-- ✅ All core filtering functionality migrated
-- ✅ Ready for production deployment
-- 🔄 Remaining hooks can be migrated incrementally
-
-This ensures the critical React Error #185 fix is deployed while maintaining backward compatibility for less critical features.
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
+**Generated:** 2025-06-05T08:49:27.658Z
+**Commit:** `454a619b9ace199dae6ad4bfa4107cde227d9a7c`
+**Message:** 🔥 CRITICAL FIX: useFilters hook - Rules of Hooks violation causing infinite loops
 
 ## 📱 Screenshots
 
@@ -50,56 +21,17 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brand Revenue Analysis - Hierarchical View
+### Brands Page
 
-New hierarchical brand visualization with category drill-down
+Brand analytics and performance tracking
 
-![Brand Revenue Analysis - Hierarchical View](./brand-revenue-analysis---hierarchical-view.png)
+![Brands Page](./brands-page.png)
 
-<details>
-<summary>Component Details</summary>
+### Product Mix Page
 
-#### kpi metrics
+Product performance analysis
 
-![kpi-metrics](./brand-revenue-analysis---hierarchical-view-kpi-metrics.png)
-
-</details>
-
-### Brand Revenue Analysis - Filtered View
-
-Smart filtering system with TBWA client highlighting
-
-![Brand Revenue Analysis - Filtered View](./brand-revenue-analysis---filtered-view.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-
-![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
-
-</details>
-
-### Product Mix Analysis
-
-Product performance and substitution patterns
-
-![Product Mix Analysis](./product-mix-analysis.png)
-
-### Trends Explorer
-
-Advanced trend analysis with multiple metrics
-
-![Trends Explorer](./trends-explorer.png)
-
-<details>
-<summary>Component Details</summary>
-
-#### kpi metrics
-
-![kpi-metrics](./trends-explorer-kpi-metrics.png)
-
-</details>
+![Product Mix Page](./product-mix-page.png)
 
 ---
 
