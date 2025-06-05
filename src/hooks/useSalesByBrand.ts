@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useFilterStore } from '@/stores/filterStore';
+import { useFilters } from '@/stores/dashboardStore';
 import { supabase } from '@/integrations/supabase/client';
-import { shallow } from 'zustand/shallow';
 
 export interface SalesByBrandData {
   brand_id: string;
@@ -13,23 +12,22 @@ export interface SalesByBrandData {
 }
 
 export function useSalesByBrand() {
-  // Subscribe to individual filter properties to avoid object creation
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
-  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
+  // Use the new dashboard store
+  const dashboardFilters = useFilters();
 
-  // Create stable filters object only when needed
+  // Create stable filters object for the query helper (transform to old format)
   const filters = useMemo(
     () => ({
-      dateRange,
-      selectedBrands,
-      selectedCategories,
-      selectedRegions,
-      selectedStores,
+      dateRange: {
+        start: dashboardFilters.dateRange.from?.toISOString().split('T')[0] || null,
+        end: dashboardFilters.dateRange.to?.toISOString().split('T')[0] || null,
+      },
+      selectedBrands: dashboardFilters.brands,
+      selectedCategories: dashboardFilters.categories,
+      selectedRegions: dashboardFilters.regions,
+      selectedStores: dashboardFilters.stores,
     }),
-    [dateRange, selectedBrands, selectedCategories, selectedRegions, selectedStores]
+    [dashboardFilters]
   );
 
   // Stabilize the query key to prevent unnecessary re-renders

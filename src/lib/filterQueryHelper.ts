@@ -1,5 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useFilterStore, type GlobalFilterState } from '@/stores/filterStore';
+
+// Legacy interface for compatibility with existing hooks
+export interface GlobalFilterState {
+  dateRange?: { start: string | null; end: string | null };
+  selectedBrands: string[];
+  selectedCategories: string[];
+  selectedRegions: string[];
+  selectedStores: string[];
+}
 
 export interface FilterOptions {
   dateRange?: { start: string | null; end: string | null };
@@ -14,10 +22,7 @@ export interface FilterOptions {
  * with all current global filters applied.
  * Every data-fetching hook should use this as the starting point.
  */
-export function buildFilterQuery(state?: GlobalFilterState) {
-  // Use provided state or fallback to current store state
-  const filters = state || useFilterStore.getState();
-
+export function buildFilterQuery(filters: GlobalFilterState) {
   let query = supabase.from('transactions').select('*');
 
   // Apply date range filter
@@ -53,9 +58,7 @@ export function buildFilterQuery(state?: GlobalFilterState) {
  * since brands/categories are properties of products, not transactions directly.
  * This function returns transaction IDs that match the product filters.
  */
-export async function getFilteredTransactionIds(state?: GlobalFilterState) {
-  const filters = state || useFilterStore.getState();
-
+export async function getFilteredTransactionIds(filters: GlobalFilterState) {
   // If no product-level filters, return null (no filtering needed)
   if (
     (!filters.selectedBrands || filters.selectedBrands.length === 0) &&
@@ -96,11 +99,11 @@ export async function getFilteredTransactionIds(state?: GlobalFilterState) {
 /**
  * Enhanced version that applies all filters including product-level ones
  */
-export async function buildCompleteFilterQuery(state?: GlobalFilterState) {
-  let query = buildFilterQuery(state);
+export async function buildCompleteFilterQuery(filters: GlobalFilterState) {
+  let query = buildFilterQuery(filters);
 
   // Get transaction IDs that match product filters
-  const filteredTransactionIds = await getFilteredTransactionIds(state);
+  const filteredTransactionIds = await getFilteredTransactionIds(filters);
 
   if (filteredTransactionIds !== null) {
     query = query.in('id', filteredTransactionIds);
