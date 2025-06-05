@@ -82,6 +82,40 @@ export default function Index() {
     return null;
   }, [data.topBrands]);
 
+  // Memoize filtered brands display to prevent infinite loops
+  const filteredBrandsDisplay = useMemo(() => {
+    const maxSales = filteredBrands.length > 0 ? Math.max(...filteredBrands.map(b => b.sales)) : 1;
+    return filteredBrands.slice(0, 15).map((brand, index) => {
+      const percentage = (brand.sales / maxSales) * 100;
+
+      return (
+        <div key={brand.id} className="flex items-center gap-4">
+          <div className="flex w-32 items-center justify-end gap-1 text-right text-sm font-medium">
+            {brand.name}
+            {brand.is_tbwa && (
+              <div className="h-2 w-2 rounded-full bg-green-500" title="TBWA Client" />
+            )}
+          </div>
+          <div className="relative h-6 flex-1 rounded-full bg-gray-200">
+            <div
+              className={`flex h-6 items-center justify-end rounded-full pr-2 transition-all duration-300 ${
+                brand.is_tbwa ? 'bg-green-500' : 'bg-blue-500'
+              }`}
+              style={{ width: `${percentage}%` }}
+            >
+              <span className="text-xs font-medium text-white">
+                ₱{brand.sales.toLocaleString()}
+              </span>
+            </div>
+          </div>
+          <div className="w-16 text-right text-sm text-gray-600">
+            {((brand.sales / (data.totalRevenue || 1)) * 100).toFixed(1)}%
+          </div>
+        </div>
+      );
+    });
+  }, [filteredBrands, data.totalRevenue]);
+
   // Use bundle data hook
   const { data: bundleData, isLoading: bundleLoading } = useBundleData(true);
 
@@ -645,41 +679,7 @@ export default function Index() {
                       onFilteredDataChange={handleFilteredDataChange}
                     />
 
-                    <div className="space-y-2">
-                      {filteredBrands.slice(0, 15).map((brand, index) => {
-                        const maxSales = Math.max(...filteredBrands.map(b => b.sales));
-                        const percentage = (brand.sales / maxSales) * 100;
-
-                        return (
-                          <div key={brand.id} className="flex items-center gap-4">
-                            <div className="flex w-32 items-center justify-end gap-1 text-right text-sm font-medium">
-                              {brand.name}
-                              {brand.is_tbwa && (
-                                <div
-                                  className="h-2 w-2 rounded-full bg-green-500"
-                                  title="TBWA Client"
-                                />
-                              )}
-                            </div>
-                            <div className="relative h-6 flex-1 rounded-full bg-gray-200">
-                              <div
-                                className={`flex h-6 items-center justify-end rounded-full pr-2 transition-all duration-300 ${
-                                  brand.is_tbwa ? 'bg-green-500' : 'bg-blue-500'
-                                }`}
-                                style={{ width: `${percentage}%` }}
-                              >
-                                <span className="text-xs font-medium text-white">
-                                  ₱{brand.sales.toLocaleString()}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="w-16 text-right text-sm text-gray-600">
-                              {((brand.sales / (data.totalRevenue || 1)) * 100).toFixed(1)}%
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <div className="space-y-2">{filteredBrandsDisplay}</div>
                   </div>
                 )}
               </div>
