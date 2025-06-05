@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Filter, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FilterWidget } from './FilterWidget';
@@ -21,6 +21,9 @@ export function ConsumerInsightsFilters({
   onFiltersChange,
   className,
 }: ConsumerInsightsFiltersProps) {
+  // Debug render counter
+  const renderCount = useRef(0);
+  renderCount.current += 1;
   // Filter states with URL persistence
   const filters = {
     categories: useFilterState({ key: 'ci_categories' }),
@@ -61,21 +64,33 @@ export function ConsumerInsightsFilters({
     },
   });
 
-  // Transform data for FilterWidget
-  const categoryOptions = (categoriesData || []).map(cat => ({
-    label: cat,
-    value: cat,
-  }));
+  // 🔥 FIX: Memoize data transformations to prevent new object creation on every render
+  const categoryOptions = useMemo(
+    () =>
+      (categoriesData || []).map(cat => ({
+        label: cat,
+        value: cat,
+      })),
+    [categoriesData]
+  );
 
-  const brandOptions = (brandsData || []).map(brand => ({
-    label: brand.name,
-    value: brand.id.toString(),
-  }));
+  const brandOptions = useMemo(
+    () =>
+      (brandsData || []).map(brand => ({
+        label: brand.name,
+        value: brand.id.toString(),
+      })),
+    [brandsData]
+  );
 
-  const productOptions = (productsData || []).map(product => ({
-    label: product.name,
-    value: product.id.toString(),
-  }));
+  const productOptions = useMemo(
+    () =>
+      (productsData || []).map(product => ({
+        label: product.name,
+        value: product.id.toString(),
+      })),
+    [productsData]
+  );
 
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(filter => filter.value.length > 0);
@@ -107,8 +122,19 @@ export function ConsumerInsightsFilters({
     filters.genders.debouncedValue,
     filters.locations.debouncedValue,
     filters.incomeRanges.debouncedValue,
-    onFiltersChange,
+    // 🔥 FIX: Remove onFiltersChange from dependencies to prevent infinite loops
+    // onFiltersChange, // REMOVED - parent might pass new function reference every render
   ]);
+
+  // Debug logging after all hooks
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🔍 ConsumerInsightsFilters rendered ${renderCount.current} times`);
+
+    if (renderCount.current > 100) {
+      console.error('🚨 INFINITE LOOP DETECTED in ConsumerInsightsFilters!');
+      return <div>Infinite loop detected in ConsumerInsightsFilters - check console</div>;
+    }
+  }
 
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className || ''}`}>

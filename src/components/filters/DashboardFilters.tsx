@@ -4,7 +4,7 @@ import { FilterWidget } from './FilterWidget';
 import { useFilters } from '@/hooks/useFilterState';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Filter, Calendar } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import { DateRange } from 'react-day-picker';
 
@@ -14,6 +14,9 @@ interface DashboardFiltersProps {
 }
 
 export function DashboardFilters({ onFiltersChange, onDateRangeChange }: DashboardFiltersProps) {
+  // Debug render counter
+  const renderCount = useRef(0);
+  renderCount.current += 1;
   // Initialize filters with URL/localStorage persistence
   const { filters, clearAllFilters, hasActiveFilters } = useFilters({
     brands: { defaultValue: [] },
@@ -22,11 +25,17 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
     stores: { defaultValue: [] },
   });
 
+  // 🔥 FIX: Memoize date range initial value to prevent new objects on every render
+  const initialDateRange = useMemo(
+    () => ({
+      from: new Date(new Date().setDate(new Date().getDate() - 30)),
+      to: new Date(),
+    }),
+    []
+  );
+
   // Date range state
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(new Date().setDate(new Date().getDate() - 30)),
-    to: new Date(),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(initialDateRange);
 
   // Fetch filter options from database
   const { data: brandOptions = [], isLoading: brandsLoading } = useQuery({
@@ -123,8 +132,19 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
     filters.categories.debouncedValue,
     filters.regions.debouncedValue,
     filters.stores.debouncedValue,
-    onFiltersChange,
+    // 🔥 FIX: Remove onFiltersChange from dependencies to prevent infinite loops
+    // onFiltersChange, // REMOVED - parent might pass new function reference every render
   ]);
+
+  // Debug logging after all hooks
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🔍 DashboardFilters rendered ${renderCount.current} times`);
+
+    if (renderCount.current > 100) {
+      console.error('🚨 INFINITE LOOP DETECTED in DashboardFilters!');
+      return <div>Infinite loop detected in DashboardFilters - check console</div>;
+    }
+  }
 
   return (
     <div className="rounded-lg border bg-white p-4 shadow-sm">
