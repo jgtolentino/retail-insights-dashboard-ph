@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "./dev-local.sh",
     "build": "vite build",
     "build:prod": "VITE_APP_ENV=production vite build --mode production",
     "build:dev": "vite build --mode development",

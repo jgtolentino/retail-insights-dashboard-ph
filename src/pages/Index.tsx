@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,7 @@ export default function Index() {
     suggestionsAccepted: 0,
     topBrands: [],
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>('all');
@@ -120,11 +119,9 @@ export default function Index() {
 
   // Stable fetch data function
   const fetchData = useCallback(async () => {
-    if (loading) return; // Prevent concurrent calls
-    
     setLoading(true);
     setError(null);
-    
+
     try {
       let dashboardData;
       let startDate, endDate;
@@ -135,7 +132,8 @@ export default function Index() {
         startDate = customStartDate;
         endDate = customEndDate;
       } else if (dateRange !== 'custom' && dateRange !== 'all') {
-        const days = dateRange === '1d' ? 1 : dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+        const days =
+          dateRange === '1d' ? 1 : dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
         const calculatedStartDate = new Date();
         calculatedStartDate.setDate(calculatedStartDate.getDate() - days);
         startDate = calculatedStartDate.toISOString().split('T')[0];
@@ -160,18 +158,19 @@ export default function Index() {
         dashboardData = await simpleDashboardService.getDashboardData();
       }
 
-      setData(dashboardData || {
-        totalRevenue: 0,
-        totalTransactions: 0,
-        avgTransaction: 0,
-        uniqueCustomers: 0,
-        suggestionAcceptanceRate: 0,
-        substitutionRate: 0,
-        suggestionsOffered: 0,
-        suggestionsAccepted: 0,
-        topBrands: [],
-      });
-
+      setData(
+        dashboardData || {
+          totalRevenue: 0,
+          totalTransactions: 0,
+          avgTransaction: 0,
+          uniqueCustomers: 0,
+          suggestionAcceptanceRate: 0,
+          substitutionRate: 0,
+          suggestionsOffered: 0,
+          suggestionsAccepted: 0,
+          topBrands: [],
+        }
+      );
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       setError('Failed to load dashboard data. Please check your connection.');
@@ -184,7 +183,7 @@ export default function Index() {
     } finally {
       setLoading(false);
     }
-  }, [dateRange, customStartDate, customEndDate, selectedStoreId, loading]);
+  }, [dateRange, customStartDate, customEndDate, selectedStoreId]);
 
   // Store the fetch function in ref to prevent dependency issues
   fetchDataRef.current = fetchData;
@@ -236,19 +235,23 @@ export default function Index() {
     }
   }, [customStartDate, customEndDate]);
 
-  const dateRangeOptions = useMemo(() => [
-    { value: 'all' as DateRange, label: 'All Time' },
-    { value: '1d' as DateRange, label: 'Today' },
-    { value: '7d' as DateRange, label: '7 Days' },
-    { value: '30d' as DateRange, label: '30 Days' },
-    { value: '90d' as DateRange, label: '90 Days' },
-    { value: 'custom' as DateRange, label: 'Custom Range' },
-  ], []);
+  const dateRangeOptions = useMemo(
+    () => [
+      { value: 'all' as DateRange, label: 'All Time' },
+      { value: '1d' as DateRange, label: 'Today' },
+      { value: '7d' as DateRange, label: '7 Days' },
+      { value: '30d' as DateRange, label: '30 Days' },
+      { value: '90d' as DateRange, label: '90 Days' },
+      { value: 'custom' as DateRange, label: 'Custom Range' },
+    ],
+    []
+  );
 
   const getDateRangeLabel = useCallback(() => {
-    const baseLabel = dateRange === 'custom' && customStartDate && customEndDate
-      ? `${customStartDate} to ${customEndDate}`
-      : dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown';
+    const baseLabel =
+      dateRange === 'custom' && customStartDate && customEndDate
+        ? `${customStartDate} to ${customEndDate}`
+        : dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Unknown';
 
     const storeLabel = selectedStoreId
       ? ` • ${stores.find(s => s.id === selectedStoreId)?.name || `Store ${selectedStoreId}`}`
