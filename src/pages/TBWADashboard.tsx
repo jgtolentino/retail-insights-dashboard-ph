@@ -20,7 +20,7 @@ import {
 import { TBWAMetricCard } from '@/components/TBWAMetricCard';
 import { TBWABrandPerformanceGrid } from '@/components/TBWABrandPerformanceGrid';
 import FilterBar from '@/components/FilterBar';
-import { useAllFilters } from '@/stores/filterStore';
+import { useFilters } from '@/stores/dashboardStore';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeData';
 
@@ -95,7 +95,7 @@ const mockBrandData = [
 ];
 
 export default function TBWADashboard() {
-  const filters = useAllFilters();
+  const filters = useFilters();
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
@@ -106,10 +106,10 @@ export default function TBWADashboard() {
   const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardData({
     timeRange: '30d',
     filters: {
-      brands: filters.selectedBrands,
-      categories: filters.selectedCategories,
-      regions: filters.selectedRegions,
-      stores: filters.selectedStores,
+      brands: filters.brands,
+      categories: filters.categories,
+      regions: filters.regions,
+      stores: filters.stores,
     },
     enabled: true,
   });

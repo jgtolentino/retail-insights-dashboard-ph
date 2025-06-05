@@ -3,58 +3,49 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, RefreshCw, Calendar } from 'lucide-react';
-import { useFilters } from '@/contexts/FilterContext';
+import { useFilters, useFilterActions } from '@/stores/dashboardStore';
 
 const FilterBarFixed = () => {
-  const {
-    selectedCategories,
-    selectedBrands,
-    selectedRegions,
-    selectedStores,
-    dateRange,
-    setSelectedCategories,
-    setSelectedBrands,
-    setSelectedRegions,
-    setSelectedStores,
-    setDateRange,
-    resetAllFilters,
-  } = useFilters();
+  const filters = useFilters();
+  const { updateFilters, resetFilters } = useFilterActions();
 
   const removeItem = (type: 'categories' | 'brands' | 'regions' | 'stores', item: string) => {
     switch (type) {
       case 'categories':
-        setSelectedCategories(selectedCategories.filter(cat => cat !== item));
+        updateFilters({ categories: filters.categories.filter(cat => cat !== item) });
         break;
       case 'brands':
-        setSelectedBrands(selectedBrands.filter(brand => brand !== item));
+        updateFilters({ brands: filters.brands.filter(brand => brand !== item) });
         break;
       case 'regions':
-        setSelectedRegions(selectedRegions.filter(region => region !== item));
+        updateFilters({ regions: filters.regions.filter(region => region !== item) });
         break;
       case 'stores':
-        setSelectedStores(selectedStores.filter(store => store !== item));
+        updateFilters({ stores: filters.stores.filter(store => store !== item) });
         break;
     }
   };
 
   const clearDateRange = () => {
-    setDateRange({ start: '', end: '' });
+    updateFilters({ dateRange: { from: null, to: null } });
   };
 
   const hasFilters =
-    selectedCategories.length > 0 ||
-    selectedBrands.length > 0 ||
-    selectedRegions.length > 0 ||
-    selectedStores.length > 0 ||
-    (dateRange.start && dateRange.end);
+    filters.categories.length > 0 ||
+    filters.brands.length > 0 ||
+    filters.regions.length > 0 ||
+    filters.stores.length > 0 ||
+    (filters.dateRange.from && filters.dateRange.to);
 
   if (!hasFilters) {
     return null;
   }
 
-  const filterSummary = `${selectedCategories.length + selectedBrands.length + selectedRegions.length + selectedStores.length} filters`;
+  const filterSummary = `${filters.categories.length + filters.brands.length + filters.regions.length + filters.stores.length} filters`;
   const dateRangeText =
-    dateRange.start && dateRange.end ? `${dateRange.start} to ${dateRange.end}` : '';
+    filters.dateRange.from && filters.dateRange.to
+      ? `${filters.dateRange.from.toDateString()} to ${filters.dateRange.to.toDateString()}`
+      : '';
 
   return (
     <Card className="sticky top-0 z-10 mb-4 border-blue-200 bg-blue-50/50">
@@ -72,7 +63,7 @@ const FilterBarFixed = () => {
             </span>
 
             <div className="flex flex-wrap gap-1">
-              {selectedCategories.map(category => (
+              {filters.categories.map(category => (
                 <Badge key={category} variant="secondary" className="gap-1 text-xs">
                   Cat: {category}
                   <button onClick={() => removeItem('categories', category)}>
@@ -81,7 +72,7 @@ const FilterBarFixed = () => {
                 </Badge>
               ))}
 
-              {selectedBrands.map(brand => (
+              {filters.brands.map(brand => (
                 <Badge key={brand} variant="secondary" className="gap-1 text-xs">
                   Brand: {brand}
                   <button onClick={() => removeItem('brands', brand)}>
@@ -90,7 +81,7 @@ const FilterBarFixed = () => {
                 </Badge>
               ))}
 
-              {selectedRegions.map(region => (
+              {filters.regions.map(region => (
                 <Badge key={region} variant="secondary" className="gap-1 text-xs">
                   Region: {region}
                   <button onClick={() => removeItem('regions', region)}>
@@ -99,7 +90,7 @@ const FilterBarFixed = () => {
                 </Badge>
               ))}
 
-              {selectedStores.map(store => (
+              {filters.stores.map(store => (
                 <Badge key={store} variant="secondary" className="gap-1 text-xs">
                   Store: {store}
                   <button onClick={() => removeItem('stores', store)}>
@@ -123,7 +114,7 @@ const FilterBarFixed = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={resetAllFilters}
+            onClick={resetFilters}
             className="border-blue-300 text-blue-700 hover:text-blue-800"
           >
             <RefreshCw className="mr-1 h-3 w-3" />

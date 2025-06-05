@@ -5,53 +5,52 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { X, Calendar, RefreshCw } from 'lucide-react';
-import { useFilters } from '@/contexts/FilterContext';
+import { useFilters, useFilterActions } from '@/stores/dashboardStore';
 
 const FilterBar = () => {
-  const {
-    selectedCategories,
-    selectedBrands,
-    selectedRegions,
-    selectedStores,
-    dateRange,
-    setSelectedCategories,
-    setSelectedBrands,
-    setSelectedRegions,
-    setSelectedStores,
-    setDateRange,
-    resetAllFilters,
-  } = useFilters();
+  const filters = useFilters();
+  const { updateFilters, resetFilters } = useFilterActions();
 
-  const handleDateChange = (type: 'start' | 'end', value: string) => {
-    setDateRange({
-      ...dateRange,
-      [type]: value,
+  const handleDateChange = (type: 'from' | 'to', value: Date) => {
+    updateFilters({
+      dateRange: {
+        ...filters.dateRange,
+        [type]: value,
+      },
     });
   };
 
   const removeBrand = (brandToRemove: string) => {
-    setSelectedBrands(selectedBrands.filter(brand => brand !== brandToRemove));
+    updateFilters({
+      brands: filters.brands.filter(brand => brand !== brandToRemove),
+    });
   };
 
   const removeCategory = (categoryToRemove: string) => {
-    setSelectedCategories(selectedCategories.filter(cat => cat !== categoryToRemove));
+    updateFilters({
+      categories: filters.categories.filter(cat => cat !== categoryToRemove),
+    });
   };
 
   const removeRegion = (regionToRemove: string) => {
-    setSelectedRegions(selectedRegions.filter(region => region !== regionToRemove));
+    updateFilters({
+      regions: filters.regions.filter(region => region !== regionToRemove),
+    });
   };
 
   const removeStore = (storeToRemove: string) => {
-    setSelectedStores(selectedStores.filter(store => store !== storeToRemove));
+    updateFilters({
+      stores: filters.stores.filter(store => store !== storeToRemove),
+    });
   };
 
   const hasActiveFilters =
-    selectedCategories.length > 0 ||
-    selectedBrands.length > 0 ||
-    selectedRegions.length > 0 ||
-    selectedStores.length > 0 ||
-    dateRange.start ||
-    dateRange.end;
+    filters.categories.length > 0 ||
+    filters.brands.length > 0 ||
+    filters.regions.length > 0 ||
+    filters.stores.length > 0 ||
+    filters.dateRange.from ||
+    filters.dateRange.to;
 
   if (!hasActiveFilters) {
     return null;
@@ -65,7 +64,7 @@ const FilterBar = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={resetAllFilters}
+            onClick={resetFilters}
             className="text-red-600 hover:text-red-700"
           >
             <RefreshCw className="mr-1 h-4 w-4" />
@@ -75,13 +74,13 @@ const FilterBar = () => {
 
         <div className="space-y-3">
           {/* Date Range */}
-          {(dateRange.start || dateRange.end) && (
+          {(filters.dateRange.from || filters.dateRange.to) && (
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
               <Badge variant="secondary" className="gap-1">
-                {dateRange.start} to {dateRange.end}
+                {filters.dateRange.from?.toDateString()} to {filters.dateRange.to?.toDateString()}
                 <button
-                  onClick={() => setDateRange({ start: '', end: '' })}
+                  onClick={() => updateFilters({ dateRange: { from: null, to: null } })}
                   className="ml-1 hover:text-red-600"
                 >
                   <X className="h-3 w-3" />
@@ -91,10 +90,10 @@ const FilterBar = () => {
           )}
 
           {/* Selected Brands */}
-          {selectedBrands.length > 0 && (
+          {filters.brands.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <span className="text-sm font-medium text-gray-700">Brands:</span>
-              {selectedBrands.map(brand => (
+              {filters.brands.map(brand => (
                 <Badge key={brand} variant="outline" className="gap-1">
                   {brand}
                   <button onClick={() => removeBrand(brand)} className="ml-1 hover:text-red-600">
@@ -106,10 +105,10 @@ const FilterBar = () => {
           )}
 
           {/* Selected Categories */}
-          {selectedCategories.length > 0 && (
+          {filters.categories.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <span className="text-sm font-medium text-gray-700">Categories:</span>
-              {selectedCategories.map(category => (
+              {filters.categories.map(category => (
                 <Badge key={category} variant="outline" className="gap-1">
                   {category}
                   <button
@@ -124,10 +123,10 @@ const FilterBar = () => {
           )}
 
           {/* Selected Regions */}
-          {selectedRegions.length > 0 && (
+          {filters.regions.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <span className="text-sm font-medium text-gray-700">Regions:</span>
-              {selectedRegions.map(region => (
+              {filters.regions.map(region => (
                 <Badge key={region} variant="outline" className="gap-1">
                   {region}
                   <button onClick={() => removeRegion(region)} className="ml-1 hover:text-red-600">
@@ -139,10 +138,10 @@ const FilterBar = () => {
           )}
 
           {/* Selected Stores */}
-          {selectedStores.length > 0 && (
+          {filters.stores.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <span className="text-sm font-medium text-gray-700">Stores:</span>
-              {selectedStores.map(store => (
+              {filters.stores.map(store => (
                 <Badge key={store} variant="outline" className="gap-1">
                   {store}
                   <button onClick={() => removeStore(store)} className="ml-1 hover:text-red-600">

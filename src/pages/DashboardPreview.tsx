@@ -6,8 +6,7 @@ import TransactionsTable from '@/components/widgets/TransactionsTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Users, ShoppingCart, Map } from 'lucide-react';
 import { useSalesTrend } from '@/hooks/useSalesTrend';
-import { useFilterStore } from '@/stores/filterStore';
-import { shallow } from 'zustand/shallow';
+import { useFilters } from '@/stores/dashboardStore';
 import {
   LineChart,
   Line,
@@ -34,11 +33,8 @@ const queryClient = new QueryClient({
 
 // Summary Stats Component
 function SummaryStats() {
-  // Use individual selectors with shallow comparison for objects/arrays
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  // Use unified filters from new dashboard store
+  const filters = useFilters();
 
   // Mock data - in real implementation, these would be separate data hooks
   const stats = React.useMemo(
@@ -181,36 +177,34 @@ function SalesTrendChart() {
 
 // Filter Status Display
 function FilterStatus() {
-  // Direct store access with shallow comparison to avoid getSnapshot warnings
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
-  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
+  // Use unified filters from new dashboard store
+  const filters = useFilters();
 
   const activeFiltersCount = [
-    selectedBrands.length > 0,
-    selectedCategories.length > 0,
-    selectedRegions.length > 0,
-    selectedStores.length > 0,
-    dateRange.start && dateRange.end,
+    filters.brands.length > 0,
+    filters.categories.length > 0,
+    filters.regions.length > 0,
+    filters.stores.length > 0,
+    filters.dateRange.from && filters.dateRange.to,
   ].filter(Boolean).length;
 
   const filterSummary: string[] = [];
-  if (dateRange.start && dateRange.end) {
-    filterSummary.push(`Date: ${dateRange.start} to ${dateRange.end}`);
+  if (filters.dateRange.from && filters.dateRange.to) {
+    filterSummary.push(
+      `Date: ${filters.dateRange.from.toDateString()} to ${filters.dateRange.to.toDateString()}`
+    );
   }
-  if (selectedBrands.length > 0) {
-    filterSummary.push(`${selectedBrands.length} brands`);
+  if (filters.brands.length > 0) {
+    filterSummary.push(`${filters.brands.length} brands`);
   }
-  if (selectedCategories.length > 0) {
-    filterSummary.push(`${selectedCategories.length} categories`);
+  if (filters.categories.length > 0) {
+    filterSummary.push(`${filters.categories.length} categories`);
   }
-  if (selectedRegions.length > 0) {
-    filterSummary.push(`${selectedRegions.length} regions`);
+  if (filters.regions.length > 0) {
+    filterSummary.push(`${filters.regions.length} regions`);
   }
-  if (selectedStores.length > 0) {
-    filterSummary.push(`${selectedStores.length} stores`);
+  if (filters.stores.length > 0) {
+    filterSummary.push(`${filters.stores.length} stores`);
   }
 
   if (activeFiltersCount === 0) {

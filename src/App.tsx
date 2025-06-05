@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { FilterProvider } from '@/contexts/FilterContext';
+// Removed old FilterProvider - now using Zustand dashboardStore
 import { Layout } from '@/components/Layout';
 import { FEATURE_FLAGS } from '@/config/features';
 
@@ -63,68 +63,66 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <FilterProvider>
-          <TooltipProvider>
-            <BrowserRouter>
-              {/* Accessibility: Skip to content link */}
-              {/* <SkipToContent /> */}
+        <TooltipProvider>
+          <BrowserRouter>
+            {/* Accessibility: Skip to content link */}
+            {/* <SkipToContent /> */}
 
-              {/* Toast notifications */}
-              {/* <ToastContainer /> */}
+            {/* Toast notifications */}
+            {/* <ToastContainer /> */}
 
-              {/* Existing toasters */}
-              <Toaster />
-              <Sonner />
+            {/* Existing toasters */}
+            <Toaster />
+            <Sonner />
 
-              <Layout>
-                <main id="main-content" className="focus:outline-none">
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <Routes>
-                      {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
-                      {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
-                      {FEATURE_FLAGS.PRODUCT_INSIGHTS && (
-                        <Route path="/product-insights" element={<ProductInsights />} />
-                      )}
-                      {FEATURE_FLAGS.CONSUMER_INSIGHTS && (
-                        <Route path="/consumer-insights" element={<ConsumerInsights />} />
-                      )}
-                      {FEATURE_FLAGS.BASKET_BEHAVIOR && (
-                        <Route path="/basket-behavior" element={<BasketBehavior />} />
-                      )}
-                      {FEATURE_FLAGS.AI_RECOMMENDATIONS && (
-                        <Route path="/ai-recommendations" element={<AIRecommendations />} />
-                      )}
-                      {FEATURE_FLAGS.SETTINGS_PAGE && (
-                        <Route path="/settings" element={<Settings />} />
-                      )}
+            <Layout>
+              <main id="main-content" className="focus:outline-none">
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Routes>
+                    {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
+                    {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
+                    {FEATURE_FLAGS.PRODUCT_INSIGHTS && (
+                      <Route path="/product-insights" element={<ProductInsights />} />
+                    )}
+                    {FEATURE_FLAGS.CONSUMER_INSIGHTS && (
+                      <Route path="/consumer-insights" element={<ConsumerInsights />} />
+                    )}
+                    {FEATURE_FLAGS.BASKET_BEHAVIOR && (
+                      <Route path="/basket-behavior" element={<BasketBehavior />} />
+                    )}
+                    {FEATURE_FLAGS.AI_RECOMMENDATIONS && (
+                      <Route path="/ai-recommendations" element={<AIRecommendations />} />
+                    )}
+                    {FEATURE_FLAGS.SETTINGS_PAGE && (
+                      <Route path="/settings" element={<Settings />} />
+                    )}
 
-                      {/* New Filter System Preview */}
-                      <Route path="/dashboard-preview" element={<DashboardPreview />} />
-                      <Route path="/filter-preview" element={<DashboardPreview />} />
+                    {/* New Filter System Preview */}
+                    <Route path="/dashboard-preview" element={<DashboardPreview />} />
+                    <Route path="/filter-preview" element={<DashboardPreview />} />
 
-                      {/* Sprint 4: Advanced Analytics Dashboard */}
-                      <Route path="/sprint4" element={<Sprint4Dashboard />} />
-                      <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
+                    {/* Sprint 4: Advanced Analytics Dashboard */}
+                    <Route path="/sprint4" element={<Sprint4Dashboard />} />
+                    <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
 
-                      {/* TBWA Integrated Dashboard */}
-                      <Route path="/tbwa" element={<TBWADashboard />} />
-                      <Route path="/tbwa-dashboard" element={<TBWADashboard />} />
+                    {/* TBWA Integrated Dashboard */}
+                    <Route path="/tbwa" element={<TBWADashboard />} />
+                    <Route path="/tbwa-dashboard" element={<TBWADashboard />} />
 
-                      {/* Legacy routes (deprecated but kept for compatibility) */}
-                      {FEATURE_FLAGS.PRODUCT_MIX && (
-                        <Route path="/product-mix" element={<ProductMix />} />
-                      )}
-                      {FEATURE_FLAGS.BRANDS_PAGE && <Route path="/brands" element={<Brands />} />}
+                    {/* Legacy routes (deprecated but kept for compatibility) */}
+                    {FEATURE_FLAGS.PRODUCT_MIX && (
+                      <Route path="/product-mix" element={<ProductMix />} />
+                    )}
+                    {FEATURE_FLAGS.BRANDS_PAGE && <Route path="/brands" element={<Brands />} />}
 
-                      {/* Catch-all route must be last */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </main>
-              </Layout>
-            </BrowserRouter>
-          </TooltipProvider>
-        </FilterProvider>
+                    {/* Catch-all route must be last */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </main>
+            </Layout>
+          </BrowserRouter>
+        </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

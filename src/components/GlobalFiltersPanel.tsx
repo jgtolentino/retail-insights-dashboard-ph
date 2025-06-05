@@ -1,5 +1,7 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { useFilterStore, useFilterActions } from '@/stores/filterStore';
+import { useEffect, useState, useMemo } from 'react';
+import { useDashboardStore, useFilters, useFilterActions } from '@/stores/dashboardStore';
+import { useRenderMonitor } from '@/hooks/debugging/useRenderMonitor';
+import { useEmergencyRenderLimit } from '@/hooks/debugging/useEmergencyRenderLimit';
 import { useBrands } from '@/hooks/useBrands';
 import Select, { MultiValue, Options } from 'react-select';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,120 +10,109 @@ const toOptions = (arr: string[]): Options<{ label: string; value: string }> =>
   arr.map(v => ({ label: v, value: v }));
 
 export function GlobalFiltersPanel() {
-  // Debug render counter to identify infinite loops
-  const renderCount = useRef(0);
-  renderCount.current += 1;
+  // 🚨 EMERGENCY: Prevent infinite loops from crashing browser
+  useEmergencyRenderLimit('GlobalFiltersPanel');
 
-  // Use the correct filter store (not the old FilterContext)
-  const selectedBrands = useFilterStore(state => state.selectedBrands);
-  const selectedCategories = useFilterStore(state => state.selectedCategories);
-  const selectedRegions = useFilterStore(state => state.selectedRegions);
-  const selectedStores = useFilterStore(state => state.selectedStores);
+  // 🔍 DEBUGGING: Monitor renders for infinite loop detection
+  const { trackReason } = useRenderMonitor('GlobalFiltersPanel', {
+    maxRenders: 50,
+    warnThreshold: 20,
+  });
 
-  const {
-    setSelectedBrands,
-    setSelectedCategories,
-    setSelectedRegions,
-    setSelectedStores,
-    resetAllFilters,
-  } = useFilterActions();
+  // ✅ NEW ARCHITECTURE: Direct Zustand store access (no prop drilling!)
+  const filters = useFilters();
+  const { updateFilters, resetFilters } = useFilterActions();
+
+  // Track what causes re-renders
+  trackReason('store-subscription');
 
   // Fetch dynamic brand data from Supabase
   const { data: allBrands = [], isLoading: brandsLoading } = useBrands();
 
+  // Local state for dropdown options (not reactive, just data)
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [allRegions, setAllRegions] = useState<string[]>([]);
   const [allStores, setAllStores] = useState<string[]>([]);
 
-  // 🔥 FIX: Memoize toOptions calls to prevent new object creation on every render
+  // ✅ FIXED: Memoize ALL options to prevent new objects every render
   const categoryOptions = useMemo(() => toOptions(allCategories), [allCategories]);
   const brandOptions = useMemo(() => toOptions(allBrands), [allBrands]);
   const regionOptions = useMemo(() => toOptions(allRegions), [allRegions]);
   const storeOptions = useMemo(() => toOptions(allStores), [allStores]);
 
-  // 🔥 FIX: Memoize selected values to prevent new object creation on every render
-  const selectedCategoryValues = useMemo(() => toOptions(selectedCategories), [selectedCategories]);
-  const selectedBrandValues = useMemo(() => toOptions(selectedBrands), [selectedBrands]);
-  const selectedRegionValues = useMemo(() => toOptions(selectedRegions), [selectedRegions]);
-  const selectedStoreValues = useMemo(() => toOptions(selectedStores), [selectedStores]);
+  // ✅ FIXED: Memoize selected values (these were the main culprits!)
+  const selectedCategoryValues = useMemo(() => toOptions(filters.categories), [filters.categories]);
+  const selectedBrandValues = useMemo(() => toOptions(filters.brands), [filters.brands]);
+  const selectedRegionValues = useMemo(() => toOptions(filters.regions), [filters.regions]);
+  const selectedStoreValues = useMemo(() => toOptions(filters.stores), [filters.stores]);
 
-  // Stabilize callback functions to prevent unnecessary re-renders
-  const handleCategoriesChange = useCallback(
-    (vals: MultiValue<{ label: string; value: string }>) =>
-      setSelectedCategories(vals.map(v => v.value)),
-    [setSelectedCategories]
-  );
+  // ✅ NEW PATTERN: Direct store updates (no useEffect, no callback deps!)
+  const handleCategoriesChange = (vals: MultiValue<{ label: string; value: string }>) => {
+    trackReason('categories-change');
+    updateFilters({ categories: vals.map(v => v.value) });
+  };
 
-  const handleBrandsChange = useCallback(
-    (vals: MultiValue<{ label: string; value: string }>) =>
-      setSelectedBrands(vals.map(v => v.value)),
-    [setSelectedBrands]
-  );
+  const handleBrandsChange = (vals: MultiValue<{ label: string; value: string }>) => {
+    trackReason('brands-change');
+    updateFilters({ brands: vals.map(v => v.value) });
+  };
 
-  const handleRegionsChange = useCallback(
-    (vals: MultiValue<{ label: string; value: string }>) =>
-      setSelectedRegions(vals.map(v => v.value)),
-    [setSelectedRegions]
-  );
+  const handleRegionsChange = (vals: MultiValue<{ label: string; value: string }>) => {
+    trackReason('regions-change');
+    updateFilters({ regions: vals.map(v => v.value) });
+  };
 
-  const handleStoresChange = useCallback(
-    (vals: MultiValue<{ label: string; value: string }>) =>
-      setSelectedStores(vals.map(v => v.value)),
-    [setSelectedStores]
-  );
+  const handleStoresChange = (vals: MultiValue<{ label: string; value: string }>) => {
+    trackReason('stores-change');
+    updateFilters({ stores: vals.map(v => v.value) });
+  };
 
+  // ✅ DATA FETCHING: Only runs once, no dependencies on reactive state
   useEffect(() => {
-    // Fetch dynamic categories from brands table instead (products table has no category column)
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from('brands')
-        .select('category')
-        .neq('category', null);
+    const fetchAllData = async () => {
+      trackReason('data-fetch');
 
-      if (!error && data) {
-        const uniqueCategories = [...new Set(data.map(b => b.category).filter(Boolean))].sort();
-        setAllCategories(uniqueCategories);
-      } else {
-        // Fallback to common categories if brands query fails
+      try {
+        // Fetch categories
+        const { data: categoriesData } = await supabase
+          .from('brands')
+          .select('category')
+          .neq('category', null);
+
+        if (categoriesData) {
+          const uniqueCategories = [
+            ...new Set(categoriesData.map(b => b.category).filter(Boolean)),
+          ].sort();
+          setAllCategories(uniqueCategories);
+        }
+
+        // Fetch regions
+        const { data: regionsData } = await supabase
+          .from('customers')
+          .select('region')
+          .neq('region', null);
+
+        if (regionsData) {
+          const uniqueRegions = [...new Set(regionsData.map(c => c.region).filter(Boolean))].sort();
+          setAllRegions(uniqueRegions);
+        }
+
+        // Fetch stores
+        const { data: storesData } = await supabase.from('stores').select('name').neq('name', null);
+
+        if (storesData) {
+          const uniqueStores = [...new Set(storesData.map(s => s.name).filter(Boolean))].sort();
+          setAllStores(uniqueStores);
+        }
+      } catch (error) {
+        console.error('Error fetching filter data:', error);
+        // Fallback data
         setAllCategories(['Dairy', 'Beverages', 'Snacks', 'Personal Care', 'Household']);
       }
     };
 
-    // Fetch dynamic regions from Supabase
-    const fetchRegions = async () => {
-      const { data, error } = await supabase.from('customers').select('region').neq('region', null);
-
-      if (!error && data) {
-        const uniqueRegions = [...new Set(data.map(c => c.region).filter(Boolean))].sort();
-        setAllRegions(uniqueRegions);
-      }
-    };
-
-    // Fetch dynamic stores from Supabase
-    const fetchStores = async () => {
-      const { data, error } = await supabase.from('stores').select('name').neq('name', null);
-
-      if (!error && data) {
-        const uniqueStores = [...new Set(data.map(s => s.name).filter(Boolean))].sort();
-        setAllStores(uniqueStores);
-      }
-    };
-
-    fetchCategories();
-    fetchRegions();
-    fetchStores();
-  }, []);
-
-  // Debug logging after all hooks are called (rules of hooks compliance)
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🔍 GlobalFiltersPanel rendered ${renderCount.current} times`);
-
-    // Safety break for infinite loops
-    if (renderCount.current > 100) {
-      console.error('🚨 INFINITE LOOP DETECTED in GlobalFiltersPanel!');
-      return <div>Infinite loop detected in GlobalFiltersPanel - check console</div>;
-    }
-  }
+    fetchAllData();
+  }, []); // ✅ NO DEPENDENCIES - runs once only
 
   return (
     <div className="flex flex-wrap items-start gap-6 rounded bg-white p-4 shadow">
@@ -176,7 +167,7 @@ export function GlobalFiltersPanel() {
       </div>
 
       <button
-        onClick={resetAllFilters}
+        onClick={resetFilters}
         className="ml-auto mt-6 rounded bg-red-50 px-3 py-1 text-red-700"
       >
         Reset All
