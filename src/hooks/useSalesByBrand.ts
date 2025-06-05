@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useFilters } from '@/stores/dashboardStore';
+import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
+import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
+import shallow from 'zustand/shallow';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SalesByBrandData {
@@ -12,36 +13,44 @@ export interface SalesByBrandData {
 }
 
 export function useSalesByBrand() {
-  // Use the new dashboard store
-  const dashboardFilters = useFilters();
+  /* -----------------------------------------
+   Stable selector → memoised query string
+------------------------------------------*/
+  const filterSelector = (s: ReturnType<typeof useFilterStore>) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    selectedBrands: s.selectedBrands,
+    selectedRegions: s.selectedRegions,
+    minConfidence: s.minConfidence,
+  });
 
-  // Create stable filters object for the query helper (transform to old format)
-  const filters = useMemo(
-    () => ({
-      dateRange: {
-        start: dashboardFilters.dateRange.from?.toISOString().split('T')[0] || null,
-        end: dashboardFilters.dateRange.to?.toISOString().split('T')[0] || null,
-      },
-      selectedBrands: dashboardFilters.brands,
-      selectedCategories: dashboardFilters.categories,
-      selectedRegions: dashboardFilters.regions,
-      selectedStores: dashboardFilters.stores,
-    }),
-    [dashboardFilters]
-  );
-
-  // Stabilize the query key to prevent unnecessary re-renders
-  const stableQueryKey = useMemo(() => ['salesByBrand', JSON.stringify(filters)], [filters]);
+  const filters = useFilterStore(filterSelector, shallow); // filters from zustand
+  const query = useMemo(() => buildCompleteFilterQuery(filters), [filters]); // SQL Query string
+  const stableQueryKey = useMemo(() => ['salesByBrand', query], [filters]); // queryKey uses the SQL query string, dependent on filters
 
   return useQuery({
     queryKey: stableQueryKey,
     queryFn: async (): Promise<SalesByBrandData[]> => {
-      // Start with base filtered query using current filters
-      const filteredQuery = await buildCompleteFilterQuery(filters);
+      let transactionsQuery = supabase.from('transactions').select('id, total_amount');
 
-      // Get transaction data with revenue
-      const { data: transactions, error: transactionError } =
-        await filteredQuery.select('id, total_amount');
+      if (filters.startDate && filters.endDate) {
+        transactionsQuery = transactionsQuery
+          .gte('interaction_date', filters.startDate)
+          .lte('interaction_date', filters.endDate);
+      }
+      // Important: Verify the correct column names for brands and regions on the 'transactions' table.
+      // buildCompleteFilterQuery used 'brand' and 'region'. Assuming these are direct columns.
+      if (filters.selectedBrands && filters.selectedBrands.length > 0) {
+        transactionsQuery = transactionsQuery.in('brand', filters.selectedBrands); // Or 'brand_id' if that's the column
+      }
+      if (filters.selectedRegions && filters.selectedRegions.length > 0) {
+        transactionsQuery = transactionsQuery.in('region', filters.selectedRegions);
+      }
+      if (filters.minConfidence !== undefined) {
+        transactionsQuery = transactionsQuery.gte('nlp_confidence_score', filters.minConfidence);
+      }
+
+      const { data: transactions, error: transactionError } = await transactionsQuery;
 
       if (transactionError) {
         throw transactionError;

@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { shallow } from 'zustand/shallow';
+import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
+import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
+import shallow from 'zustand/shallow';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface TransactionData {
   id: number;
@@ -31,25 +32,20 @@ export interface PaginationInfo {
 }
 
 export function useFilteredTransactions(paginationInfo: PaginationInfo) {
-  // Subscribe to filters from new Zustand store
-  const filters = useDashboardStore(state => state.filters, shallow);
+  const filterSelector = (s: ReturnType<typeof useFilterStore>) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    selectedBrands: s.selectedBrands,
+    selectedRegions: s.selectedRegions,
+    minConfidence: s.minConfidence,
+    // selectedStores and selectedCategories are not in the standard selector
+  });
 
-  // Filters are already memoized in the store
-  const stableFilters = useMemo(
-    () => ({
-      dateRange: filters.dateRange,
-      selectedBrands: filters.selectedBrands,
-      selectedCategories: filters.selectedCategories,
-      selectedRegions: filters.selectedRegions,
-      selectedStores: filters.selectedStores,
-    }),
-    [filters]
-  );
-
-  // Stabilize the query key to prevent unnecessary re-renders
+  const filters = useFilterStore(filterSelector, shallow);
+  const query = useMemo(() => buildCompleteFilterQuery(filters), [filters]); // String for query key
   const stableQueryKey = useMemo(
-    () => ['filteredTransactions', JSON.stringify(stableFilters), paginationInfo],
-    [stableFilters, paginationInfo]
+    () => ['filteredTransactions', query, paginationInfo],
+    [filters, paginationInfo]
   );
 
   return useQuery({
@@ -57,11 +53,29 @@ export function useFilteredTransactions(paginationInfo: PaginationInfo) {
     queryFn: async (): Promise<PaginatedTransactionData> => {
       const { pageNumber, pageSize } = paginationInfo;
 
-      // Build the complete filtered query using current filters
-      const baseQuery = await buildCompleteFilterQuery(stableFilters);
+      let transactionsQuery = supabase.from('transactions'); // Base query
+
+      // Apply filters from useFilterStore
+      if (filters.startDate && filters.endDate) {
+        transactionsQuery = transactionsQuery
+          .gte('interaction_date', filters.startDate)
+          .lte('interaction_date', filters.endDate);
+      }
+      if (filters.selectedBrands && filters.selectedBrands.length > 0) {
+        transactionsQuery = transactionsQuery.in('brand', filters.selectedBrands); // Assuming 'brand' column
+      }
+      if (filters.selectedRegions && filters.selectedRegions.length > 0) {
+        transactionsQuery = transactionsQuery.in('region', filters.selectedRegions); // Assuming 'region' column
+      }
+      // selectedStores and selectedCategories from the old stableFilters are not in the standard `filters` object from the store via the standard selector.
+      // If they need to be applied, filterSelector would need to include them or another mechanism would be required.
+      if (filters.minConfidence !== undefined) {
+        transactionsQuery = transactionsQuery.gte('nlp_confidence_score', filters.minConfidence);
+      }
 
       // Get total count first
-      const { count, error: countError } = await baseQuery.select('*', {
+      const { count, error: countError } = await transactionsQuery.select('*', {
+        // Count on the filtered query
         count: 'exact',
         head: true,
       });
@@ -76,7 +90,7 @@ export function useFilteredTransactions(paginationInfo: PaginationInfo) {
       const startIndex = (pageNumber - 1) * pageSize;
       const endIndex = startIndex + pageSize - 1;
 
-      const { data: transactions, error } = await baseQuery
+      const { data: transactions, error } = await transactionsQuery // Use the same filtered query for data selection
         .select(
           `
           id,
