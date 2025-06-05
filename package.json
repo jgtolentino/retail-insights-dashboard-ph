@@ -55,7 +55,10 @@
     "qa:generate-scaffolds": "ts-node scripts/qa/generate_test_scaffold.ts",
     "qa:update-matrix": "ts-node scripts/qa/update_matrix.ts",
     "ai:diagnostics": "node scripts/ai-diagnostics.js",
-    "ai:autofix": "node scripts/ai-autofix.js"
+    "ai:autofix": "node scripts/ai-autofix.js",
+    "monitor": "ts-node scripts/performance-alerts.ts",
+    "load-test": "ts-node scripts/load-test.ts",
+    "benchmark": "ts-node scripts/benchmark-dashboard.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

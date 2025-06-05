@@ -69,8 +69,7 @@ export const dashboardService = {
             )
           `
           )
-          .order('created_at', { ascending: false })
-          .limit(1000);
+          .order('created_at', { ascending: false });
 
         if (error) {
           logger.error('Supabase query error', error);

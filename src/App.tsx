@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { SafeWrapper } from '@/components/SafeWrapper';
 // Removed old FilterProvider - now using Zustand dashboardStore
 import { Layout } from '@/components/Layout';
 import { FEATURE_FLAGS } from '@/config/features';
@@ -58,8 +59,24 @@ const queryClient = new QueryClient({
   },
 });
 
+// Add this hook at the top level of your App or relevant root component
+function useRenderCounter(componentName: string) {
+  const renders = useRef(0);
+  renders.current++;
+
+  useEffect(() => {
+    if (renders.current > 50) {
+      console.error(`🚨 ${componentName} rendered ${renders.current} times!`);
+      console.trace();
+    }
+  });
+
+  console.log(`${componentName} render #${renders.current}`);
+}
+
 // Main App Component with all improvements
 const App = () => {
+  useRenderCounter('App');
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -102,12 +119,40 @@ const App = () => {
                     <Route path="/filter-preview" element={<DashboardPreview />} />
 
                     {/* Sprint 4: Advanced Analytics Dashboard */}
-                    <Route path="/sprint4" element={<Sprint4Dashboard />} />
-                    <Route path="/advanced-analytics" element={<Sprint4Dashboard />} />
+                    <Route
+                      path="/sprint4"
+                      element={
+                        <SafeWrapper name="Sprint4Dashboard" maxRenders={50}>
+                          <Sprint4Dashboard />
+                        </SafeWrapper>
+                      }
+                    />
+                    <Route
+                      path="/advanced-analytics"
+                      element={
+                        <SafeWrapper name="Sprint4Dashboard" maxRenders={50}>
+                          <Sprint4Dashboard />
+                        </SafeWrapper>
+                      }
+                    />
 
                     {/* TBWA Integrated Dashboard */}
-                    <Route path="/tbwa" element={<TBWADashboard />} />
-                    <Route path="/tbwa-dashboard" element={<TBWADashboard />} />
+                    <Route
+                      path="/tbwa"
+                      element={
+                        <SafeWrapper name="TBWADashboard" maxRenders={50}>
+                          <TBWADashboard />
+                        </SafeWrapper>
+                      }
+                    />
+                    <Route
+                      path="/tbwa-dashboard"
+                      element={
+                        <SafeWrapper name="TBWADashboard" maxRenders={50}>
+                          <TBWADashboard />
+                        </SafeWrapper>
+                      }
+                    />
 
                     {/* Legacy routes (deprecated but kept for compatibility) */}
                     {FEATURE_FLAGS.PRODUCT_MIX && (

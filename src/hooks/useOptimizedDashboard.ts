@@ -78,7 +78,6 @@ export function useOptimizedDashboard(dateRange: { start: Date; end: Date }) {
           .from('mv_customer_segments')
           .select('customer_segment, COUNT(*) as count, SUM(total_spent) as total_value')
           .select()
-          .limit(1000) // Process client-side for now
           .then(({ data }) => {
             // Group by segment client-side
             const segments = data?.reduce(

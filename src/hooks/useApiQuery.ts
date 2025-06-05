@@ -130,7 +130,16 @@ export const transactionsApi = {
       }
     }
 
-    return apiCall(() => query.order('created_at', { ascending: false }).limit(1000));
+    // Use configurable limit from environment variable, default to no limit
+    const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
+
+    let finalQuery = query.order('created_at', { ascending: false });
+
+    if (transactionLimit && !isNaN(Number(transactionLimit))) {
+      finalQuery = finalQuery.limit(Number(transactionLimit));
+    }
+
+    return apiCall(() => finalQuery);
   },
 
   getSummary: async (filters: any) => {

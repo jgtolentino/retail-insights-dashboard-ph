@@ -64,10 +64,8 @@ export default function Brands() {
       console.log('Fetching brand performance data...');
 
       // Get comprehensive brand data
-      let query = supabase
-        .from('transaction_items')
-        .select(
-          `
+      const query = supabase.from('transaction_items').select(
+        `
           quantity,
           price,
           products!inner(
@@ -83,17 +81,24 @@ export default function Brands() {
             created_at
           )
         `
-        )
-        .limit(1000);
+      );
+
+      // Use configurable limit from environment variable, default to no limit
+      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
+      let finalQuery = query;
+
+      if (transactionLimit && !isNaN(Number(transactionLimit))) {
+        finalQuery = finalQuery.limit(Number(transactionLimit));
+      }
 
       // Apply date filter
       const daysAgo = parseInt(dateRange);
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
 
-      query = query.gte('transactions.created_at', startDate.toISOString());
-
-      const { data, error } = await query;
+      const { data, error } = await finalQuery
+        .gte('transactions.created_at', startDate.toISOString())
+        .lte('transactions.created_at', new Date().toISOString());
 
       if (error) {
         console.error('Error fetching brand data:', error);

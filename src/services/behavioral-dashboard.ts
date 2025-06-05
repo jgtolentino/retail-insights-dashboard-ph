@@ -326,7 +326,15 @@ export const behavioralDashboardService = {
         query = query.eq('transactions.store_id', storeId);
       }
 
-      const { data: brandSalesData, error } = await query.limit(10000);
+      // Use configurable limit from environment variable, default to no limit
+      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
+      let finalQuery = query;
+
+      if (transactionLimit && !isNaN(Number(transactionLimit))) {
+        finalQuery = finalQuery.limit(Number(transactionLimit));
+      }
+
+      const { data: brandSalesData, error } = await finalQuery;
 
       if (error) {
         console.error('❌ Error fetching brand sales data:', error);
@@ -395,7 +403,15 @@ export const behavioralDashboardService = {
         query = query.eq('store_id', storeId);
       }
 
-      const { data: transactions, error } = await query.limit(20000); // Increased to handle all 18k records
+      // Use configurable limit from environment variable, default to no limit
+      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
+      let finalQuery = query;
+
+      if (transactionLimit && !isNaN(Number(transactionLimit))) {
+        finalQuery = finalQuery.limit(Number(transactionLimit));
+      }
+
+      const { data: transactions, error } = await finalQuery;
 
       if (error) {
         console.error('❌ Error fetching time series:', error);

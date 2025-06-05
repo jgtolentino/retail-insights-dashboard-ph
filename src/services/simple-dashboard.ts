@@ -78,10 +78,8 @@ export const simpleDashboardService = {
       let topBrands = [];
 
       // Get all transaction items with product and brand info
-      const { data: brandSalesData, error: brandError } = await supabase
-        .from('transaction_items')
-        .select(
-          `
+      let brandItemsQuery = supabase.from('transaction_items').select(
+        `
           quantity,
           price,
           products!inner (
@@ -94,8 +92,15 @@ export const simpleDashboardService = {
             )
           )
         `
-        )
-        .limit(50000); // Get more transaction items for better analysis
+      );
+
+      // Use configurable limit from environment variable, default to no limit
+      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
+      if (transactionLimit && !isNaN(Number(transactionLimit))) {
+        brandItemsQuery = brandItemsQuery.limit(Number(transactionLimit));
+      }
+
+      const { data: brandSalesData, error: brandError } = await brandItemsQuery;
 
       if (brandError) {
         console.warn(
