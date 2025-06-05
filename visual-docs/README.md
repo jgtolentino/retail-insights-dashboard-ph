@@ -1,17 +1,36 @@
 # Visual Documentation
 
-**Generated:** 2025-06-04T22:41:04.147Z
-**Commit:** `ce6d2e74f8a7cceba239f49d90542365443c12d4`
-**Message:** Fix lucide-react build error and add deployment safety tools
+**Generated:** 2025-06-05T05:32:28.924Z
+**Commit:** `57430313aa7f7b831fd40ded2fd73c025ce6557b`
+**Message:** 🔥 CRITICAL FIX: React Error #185 - GlobalFiltersPanel infinite loop
 
-- Updated lucide-react to latest version to fix missing database-backup icon
-- Added DEPLOYMENT_CHECKLIST.md for pre-deployment verification
-- Added scripts/validate-env.js for environment validation
-- Added scripts/clean-artifacts.js for artifact cleanup
-- Added src/utils/healthCheck.ts for health monitoring
-- Removed unnecessary backup script
+Found the exact cause: toOptions() creating new objects on every render!
 
-✅ Build now succeeds with all safety checks in place
+Root Issue:
+
+- GlobalFiltersPanel was calling toOptions(selectedValues) in render
+- Each call creates new array + new objects = React thinks props changed
+- react-select triggers re-render → toOptions creates new objects → infinite loop
+
+Fixes Applied:
+
+1. Add render counter debugging (with safety break at 100 renders)
+2. Memoize ALL toOptions calls using useMemo with proper dependencies
+3. Replace direct toOptions calls with memoized versions in Select components
+4. Fix TypeScript warnings with proper MultiValue types
+
+Before: value={toOptions(selectedBrands)} ❌ (new objects every render)
+After: value={selectedBrandValues} ✅ (stable memoized reference)
+
+This follows the debugging patterns from React Error #185 guide:
+
+- Identified state updates triggering immediate re-renders
+- Fixed unmemoized object/function references
+- Applied proper memoization to prevent reference changes
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## 📱 Screenshots
 
@@ -30,17 +49,35 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brands Page
+### Brand Revenue Analysis - Hierarchical View
 
-Brand analytics and performance tracking
+New hierarchical brand visualization with category drill-down
 
-![Brands Page](./brands-page.png)
+![Brand Revenue Analysis - Hierarchical View](./brand-revenue-analysis---hierarchical-view.png)
 
-### Product Mix Page
+<details>
+<summary>Component Details</summary>
 
-Product performance analysis
+#### kpi metrics
 
-![Product Mix Page](./product-mix-page.png)
+![kpi-metrics](./brand-revenue-analysis---hierarchical-view-kpi-metrics.png)
+
+</details>
+
+### Brand Revenue Analysis - Filtered View
+
+Smart filtering system with TBWA client highlighting
+
+![Brand Revenue Analysis - Filtered View](./brand-revenue-analysis---filtered-view.png)
+
+<details>
+<summary>Component Details</summary>
+
+#### kpi metrics
+
+![kpi-metrics](./brand-revenue-analysis---filtered-view-kpi-metrics.png)
+
+</details>
 
 ---
 
