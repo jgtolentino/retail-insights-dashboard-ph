@@ -102,31 +102,23 @@ export function useFilterState({
 // Hook for managing multiple filters - FIXED to follow Rules of Hooks
 export function useFilters(filterConfigs: Record<string, UseFilterStateOptions>) {
   // CRITICAL FIX: Calculate all filter keys at top level to avoid calling hooks in loops
-  const filterKeys = useMemo(() => Object.keys(filterConfigs), [filterConfigs]);
-
-  // Call hooks at the top level for each filter (fixed number based on keys)
-  const filterStates = useMemo(() => {
-    return filterKeys.map(key => {
-      const config = filterConfigs[key];
-      return { key, config };
-    });
-  }, [filterKeys, filterConfigs]);
-
-  // Create individual hook calls at top level
-  const brandFilter = useFilterState(
-    filterStates.find(f => f.key === 'brands')?.config || { defaultValue: [] }
-  );
+  // This comment is misleading, the subsequent hook calls are still conditional.
+  // The fix is to call hooks unconditionally at the top level.
+  // Call useFilterState unconditionally for each expected filter type.
+  // Pass the config directly, providing a default if not present.
+  const brandFilter = useFilterState(filterConfigs.brands || { key: 'brands', defaultValue: [] });
   const categoryFilter = useFilterState(
-    filterStates.find(f => f.key === 'categories')?.config || { defaultValue: [] }
+    filterConfigs.categories || { key: 'categories', defaultValue: [] }
   );
   const locationFilter = useFilterState(
-    filterStates.find(f => f.key === 'locations')?.config || { defaultValue: [] }
+    filterConfigs.locations || { key: 'locations', defaultValue: [] }
   );
   const regionFilter = useFilterState(
-    filterStates.find(f => f.key === 'regions')?.config || { defaultValue: [] }
+    filterConfigs.regions || { key: 'regions', defaultValue: [] }
   );
 
-  // Build filters object
+  // Build filters object - only include filters that were originally configured
+  // This object's structure depends on input, but the hook calls are static.
   const filters = useMemo(() => {
     const result: Record<string, ReturnType<typeof useFilterState>> = {};
     if (filterConfigs.brands) result.brands = brandFilter;

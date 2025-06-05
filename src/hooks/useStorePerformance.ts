@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useFilterStore } from '@/stores/filterStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
 import { shallow } from 'zustand/shallow';
 
 export interface StorePerformanceData {
@@ -19,25 +19,25 @@ export interface StorePerformanceData {
 }
 
 export function useStorePerformance() {
-  // Subscribe to individual filter properties to avoid object creation
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  // Subscribe to filters from new Zustand store
+  const filters = useDashboardStore(state => state.filters, shallow);
 
-  // Create stable filters object only when needed
-  const filters = useMemo(
+  // Filters are already memoized in the store
+  const stableFilters = useMemo(
     () => ({
-      dateRange,
-      selectedBrands,
-      selectedCategories,
-      selectedRegions,
+      dateRange: filters.dateRange,
+      selectedBrands: filters.selectedBrands,
+      selectedCategories: filters.selectedCategories,
+      selectedRegions: filters.selectedRegions,
     }),
-    [dateRange, selectedBrands, selectedCategories, selectedRegions]
+    [filters]
   );
 
   // Stabilize the query key to prevent unnecessary re-renders
-  const stableQueryKey = useMemo(() => ['storePerformance', JSON.stringify(filters)], [filters]);
+  const stableQueryKey = useMemo(
+    () => ['storePerformance', JSON.stringify(stableFilters)],
+    [stableFilters]
+  );
 
   return useQuery({
     queryKey: stableQueryKey,
@@ -57,11 +57,11 @@ export function useStorePerformance() {
         `);
 
       // Apply date range filter
-      if (filters.dateRange.start) {
-        query = query.gte('created_at', filters.dateRange.start);
+      if (stableFilters.dateRange.start) {
+        query = query.gte('created_at', stableFilters.dateRange.start);
       }
-      if (filters.dateRange.end) {
-        query = query.lte('created_at', filters.dateRange.end);
+      if (stableFilters.dateRange.end) {
+        query = query.lte('created_at', stableFilters.dateRange.end);
       }
 
       // Get filtered transactions
@@ -77,20 +77,20 @@ export function useStorePerformance() {
       // Apply brand/category filters if needed
       let filteredTransactionIds = transactions.map(t => t.id);
 
-      if (filters.selectedBrands.length > 0 || filters.selectedCategories.length > 0) {
+      if (stableFilters.selectedBrands.length > 0 || stableFilters.selectedCategories.length > 0) {
         let itemsQuery = supabase
           .from('transaction_items')
           .select('transaction_id, brand_id, category');
 
-        if (filters.selectedBrands.length > 0) {
+        if (stableFilters.selectedBrands.length > 0) {
           itemsQuery = itemsQuery.in(
             'brand_id',
-            filters.selectedBrands.map(b => parseInt(b))
+            stableFilters.selectedBrands.map(b => parseInt(b))
           );
         }
 
-        if (filters.selectedCategories.length > 0) {
-          itemsQuery = itemsQuery.in('category', filters.selectedCategories);
+        if (stableFilters.selectedCategories.length > 0) {
+          itemsQuery = itemsQuery.in('category', stableFilters.selectedCategories);
         }
 
         const { data: filteredItems } = await itemsQuery;
@@ -137,8 +137,8 @@ export function useStorePerformance() {
       const storePerformance: StorePerformanceData[] = stores
         .filter(store => {
           // Apply region filter
-          if (filters.selectedRegions.length > 0) {
-            return filters.selectedRegions.includes(store.region);
+          if (stableFilters.selectedRegions.length > 0) {
+            return stableFilters.selectedRegions.includes(store.region);
           }
           return true;
         })

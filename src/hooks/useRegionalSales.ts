@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useFilterStore } from '@/stores/filterStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
 import { shallow } from 'zustand/shallow';
 
 export interface RegionalSalesData {
@@ -13,25 +13,25 @@ export interface RegionalSalesData {
 }
 
 export function useRegionalSales() {
-  // Subscribe to individual filter properties to avoid object creation
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  // Subscribe to filters from new Zustand store
+  const filters = useDashboardStore(state => state.filters, shallow);
 
-  // Create stable filters object only when needed
-  const filters = useMemo(
+  // Filters are already memoized in the store
+  const stableFilters = useMemo(
     () => ({
-      dateRange,
-      selectedBrands,
-      selectedCategories,
-      selectedRegions,
+      dateRange: filters.dateRange,
+      selectedBrands: filters.selectedBrands,
+      selectedCategories: filters.selectedCategories,
+      selectedRegions: filters.selectedRegions,
     }),
-    [dateRange, selectedBrands, selectedCategories, selectedRegions]
+    [filters]
   );
 
   // Stabilize the query key to prevent unnecessary re-renders
-  const stableQueryKey = useMemo(() => ['regionalSales', JSON.stringify(filters)], [filters]);
+  const stableQueryKey = useMemo(
+    () => ['regionalSales', JSON.stringify(stableFilters)],
+    [stableFilters]
+  );
 
   return useQuery({
     queryKey: stableQueryKey,
@@ -46,22 +46,22 @@ export function useRegionalSales() {
         `);
 
       // Apply date range filter using created_at
-      if (filters.dateRange.start) {
-        query = query.gte('created_at', filters.dateRange.start);
+      if (stableFilters.dateRange.start) {
+        query = query.gte('created_at', stableFilters.dateRange.start);
       }
-      if (filters.dateRange.end) {
-        query = query.lte('created_at', filters.dateRange.end);
+      if (stableFilters.dateRange.end) {
+        query = query.lte('created_at', stableFilters.dateRange.end);
       }
 
       // Apply brand filter if needed (using direct column query)
-      if (filters.selectedBrands.length > 0) {
+      if (stableFilters.selectedBrands.length > 0) {
         // Query transaction_items directly without foreign key joins
         const { data: brandTransactions } = await supabase
           .from('transaction_items')
           .select('transaction_id, brand_id')
           .in(
             'brand_id',
-            filters.selectedBrands.map(b => parseInt(b))
+            stableFilters.selectedBrands.map(b => parseInt(b))
           );
 
         if (brandTransactions) {
@@ -71,11 +71,11 @@ export function useRegionalSales() {
       }
 
       // Apply category filter similarly
-      if (filters.selectedCategories.length > 0) {
+      if (stableFilters.selectedCategories.length > 0) {
         const { data: categoryTransactions } = await supabase
           .from('transaction_items')
           .select('transaction_id, category')
-          .in('category', filters.selectedCategories);
+          .in('category', stableFilters.selectedCategories);
 
         if (categoryTransactions) {
           const transactionIds = [...new Set(categoryTransactions.map(ct => ct.transaction_id))];
@@ -110,7 +110,10 @@ export function useRegionalSales() {
         const region = locationParts.length > 1 ? locationParts[1].trim() : 'Unknown';
 
         // Apply region filter if needed
-        if (filters.selectedRegions.length > 0 && !filters.selectedRegions.includes(region)) {
+        if (
+          stableFilters.selectedRegions.length > 0 &&
+          !stableFilters.selectedRegions.includes(region)
+        ) {
           return;
         }
 

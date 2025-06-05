@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { buildCompleteFilterQuery } from '@/lib/filterQueryHelper';
-import { useFilterStore } from '@/stores/filterStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
 import { shallow } from 'zustand/shallow';
 
 export interface TransactionData {
@@ -31,29 +31,25 @@ export interface PaginationInfo {
 }
 
 export function useFilteredTransactions(paginationInfo: PaginationInfo) {
-  // Subscribe to individual filter properties to avoid object creation
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
-  const selectedStores = useFilterStore(state => state.selectedStores, shallow);
+  // Subscribe to filters from new Zustand store
+  const filters = useDashboardStore(state => state.filters, shallow);
 
-  // Create stable filters object only when needed
-  const filters = useMemo(
+  // Filters are already memoized in the store
+  const stableFilters = useMemo(
     () => ({
-      dateRange,
-      selectedBrands,
-      selectedCategories,
-      selectedRegions,
-      selectedStores,
+      dateRange: filters.dateRange,
+      selectedBrands: filters.selectedBrands,
+      selectedCategories: filters.selectedCategories,
+      selectedRegions: filters.selectedRegions,
+      selectedStores: filters.selectedStores,
     }),
-    [dateRange, selectedBrands, selectedCategories, selectedRegions, selectedStores]
+    [filters]
   );
 
   // Stabilize the query key to prevent unnecessary re-renders
   const stableQueryKey = useMemo(
-    () => ['filteredTransactions', JSON.stringify(filters), paginationInfo],
-    [filters, paginationInfo]
+    () => ['filteredTransactions', JSON.stringify(stableFilters), paginationInfo],
+    [stableFilters, paginationInfo]
   );
 
   return useQuery({
@@ -62,7 +58,7 @@ export function useFilteredTransactions(paginationInfo: PaginationInfo) {
       const { pageNumber, pageSize } = paginationInfo;
 
       // Build the complete filtered query using current filters
-      const baseQuery = await buildCompleteFilterQuery(filters);
+      const baseQuery = await buildCompleteFilterQuery(stableFilters);
 
       // Get total count first
       const { count, error: countError } = await baseQuery.select('*', {

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useFilterStore } from '@/stores/filterStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
 import { shallow } from 'zustand/shallow';
 
 export interface CustomerDensityData {
@@ -56,27 +56,24 @@ const philippinesLocations = {
 };
 
 export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'province' = 'city') {
-  // Subscribe to individual filter properties to avoid object creation
-  const dateRange = useFilterStore(state => state.dateRange, shallow);
-  const selectedBrands = useFilterStore(state => state.selectedBrands, shallow);
-  const selectedCategories = useFilterStore(state => state.selectedCategories, shallow);
-  const selectedRegions = useFilterStore(state => state.selectedRegions, shallow);
+  // Subscribe to filters from new Zustand store
+  const filters = useDashboardStore(state => state.filters, shallow);
 
-  // Create stable filters object only when needed
-  const filters = useMemo(
+  // Filters are already memoized in the store
+  const stableFilters = useMemo(
     () => ({
-      dateRange,
-      selectedBrands,
-      selectedCategories,
-      selectedRegions,
+      dateRange: filters.dateRange,
+      selectedBrands: filters.selectedBrands,
+      selectedCategories: filters.selectedCategories,
+      selectedRegions: filters.selectedRegions,
     }),
-    [dateRange, selectedBrands, selectedCategories, selectedRegions]
+    [filters]
   );
 
   // Stabilize the query key to prevent unnecessary re-renders
   const stableQueryKey = useMemo(
-    () => ['customerDensity', aggregationLevel, JSON.stringify(filters)],
-    [aggregationLevel, filters]
+    () => ['customerDensity', aggregationLevel, JSON.stringify(stableFilters)],
+    [aggregationLevel, stableFilters]
   );
 
   return useQuery({
@@ -92,11 +89,11 @@ export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'prov
         `);
 
       // Apply date range filter
-      if (filters.dateRange.start) {
-        query = query.gte('created_at', filters.dateRange.start);
+      if (stableFilters.dateRange.start) {
+        query = query.gte('created_at', stableFilters.dateRange.start);
       }
-      if (filters.dateRange.end) {
-        query = query.lte('created_at', filters.dateRange.end);
+      if (stableFilters.dateRange.end) {
+        query = query.lte('created_at', stableFilters.dateRange.end);
       }
 
       // Note: Region filter is applied after fetching since we need to check the stores relationship
@@ -112,31 +109,31 @@ export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'prov
 
       // Apply region filter if needed by parsing store_location
       let regionFilteredTransactions = transactions;
-      if (filters.selectedRegions.length > 0) {
+      if (stableFilters.selectedRegions.length > 0) {
         regionFilteredTransactions = transactions.filter(transaction => {
           const locationParts = transaction.store_location?.split(',') || [];
           const region = locationParts.length > 1 ? locationParts[1].trim() : '';
-          return filters.selectedRegions.includes(region);
+          return stableFilters.selectedRegions.includes(region);
         });
       }
 
       // Apply brand/category filters if needed
       let filteredTransactions = regionFilteredTransactions;
 
-      if (filters.selectedBrands.length > 0 || filters.selectedCategories.length > 0) {
+      if (stableFilters.selectedBrands.length > 0 || stableFilters.selectedCategories.length > 0) {
         let itemsQuery = supabase
           .from('transaction_items')
           .select('transaction_id, brand_id, category');
 
-        if (filters.selectedBrands.length > 0) {
+        if (stableFilters.selectedBrands.length > 0) {
           itemsQuery = itemsQuery.in(
             'brand_id',
-            filters.selectedBrands.map(b => parseInt(b))
+            stableFilters.selectedBrands.map(b => parseInt(b))
           );
         }
 
-        if (filters.selectedCategories.length > 0) {
-          itemsQuery = itemsQuery.in('category', filters.selectedCategories);
+        if (stableFilters.selectedCategories.length > 0) {
+          itemsQuery = itemsQuery.in('category', stableFilters.selectedCategories);
         }
 
         const { data: filteredItems } = await itemsQuery;
