@@ -83,7 +83,7 @@ export default function Index() {
   }, [data.topBrands]);
 
   // Use bundle data hook
-  const { data: bundleData, isLoading: bundleLoading } = useBundleData(!loading);
+  const { data: bundleData, isLoading: bundleLoading } = useBundleData(true);
 
   // Stable fetch stores function
   const fetchStores = useCallback(async () => {

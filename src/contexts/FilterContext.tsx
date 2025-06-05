@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
 export interface DateRange {
   start: string;
@@ -29,36 +28,35 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange>({
     start: '',
-    end: ''
+    end: '',
   });
 
-  const resetAllFilters = () => {
+  const resetAllFilters = useCallback(() => {
     setSelectedCategories([]);
     setSelectedBrands([]);
     setSelectedRegions([]);
     setSelectedStores([]);
     setDateRange({ start: '', end: '' });
-  };
+  }, []);
 
-  const value: FilterState = {
-    selectedCategories,
-    selectedBrands,
-    selectedRegions,
-    selectedStores,
-    dateRange,
-    setSelectedCategories,
-    setSelectedBrands,
-    setSelectedRegions,
-    setSelectedStores,
-    setDateRange,
-    resetAllFilters
-  };
-
-  return (
-    <FilterContext.Provider value={value}>
-      {children}
-    </FilterContext.Provider>
+  const value: FilterState = React.useMemo(
+    () => ({
+      selectedCategories,
+      selectedBrands,
+      selectedRegions,
+      selectedStores,
+      dateRange,
+      setSelectedCategories,
+      setSelectedBrands,
+      setSelectedRegions,
+      setSelectedStores,
+      setDateRange,
+      resetAllFilters,
+    }),
+    [selectedCategories, selectedBrands, selectedRegions, selectedStores, dateRange]
   );
+
+  return <FilterContext.Provider value={value}>{children}</FilterContext.Provider>;
 };
 
 export const useFilters = (): FilterState => {

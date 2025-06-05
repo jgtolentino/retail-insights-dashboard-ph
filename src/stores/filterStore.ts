@@ -188,61 +188,9 @@ export const useFilterActions = () =>
     shallow
   );
 
-export const useActiveFiltersCount = () => {
-  const filters = useAllFilters();
+export const useActiveFiltersCount = () => useFilterStore(state => state.getActiveFiltersCount());
 
-  let count = 0;
-  if (filters.selectedBrands.length > 0) count++;
-  if (filters.selectedCategories.length > 0) count++;
-  if (filters.selectedRegions.length > 0) count++;
-  if (filters.selectedStores.length > 0) count++;
-  if (filters.selectedAgeGroups.length > 0) count++;
-  if (filters.selectedGenders.length > 0) count++;
-  if (filters.selectedIncomeRanges.length > 0) count++;
-  if (filters.dateRange.start && filters.dateRange.end) count++;
-
-  return count;
-};
-
-export const useFilterSummary = () => {
-  const filters = useAllFilters();
-
-  const summary: string[] = [];
-
-  if (filters.dateRange.start && filters.dateRange.end) {
-    summary.push(`Date: ${filters.dateRange.start} to ${filters.dateRange.end}`);
-  }
-
-  if (filters.selectedBrands.length > 0) {
-    summary.push(`${filters.selectedBrands.length} brands`);
-  }
-
-  if (filters.selectedCategories.length > 0) {
-    summary.push(`${filters.selectedCategories.length} categories`);
-  }
-
-  if (filters.selectedRegions.length > 0) {
-    summary.push(`${filters.selectedRegions.length} regions`);
-  }
-
-  if (filters.selectedStores.length > 0) {
-    summary.push(`${filters.selectedStores.length} stores`);
-  }
-
-  if (filters.selectedAgeGroups.length > 0) {
-    summary.push(`${filters.selectedAgeGroups.length} age groups`);
-  }
-
-  if (filters.selectedGenders.length > 0) {
-    summary.push(`${filters.selectedGenders.length} genders`);
-  }
-
-  if (filters.selectedIncomeRanges.length > 0) {
-    summary.push(`${filters.selectedIncomeRanges.length} income ranges`);
-  }
-
-  return summary;
-};
+export const useFilterSummary = () => useFilterStore(state => state.getFilterSummary());
 
 // URL persistence helper
 export const persistFiltersToURL = () => {
