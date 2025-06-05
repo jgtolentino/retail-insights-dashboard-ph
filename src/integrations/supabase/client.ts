@@ -3,10 +3,37 @@ import type { Database } from './types';
 
 // Use the actual Supabase project values directly
 const supabaseUrl = 'https://lcoxtanyckjzyxxcsjzz.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
+const supabaseAnonKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
 
 // Export standard client for immediate compatibility
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      // Add logging for debugging
+      console.log('🔍 Supabase Request:', url);
+      return fetch(url, {
+        ...options,
+        // Add timeout to prevent hanging requests
+        signal: AbortSignal.timeout(30000), // 30 second timeout
+      })
+        .then(response => {
+          if (!response.ok) {
+            console.error('❌ Supabase Error:', response.status, response.statusText);
+          }
+          return response;
+        })
+        .catch(error => {
+          console.error('🚨 Network Error:', error.message);
+          throw error;
+        });
+    },
+  },
+});
 
 // Environment variables - these should be set in Vercel or your deployment platform
 // Use the VITE_SUPABASE_MCP_URL for the Managed Connection Proxy endpoint

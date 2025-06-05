@@ -1,0 +1,26 @@
+{
+  "measurements": [
+    {
+      "route": "Home",
+      "loadTime": 1354,
+      "ttfb": 1.7999999970197678,
+      "domReady": 355.90000000596046,
+      "loadComplete": 356.79999999701977
+    },
+    {
+      "route": "Dashboard",
+      "loadTime": 782,
+      "ttfb": 2,
+      "domReady": 31.399999991059303,
+      "loadComplete": 32
+    },
+    {
+      "route": "Sales",
+      "loadTime": 776,
+      "ttfb": 3.7999999970197678,
+      "domReady": 40.19999998807907,
+      "loadComplete": 41.099999994039536
+    }
+  ],
+  "avgLoadTime": 970.6666666666666
+}

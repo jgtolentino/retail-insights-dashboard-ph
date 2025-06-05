@@ -217,7 +217,7 @@ run_lighthouse_analysis() {
         --throttling-method=simulate \
         --preset=desktop \
         --max-wait-for-load=45000 \
-        --no-enable-error-reporting
+        --no-enable-error-reporting || true
     
     # Extract and display results
     if [ -f "$lighthouse_output" ]; then

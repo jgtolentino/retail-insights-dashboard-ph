@@ -1,0 +1,28 @@
+{
+  "initial": 21.05603790283203,
+  "final": 46.31778907775879,
+  "growth": 25.261751174926758,
+  "measurements": [
+    {
+      "route": "Home",
+      "memory": "26.24"
+    },
+    {
+      "route": "Dashboard",
+      "memory": "29.87"
+    },
+    {
+      "route": "Sales",
+      "memory": "30.63"
+    },
+    {
+      "route": "Product Mix",
+      "memory": "32.41"
+    },
+    {
+      "route": "Trends",
+      "memory": "46.31"
+    }
+  ],
+  "timestamp": "2025-06-05T20:29:18.612Z"
+}

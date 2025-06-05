@@ -23,6 +23,7 @@ import { SmartBrandFilter } from '@/components/charts/SmartBrandFilter';
 import { DebugDataLoader } from '@/components/DebugDataLoader';
 import { QuickDataCheck } from '@/components/QuickDataCheck';
 import { useBundleData } from '@/hooks/useBundleData';
+import { DiagnosticPanel } from '@/components/DiagnosticPanel';
 
 type DateRange = '1d' | '7d' | '30d' | '90d' | 'all' | 'custom';
 
@@ -335,6 +336,9 @@ export default function Index() {
             </div>
           </div>
         )}
+
+        {/* API Diagnostic Panel - Show when there are errors */}
+        {(error || process.env.NODE_ENV === 'development') && <DiagnosticPanel />}
 
         {/* Controls */}
         <div className="space-y-4">

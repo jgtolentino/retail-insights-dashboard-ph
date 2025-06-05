@@ -30,3 +30,8 @@ dist-ssr
 *.secrets
 .env
 coverage/
+
+# Google Cloud credentials
+*gcp_codex_creds.json
+*credentials*.json
+*creds*.json

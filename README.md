@@ -462,6 +462,17 @@ node test_edge_integration.cjs
 - 📈 Usage analytics and optimization
 - 🔍 Error tracking and debugging
 
+### **Performance Benchmarking**
+
+We utilize a performance benchmarking script (`./run-performance-benchmarks.sh`) to assess key metrics including:
+
+- Lighthouse scores (Performance, Accessibility, Best Practices, SEO)
+- Bundle size analysis
+- Memory profiling
+- Runtime performance metrics
+
+Recent optimizations have been implemented in the **Time Series Dashboard** to significantly improve data processing efficiency and reduce load times for large datasets using batch processing and caching.
+
 ---
 
 ## 📋 Development Roadmap
