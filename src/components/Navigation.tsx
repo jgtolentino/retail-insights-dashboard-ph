@@ -10,11 +10,20 @@ import {
   Zap,
   Filter,
   Target,
+  Activity,
 } from 'lucide-react';
 import { FEATURE_FLAGS } from '@/config/features';
 
 const navItems = [
   { href: '/', label: 'Overview', icon: LayoutDashboard, feature: 'DASHBOARD_OVERVIEW' },
+  {
+    href: '/project-scout',
+    label: 'Project Scout',
+    icon: Activity,
+    feature: null,
+    highlight: true,
+    iot: true,
+  },
   {
     href: '/tbwa',
     label: 'TBWA Dashboard',
@@ -69,9 +78,11 @@ export function Navigation() {
                 location.pathname === item.href ||
                 (item.href === '/sprint4' && location.pathname === '/advanced-analytics') ||
                 (item.href === '/dashboard-preview' && location.pathname === '/filter-preview') ||
-                (item.href === '/tbwa' && location.pathname === '/tbwa-dashboard');
+                (item.href === '/tbwa' && location.pathname === '/tbwa-dashboard') ||
+                (item.href === '/project-scout' && location.pathname === '/iot');
               const isHighlight = item.highlight;
               const isTBWA = (item as any).tbwa;
+              const isIoT = (item as any).iot;
               return (
                 <Link
                   key={item.href}
@@ -81,14 +92,18 @@ export function Navigation() {
                     (isActive
                       ? isTBWA
                         ? 'bg-gradient-to-r from-tbwa-blue to-tbwa-orange text-white'
-                        : isHighlight
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                          : 'bg-blue-50 text-blue-700'
+                        : isIoT
+                          ? 'bg-gradient-to-r from-green-500 to-blue-600 text-white'
+                          : isHighlight
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                            : 'bg-blue-50 text-blue-700'
                       : isTBWA
                         ? 'bg-gradient-to-r from-orange-100 to-blue-100 text-orange-800 hover:from-orange-200 hover:to-blue-200'
-                        : isHighlight
-                          ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 hover:from-blue-200 hover:to-purple-200'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900')
+                        : isIoT
+                          ? 'bg-gradient-to-r from-green-100 to-blue-100 text-green-800 hover:from-green-200 hover:to-blue-200'
+                          : isHighlight
+                            ? 'bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 hover:from-blue-200 hover:to-purple-200'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900')
                   }
                 >
                   <Icon className="h-4 w-4" />

@@ -96,9 +96,7 @@ export function Sprint4DataVerification() {
       const { data: paymentMethods } = await supabase
         .from('transactions')
         .select('payment_method')
-        .not('payment_method', 'is', null)
-        .limit(1000);
-
+        .not('payment_method', 'is', null);
       const uniquePaymentMethods = new Set(paymentMethods?.map(p => p.payment_method) || []);
       checks.push({
         check: 'Payment Methods',
@@ -111,9 +109,7 @@ export function Sprint4DataVerification() {
       const { data: requestTypes } = await supabase
         .from('transactions')
         .select('request_type')
-        .not('request_type', 'is', null)
-        .limit(1000);
-
+        .not('request_type', 'is', null);
       const uniqueRequestTypes = new Set(requestTypes?.map(r => r.request_type) || []);
       checks.push({
         check: 'Request Types',

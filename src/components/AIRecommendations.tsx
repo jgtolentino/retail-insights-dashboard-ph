@@ -355,21 +355,21 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {nlpInsights.sentimentAnalysis.positive.toFixed(1)}%
+                      {(nlpInsights.sentimentAnalysis.positive || 0).toFixed(1)}%
                     </div>
                     <div className="text-sm text-gray-600">Positive</div>
                     <Progress value={nlpInsights.sentimentAnalysis.positive} className="mt-2 h-2" />
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-600">
-                      {nlpInsights.sentimentAnalysis.neutral.toFixed(1)}%
+                      {(nlpInsights.sentimentAnalysis.neutral || 0).toFixed(1)}%
                     </div>
                     <div className="text-sm text-gray-600">Neutral</div>
                     <Progress value={nlpInsights.sentimentAnalysis.neutral} className="mt-2 h-2" />
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">
-                      {nlpInsights.sentimentAnalysis.negative.toFixed(1)}%
+                      {(nlpInsights.sentimentAnalysis.negative || 0).toFixed(1)}%
                     </div>
                     <div className="text-sm text-gray-600">Negative</div>
                     <Progress value={nlpInsights.sentimentAnalysis.negative} className="mt-2 h-2" />

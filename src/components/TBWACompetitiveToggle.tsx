@@ -144,7 +144,7 @@ export const MarketShareWidget: React.FC<MarketShareWidgetProps> = ({
           className="flex h-full items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-sm font-medium text-white"
           style={{ width: `${Math.max(tbwaShare, 10)}%` }} // Minimum 10% for visibility
         >
-          {tbwaShare.toFixed(1)}%
+          {(tbwaShare || 0).toFixed(1)}%
         </div>
       </div>
 

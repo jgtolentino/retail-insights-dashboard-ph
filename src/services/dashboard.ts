@@ -348,9 +348,7 @@ export const dashboardService = {
           .from('transactions')
           .select('total_amount')
           .gte('created_at', startDate.toISOString())
-          .lte('created_at', endDate.toISOString())
-          .limit(1000);
-
+          .lte('created_at', endDate.toISOString());
         if (!sampleError && sampleData) {
           const sampleRevenue = sampleData.reduce(
             (sum, transaction) => sum + (transaction.total_amount || 0),
