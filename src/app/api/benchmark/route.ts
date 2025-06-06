@@ -7,7 +7,8 @@ export async function GET() {
     // Calculate overall metrics from the detailed results
     const endpointNames = Object.keys(results);
     const overallAvgDuration =
-      endpointNames.reduce((sum, name) => sum + results[name].duration, 0) / endpointNames.length;
+      endpointNames.reduce((sum, name) => sum + (results[name]?.duration || 0), 0) /
+      (endpointNames.length || 1);
 
     // For percentiles and success rate, it's better to use the individual benchmark results
     // The runBenchmarks script already prints detailed results, which is sufficient for now.

@@ -49,7 +49,7 @@ const queryClient = new QueryClient({
         }
         return failureCount < 3;
       },
-      refetchOnWindowFocus: process.env.NODE_ENV === 'production',
+      refetchOnWindowFocus: process.env?.NODE_ENV === 'production',
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
       refetchOnReconnect: true,
