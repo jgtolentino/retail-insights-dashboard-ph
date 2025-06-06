@@ -1,8 +1,23 @@
 # Visual Documentation
 
-**Generated:** 2025-06-05T08:49:27.658Z
-**Commit:** `454a619b9ace199dae6ad4bfa4107cde227d9a7c`
-**Message:** 🔥 CRITICAL FIX: useFilters hook - Rules of Hooks violation causing infinite loops
+**Generated:** 2025-06-06T00:53:47.100Z
+**Commit:** `9c7be37a9192990c8ba62051e8045ed9bdbfee4d`
+**Message:** 🔒 Implement MCP (Managed Connection Proxy) integration
+
+- Added /pages/api/getMcpToken.js serverless endpoint
+- Updated Supabase client with MCP support and fallback mechanism
+- Created comprehensive MCP setup guide and test script
+- Implements secure short-lived JWT tokens for enhanced security
+- Automatic fallback to standard client if MCP fails
+- Zero downtime deployment - existing functionality preserved
+
+Benefits:
+✅ Enhanced security with short-lived tokens
+✅ Better connection pooling and performance
+✅ Audit trail and monitoring capabilities
+✅ Zero risk with automatic fallback mechanism
+
+Setup: Configure VITE_SUPABASE_MCP_URL in Vercel to enable MCP
 
 ## 📱 Screenshots
 
@@ -21,17 +36,35 @@ Main dashboard with KPIs and transaction trends
 
 </details>
 
-### Brands Page
+### Trends Explorer
 
-Brand analytics and performance tracking
+Advanced trend analysis with multiple metrics
 
-![Brands Page](./brands-page.png)
+![Trends Explorer](./trends-explorer.png)
 
-### Product Mix Page
+<details>
+<summary>Component Details</summary>
 
-Product performance analysis
+#### kpi metrics
 
-![Product Mix Page](./product-mix-page.png)
+![kpi-metrics](./trends-explorer-kpi-metrics.png)
+
+</details>
+
+### Settings Configuration
+
+Dashboard settings and feature flags
+
+![Settings Configuration](./settings-configuration.png)
+
+<details>
+<summary>Component Details</summary>
+
+#### kpi metrics
+
+![kpi-metrics](./settings-configuration-kpi-metrics.png)
+
+</details>
 
 ---
 

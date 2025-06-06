@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { shallow } from 'zustand/shallow';
+import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
+import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
+import shallow from 'zustand/shallow';
 
 export interface RegionalSalesData {
   region: string;
@@ -13,30 +14,21 @@ export interface RegionalSalesData {
 }
 
 export function useRegionalSales() {
-  // Subscribe to filters from new Zustand store
-  const filters = useDashboardStore(state => state.filters, shallow);
+  const filterSelector = (s: ReturnType<typeof useFilterStore>) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    selectedBrands: s.selectedBrands,
+    selectedRegions: s.selectedRegions,
+    minConfidence: s.minConfidence,
+  });
 
-  // Filters are already memoized in the store
-  const stableFilters = useMemo(
-    () => ({
-      dateRange: filters.dateRange,
-      selectedBrands: filters.selectedBrands,
-      selectedCategories: filters.selectedCategories,
-      selectedRegions: filters.selectedRegions,
-    }),
-    [filters]
-  );
-
-  // Stabilize the query key to prevent unnecessary re-renders
-  const stableQueryKey = useMemo(
-    () => ['regionalSales', JSON.stringify(stableFilters)],
-    [stableFilters]
-  );
+  const filters = useFilterStore(filterSelector, shallow);
+  const query = useMemo(() => buildCompleteFilterQuery(filters), [filters]);
+  const stableQueryKey = useMemo(() => ['regionalSales', query], [filters]);
 
   return useQuery({
     queryKey: stableQueryKey,
     queryFn: async () => {
-      // Start with base query for transactions
       let query = supabase.from('transactions').select(`
           id,
           total_amount,
@@ -45,23 +37,25 @@ export function useRegionalSales() {
           created_at
         `);
 
-      // Apply date range filter using created_at
-      if (stableFilters.dateRange.start) {
-        query = query.gte('created_at', stableFilters.dateRange.start);
+      // Apply date range filter using interaction_date
+      if (filters.startDate && filters.endDate) {
+        query = query
+          .gte('interaction_date', filters.startDate)
+          .lte('interaction_date', filters.endDate);
       }
-      if (stableFilters.dateRange.end) {
-        query = query.lte('created_at', stableFilters.dateRange.end);
+      // Apply confidence filter
+      if (filters.minConfidence !== undefined) {
+        query = query.gte('nlp_confidence_score', filters.minConfidence);
       }
 
-      // Apply brand filter if needed (using direct column query)
-      if (stableFilters.selectedBrands.length > 0) {
-        // Query transaction_items directly without foreign key joins
+      // Apply brand filter if needed (using existing logic with new `filters` object)
+      if (filters.selectedBrands && filters.selectedBrands.length > 0) {
         const { data: brandTransactions } = await supabase
           .from('transaction_items')
           .select('transaction_id, brand_id')
           .in(
             'brand_id',
-            stableFilters.selectedBrands.map(b => parseInt(b))
+            filters.selectedBrands.map(b => parseInt(b)) // Assuming brand_id is number
           );
 
         if (brandTransactions) {
@@ -70,20 +64,19 @@ export function useRegionalSales() {
         }
       }
 
-      // Apply category filter similarly
-      if (stableFilters.selectedCategories.length > 0) {
+      // Apply category filter similarly (using existing logic with new `filters` object)
+      // Note: filters.selectedCategories might not be populated if not in standard filterSelector
+      if (filters.selectedCategories && filters.selectedCategories.length > 0) {
         const { data: categoryTransactions } = await supabase
           .from('transaction_items')
           .select('transaction_id, category')
-          .in('category', stableFilters.selectedCategories);
+          .in('category', filters.selectedCategories);
 
         if (categoryTransactions) {
           const transactionIds = [...new Set(categoryTransactions.map(ct => ct.transaction_id))];
           query = query.in('id', transactionIds);
         }
       }
-
-      // Note: Region filter is applied after fetching since we need to check the stores relationship
 
       const { data, error } = await query;
 
@@ -109,10 +102,11 @@ export function useRegionalSales() {
         const locationParts = transaction.store_location?.split(',') || [];
         const region = locationParts.length > 1 ? locationParts[1].trim() : 'Unknown';
 
-        // Apply region filter if needed
+        // Apply region filter if needed (using new `filters` object)
         if (
-          stableFilters.selectedRegions.length > 0 &&
-          !stableFilters.selectedRegions.includes(region)
+          filters.selectedRegions &&
+          filters.selectedRegions.length > 0 && // Ensure filters.selectedRegions is checked
+          !filters.selectedRegions.includes(region)
         ) {
           return;
         }

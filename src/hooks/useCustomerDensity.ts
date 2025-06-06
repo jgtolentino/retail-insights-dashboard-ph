@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { shallow } from 'zustand/shallow';
+import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
+import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
+import shallow from 'zustand/shallow';
 
 export interface CustomerDensityData {
   area_name: string;
@@ -56,49 +57,48 @@ const philippinesLocations = {
 };
 
 export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'province' = 'city') {
-  // Subscribe to filters from new Zustand store
-  const filters = useDashboardStore(state => state.filters, shallow);
+  const filterSelector = (s: ReturnType<typeof useFilterStore>) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    selectedBrands: s.selectedBrands,
+    selectedRegions: s.selectedRegions,
+    minConfidence: s.minConfidence,
+  });
 
-  // Filters are already memoized in the store
-  const stableFilters = useMemo(
-    () => ({
-      dateRange: filters.dateRange,
-      selectedBrands: filters.selectedBrands,
-      selectedCategories: filters.selectedCategories,
-      selectedRegions: filters.selectedRegions,
-    }),
-    [filters]
-  );
-
-  // Stabilize the query key to prevent unnecessary re-renders
+  const filters = useFilterStore(filterSelector, shallow);
+  const query = useMemo(() => buildCompleteFilterQuery(filters), [filters]);
   const stableQueryKey = useMemo(
-    () => ['customerDensity', aggregationLevel, JSON.stringify(stableFilters)],
-    [aggregationLevel, stableFilters]
+    () => ['customerDensity', query, aggregationLevel],
+    [filters, aggregationLevel]
   );
 
   return useQuery({
     queryKey: stableQueryKey,
     queryFn: async () => {
-      // Get all transactions with customer and store data
-      let query = supabase.from('transactions').select(`
+      let transactionsQuery = supabase.from('transactions').select(`
           id,
           total_amount,
           customer_age,
           store_location,
           created_at
-        `);
+        `); // Ensure all necessary fields for subsequent logic are selected
 
-      // Apply date range filter
-      if (stableFilters.dateRange.start) {
-        query = query.gte('created_at', stableFilters.dateRange.start);
+      if (filters.startDate && filters.endDate) {
+        transactionsQuery = transactionsQuery
+          .gte('interaction_date', filters.startDate)
+          .lte('interaction_date', filters.endDate);
       }
-      if (stableFilters.dateRange.end) {
-        query = query.lte('created_at', stableFilters.dateRange.end);
+      if (filters.selectedBrands && filters.selectedBrands.length > 0) {
+        transactionsQuery = transactionsQuery.in('brand', filters.selectedBrands); // Assuming 'brand' column
+      }
+      if (filters.selectedRegions && filters.selectedRegions.length > 0) {
+        transactionsQuery = transactionsQuery.in('region', filters.selectedRegions); // Assuming 'region' column
+      }
+      if (filters.minConfidence !== undefined) {
+        transactionsQuery = transactionsQuery.gte('nlp_confidence_score', filters.minConfidence);
       }
 
-      // Note: Region filter is applied after fetching since we need to check the stores relationship
-
-      const { data: transactions, error } = await query;
+      const { data: transactions, error } = await transactionsQuery;
 
       if (error) {
         console.error('Error fetching customer density:', error);

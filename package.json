@@ -29,7 +29,7 @@
     "test:e2e": "playwright test",
     "test:console": "echo 'Playwright tests to be implemented'",
     "validate:sprint": "node -e \"import('./src/utils/pre-sprint-checks.js').then(m => m.runPreSprintChecks(1).then(m.displayValidationResults))\"",
-    "validate:pre-deploy": "node scripts/pre-deployment-validation.js",
+    "validate:pre-deploy": "node scripts/pre-deployment-validation.mjs",
     "test:all": "npm run validate:pre-deploy",
     "test:unit": "vitest run tests/unit --passWithNoTests",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",

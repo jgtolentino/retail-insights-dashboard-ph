@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { shallow } from 'zustand/shallow';
+import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
+import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
+import shallow from 'zustand/shallow';
 
 export interface StorePerformanceData {
   id: number;
@@ -19,25 +20,18 @@ export interface StorePerformanceData {
 }
 
 export function useStorePerformance() {
-  // Subscribe to filters from new Zustand store
-  const filters = useDashboardStore(state => state.filters, shallow);
+  const filterSelector = (s: ReturnType<typeof useFilterStore>) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    selectedBrands: s.selectedBrands,
+    selectedRegions: s.selectedRegions,
+    minConfidence: s.minConfidence,
+    // selectedCategories is not in the standard selector
+  });
 
-  // Filters are already memoized in the store
-  const stableFilters = useMemo(
-    () => ({
-      dateRange: filters.dateRange,
-      selectedBrands: filters.selectedBrands,
-      selectedCategories: filters.selectedCategories,
-      selectedRegions: filters.selectedRegions,
-    }),
-    [filters]
-  );
-
-  // Stabilize the query key to prevent unnecessary re-renders
-  const stableQueryKey = useMemo(
-    () => ['storePerformance', JSON.stringify(stableFilters)],
-    [stableFilters]
-  );
+  const filters = useFilterStore(filterSelector, shallow);
+  const query = useMemo(() => buildCompleteFilterQuery(filters), [filters]);
+  const stableQueryKey = useMemo(() => ['storePerformance', query], [filters]);
 
   return useQuery({
     queryKey: stableQueryKey,
@@ -48,7 +42,7 @@ export function useStorePerformance() {
       if (!stores || stores.length === 0) return [];
 
       // Build transaction query with filters
-      let query = supabase.from('transactions').select(`
+      let transactionsQuery = supabase.from('transactions').select(`
           id,
           store_location,
           total_amount,
@@ -56,16 +50,19 @@ export function useStorePerformance() {
           created_at
         `);
 
-      // Apply date range filter
-      if (stableFilters.dateRange.start) {
-        query = query.gte('created_at', stableFilters.dateRange.start);
+      // Apply date range filter from new `filters` object
+      if (filters.startDate && filters.endDate) {
+        transactionsQuery = transactionsQuery
+          .gte('interaction_date', filters.startDate)
+          .lte('interaction_date', filters.endDate);
       }
-      if (stableFilters.dateRange.end) {
-        query = query.lte('created_at', stableFilters.dateRange.end);
+      // Apply confidence filter
+      if (filters.minConfidence !== undefined) {
+        transactionsQuery = transactionsQuery.gte('nlp_confidence_score', filters.minConfidence);
       }
 
-      // Get filtered transactions
-      const { data: transactions, error } = await query;
+      // Get initially filtered transactions
+      const { data: transactions, error } = await transactionsQuery;
 
       if (error) {
         console.error('Error fetching store performance:', error);
@@ -75,22 +72,27 @@ export function useStorePerformance() {
       if (!transactions) return [];
 
       // Apply brand/category filters if needed
-      let filteredTransactionIds = transactions.map(t => t.id);
+      let filteredTransactionIds = transactions.map(t => t.id); // Assuming transactions is not null due to check below
 
-      if (stableFilters.selectedBrands.length > 0 || stableFilters.selectedCategories.length > 0) {
+      // Apply brand/category filters if needed (using new `filters` object)
+      // Note: filters.selectedCategories might not be populated if not in standard filterSelector
+      if (
+        (filters.selectedBrands && filters.selectedBrands.length > 0) ||
+        (filters.selectedCategories && filters.selectedCategories.length > 0)
+      ) {
         let itemsQuery = supabase
           .from('transaction_items')
           .select('transaction_id, brand_id, category');
 
-        if (stableFilters.selectedBrands.length > 0) {
+        if (filters.selectedBrands && filters.selectedBrands.length > 0) {
           itemsQuery = itemsQuery.in(
             'brand_id',
-            stableFilters.selectedBrands.map(b => parseInt(b))
+            filters.selectedBrands.map(b => parseInt(b)) // Assuming brand_id is number
           );
         }
 
-        if (stableFilters.selectedCategories.length > 0) {
-          itemsQuery = itemsQuery.in('category', stableFilters.selectedCategories);
+        if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+          itemsQuery = itemsQuery.in('category', filters.selectedCategories);
         }
 
         const { data: filteredItems } = await itemsQuery;
@@ -136,9 +138,9 @@ export function useStorePerformance() {
       // Combine with store information
       const storePerformance: StorePerformanceData[] = stores
         .filter(store => {
-          // Apply region filter
-          if (stableFilters.selectedRegions.length > 0) {
-            return stableFilters.selectedRegions.includes(store.region);
+          // Apply region filter (using new `filters` object)
+          if (filters.selectedRegions && filters.selectedRegions.length > 0) {
+            return filters.selectedRegions.includes(store.region);
           }
           return true;
         })
