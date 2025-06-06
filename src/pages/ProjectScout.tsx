@@ -26,6 +26,7 @@ import {
 // Import our new components
 import { AIInsightsPanel } from '@/components/ai/AIInsightsPanel';
 import { DeviceHealthDashboard } from '@/components/iot/DeviceHealthDashboard';
+import { ProjectScoutTour } from '@/components/GuidedTour';
 
 export default function ProjectScout() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -61,6 +62,7 @@ export default function ProjectScout() {
             </div>
             <div className="text-xs text-gray-500">Database connected successfully</div>
           </div>
+          <ProjectScoutTour />
           <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
             <Activity className="mr-2 h-4 w-4" />
             Refresh Status
@@ -73,23 +75,39 @@ export default function ProjectScout() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview" className="flex items-center space-x-1">
+          <TabsTrigger
+            value="overview"
+            className="flex items-center space-x-1"
+            data-tour="overview-tab"
+          >
             <BarChart3 className="h-4 w-4" />
             <span>Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="devices" className="flex items-center space-x-1">
+          <TabsTrigger
+            value="devices"
+            className="flex items-center space-x-1"
+            data-tour="devices-tab"
+          >
             <Activity className="h-4 w-4" />
             <span>IoT Devices</span>
           </TabsTrigger>
-          <TabsTrigger value="ai" className="flex items-center space-x-1">
+          <TabsTrigger value="ai" className="flex items-center space-x-1" data-tour="ai-tab">
             <Brain className="h-4 w-4" />
             <span>AI Insights</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center space-x-1">
+          <TabsTrigger
+            value="analytics"
+            className="flex items-center space-x-1"
+            data-tour="analytics-tab"
+          >
             <TrendingUp className="h-4 w-4" />
             <span>Analytics</span>
           </TabsTrigger>
-          <TabsTrigger value="architecture" className="flex items-center space-x-1">
+          <TabsTrigger
+            value="architecture"
+            className="flex items-center space-x-1"
+            data-tour="architecture-tab"
+          >
             <Cpu className="h-4 w-4" />
             <span>Architecture</span>
           </TabsTrigger>
@@ -98,7 +116,7 @@ export default function ProjectScout() {
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card data-tour="active-devices">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Devices</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
@@ -120,7 +138,7 @@ export default function ProjectScout() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-tour="cost-savings">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Cost Savings</CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-500" />
@@ -145,7 +163,7 @@ export default function ProjectScout() {
 
           {/* Key Features */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
+            <Card data-tour="data-integrity">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Shield className="h-5 w-5 text-blue-500" />

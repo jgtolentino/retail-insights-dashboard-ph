@@ -4,6 +4,7 @@ import { GlobalFiltersPanel } from './GlobalFiltersPanel';
 import { Footer } from './layout/Footer';
 import { DatabaseStatus } from './DatabaseStatus';
 import { StatusBanner } from './StatusBanner';
+import { Chatbot } from './Chatbot';
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,6 +26,7 @@ export function Layout({ children }: LayoutProps) {
 
       <Footer />
       <DatabaseStatus />
+      <Chatbot />
     </div>
   );
 }
