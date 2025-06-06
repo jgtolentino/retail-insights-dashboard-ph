@@ -36,12 +36,11 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 });
 
 // Environment variables - these should be set in Vercel or your deployment platform
-// Use the VITE_SUPABASE_MCP_URL for the Managed Connection Proxy endpoint
 const MCP_URL = import.meta.env.VITE_SUPABASE_MCP_URL;
 
 // Function to fetch the short-lived MCP token from our serverless endpoint
 const fetchMcpToken = async () => {
-  const resp = await fetch('/api/getMcpToken');
+  const resp = await fetch('/api/getMcpToken', { method: 'POST' });
   if (!resp.ok) {
     const errorText = await resp.text();
     throw new Error(`Failed to fetch MCP token: ${resp.status} - ${errorText}`);
