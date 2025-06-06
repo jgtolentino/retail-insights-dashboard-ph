@@ -42,6 +42,21 @@ import { BehaviorSuggestionsTable } from '@/components/BehaviorSuggestionsTable'
 // Import services
 import { enhancedAnalyticsService, DateRange } from '@/services/enhanced-analytics';
 
+const formatCurrency = (value: number | undefined | null): string => {
+  if (typeof value !== 'number' || isNaN(value)) return '--';
+  return `₱${value.toFixed(2)}`;
+};
+
+const formatPercentage = (value: number | undefined | null): string => {
+  if (typeof value !== 'number' || isNaN(value)) return '--';
+  return `${value.toFixed(1)}%`;
+};
+
+const formatNumber = (value: number | undefined | null): string => {
+  if (typeof value !== 'number' || isNaN(value)) return '--';
+  return value.toLocaleString();
+};
+
 export default function Sprint4Dashboard() {
   const [selectedDateRange, setSelectedDateRange] = useState<string>('30d');
   const [isLoading, setIsLoading] = useState(false);
@@ -83,11 +98,11 @@ export default function Sprint4Dashboard() {
       // Create CSV data
       const csvData = [
         ['Metric', 'Value'],
-        ['Total Transactions', summary.totalTransactions.toString()],
-        ['Total Revenue', `₱${(summary?.totalRevenue || 0).toFixed(2)}`],
+        ['Total Transactions', formatNumber(summary.totalTransactions)],
+        ['Total Revenue', formatCurrency(summary?.totalRevenue)],
         ['Average Checkout Time', `${(summary?.avgCheckoutTime || 0).toFixed(1)}s`],
-        ['Substitution Rate', `${(summary?.avgSubstitutionRate || 0).toFixed(1)}%`],
-        ['Digital Payment Rate', `${(summary?.avgDigitalPaymentRate || 0).toFixed(1)}%`],
+        ['Substitution Rate', formatPercentage(summary?.avgSubstitutionRate)],
+        ['Digital Payment Rate', formatPercentage(summary?.avgDigitalPaymentRate)],
       ];
 
       const csvContent = csvData.map(row => row.join(',')).join('\n');
@@ -211,7 +226,7 @@ export default function Sprint4Dashboard() {
                 <Brain className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">Active</div>
+                <div className="text-2xl font-bold text-blue-600">{formatNumber(summary?.totalTransactions)}</div>
                 <p className="text-xs text-muted-foreground">AI insights enabled</p>
               </CardContent>
             </Card>

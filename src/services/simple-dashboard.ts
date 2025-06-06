@@ -60,10 +60,6 @@ export const simpleDashboardService = {
       const totalTransactions = transactions.length;
       const avgTransaction = totalRevenue / totalTransactions;
 
-      }`);
-      }`);
-      }`);
-
       // Get actual brand sales from transaction_items, products, and brands tables
       let topBrands = [];
 
@@ -147,11 +143,7 @@ export const simpleDashboardService = {
           }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 15);
-
-        );
       }
-
-      );
 
       // Create simple time series from created_at dates
       const dailySales = new Map<string, { transactions: number; revenue: number }>();

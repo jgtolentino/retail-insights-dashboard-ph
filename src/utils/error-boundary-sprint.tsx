@@ -68,12 +68,6 @@ export class SprintErrorBoundary extends Component<Props, State> {
 
     const isExpected = this.expectedErrors[sprint]?.some(msg => errorMessage.includes(msg));
 
-    :`, {
-      error,
-      errorInfo,
-      sprint,
-    });
-
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production' && !isExpected) {
       // window.Sentry?.captureException(error, {

@@ -1,78 +1,73 @@
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
-export interface AIRecommendation {
+export interface AIInsight {
   id: string;
-  type: 'upsell' | 'cross-sell' | 'substitution';
   title: string;
   description: string;
   confidence: number;
-  products: string[];
-  expectedLift: number;
-}
-
-export interface TranscriptionInsight {
-  id: string;
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  impact: number;
   timestamp: string;
-  transcription: string;
-  intent: string;
-  confidence: number;
-  extractedEntities: Record<string, any>;
 }
 
-export interface DateRange {
-  start: string;
-  end: string;
-}
+export const aiService = {
+  async getInsights(): Promise<AIInsight[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_insights')
+        .select('*')
+        .order('timestamp', { ascending: false });
 
-class AIService {
-  async generatePredictions(data: any): Promise<any[]> {
-    // Mock implementation
-    return [
-      {
-        prediction: 'Increased demand for beverage category',
-        confidence: 0.85,
-        impact: 'high'
+      if (error) {
+        logger.error('Error fetching AI insights:', error);
+        return [];
       }
-    ];
-  }
 
-  async getConsumerInsights(filters: any): Promise<any> {
-    // Mock implementation
-    return {
-      demographics: [],
-      preferences: [],
-      trends: []
-    };
-  }
+      return data || [];
+    } catch (error) {
+      logger.error('Error in getInsights:', error);
+      return [];
+    }
+  },
 
-  async generateAIRecommendations(dateRange: DateRange): Promise<AIRecommendation[]> {
-    // Mock implementation
-    return [
-      {
-        id: '1',
-        type: 'upsell',
-        title: 'Bundle Opportunity',
-        description: 'Customers buying cigarettes often purchase coffee',
-        confidence: 85,
-        products: ['Cigarettes', 'Coffee'],
-        expectedLift: 15
+  async getRecommendations(): Promise<AIInsight[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_recommendations')
+        .select('*')
+        .order('priority', { ascending: false });
+
+      if (error) {
+        logger.error('Error fetching AI recommendations:', error);
+        return [];
       }
-    ];
-  }
 
-  async getTranscriptionInsights(dateRange: DateRange): Promise<TranscriptionInsight[]> {
-    // Mock implementation
-    return [
-      {
-        id: '1',
-        timestamp: new Date().toISOString(),
-        transcription: 'Customer asked for Marlboro',
-        intent: 'product_request',
-        confidence: 0.9,
-        extractedEntities: { brand: 'Marlboro', category: 'cigarettes' }
+      return data || [];
+    } catch (error) {
+      logger.error('Error in getRecommendations:', error);
+      return [];
+    }
+  },
+
+  async getCompetitiveAnalysis(): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('competitive_analysis')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        logger.error('Error fetching competitive analysis:', error);
+        return null;
       }
-    ];
-  }
-}
 
-export const aiService = new AIService();
-export default aiService;
+      return data?.[0] || null;
+    } catch (error) {
+      logger.error('Error in getCompetitiveAnalysis:', error);
+      return null;
+    }
+  }
+};

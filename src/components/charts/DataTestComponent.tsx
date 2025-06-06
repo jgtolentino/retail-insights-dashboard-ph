@@ -1,6 +1,70 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/utils/logger';
+
+export interface TestResults {
+  ageDistribution: {
+    data: Array<{
+      age: string;
+      count: number;
+    }>;
+  };
+  genderDistribution: {
+    data: Array<{
+      gender: string;
+      count: number;
+    }>;
+  };
+  transactions: {
+    data: Array<{
+      id: string;
+      total_amount: number;
+      created_at: string;
+    }>;
+  };
+}
+
+export async function useDataTest(): Promise<TestResults> {
+  try {
+    const [ageData, genderData, transactionData] = await Promise.all([
+      supabase.from('age_distribution').select('*'),
+      supabase.from('gender_distribution').select('*'),
+      supabase.from('transactions').select('*').limit(10)
+    ]);
+
+    if (ageData.error) {
+      logger.error('Error fetching age distribution:', ageData.error);
+    }
+
+    if (genderData.error) {
+      logger.error('Error fetching gender distribution:', genderData.error);
+    }
+
+    if (transactionData.error) {
+      logger.error('Error fetching transaction data:', transactionData.error);
+    }
+
+    return {
+      ageDistribution: {
+        data: ageData.data || []
+      },
+      genderDistribution: {
+        data: genderData.data || []
+      },
+      transactions: {
+        data: transactionData.data || []
+      }
+    };
+  } catch (error) {
+    logger.error('Error in useDataTest:', error);
+    return {
+      ageDistribution: { data: [] },
+      genderDistribution: { data: [] },
+      transactions: { data: [] }
+    };
+  }
+}
 
 export function DataTestComponent() {
   const [testResults, setTestResults] = useState<any>({});
@@ -54,7 +118,7 @@ export function DataTestComponent() {
       // Test 3: Raw transaction sample
       const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
-        .select('customer_age, customer_gender, amount, created_at')
+        .select('customer_age, customer_gender, total_amount, created_at')
         .not('customer_age', 'is', null)
         .limit(5);
 

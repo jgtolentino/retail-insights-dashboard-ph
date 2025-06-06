@@ -214,3 +214,6 @@ export function CLIENTBrandPerformanceGrid({
     </Card>
   );
 }
+
+// Export alias for backward compatibility
+export { CLIENTBrandPerformanceGrid as TBWABrandPerformanceGrid };

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
-const supabase = createClient(
+const supabaseClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
@@ -65,6 +67,12 @@ export interface BrandAnalysis {
   };
 }
 
+export interface AdvancedFilter {
+  field: string;
+  operator: string;
+  value: any;
+}
+
 export const useAdvancedFilters = () => {
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -97,7 +105,7 @@ export const useAdvancedFilters = () => {
     setIsLoading(true);
     try {
       // Get categories
-      const { data: brandCategories } = await supabase
+      const { data: brandCategories } = await supabaseClient
         .from('brands')
         .select('category')
         .not('category', 'is', null);
@@ -105,14 +113,14 @@ export const useAdvancedFilters = () => {
       const categories = [...new Set(brandCategories?.map(b => b.category) || [])];
 
       // Get brands with Client status
-      const { data: allBrands } = await supabase
+      const { data: allBrands } = await supabaseClient
         .from('brands')
         .select('id, name, category, is_client')
         .not('name', 'is', null)
         .order('name');
 
       // Get locations
-      const { data: allStores } = await supabase
+      const { data: allStores } = await supabaseClient
         .from('stores')
         .select('location')
         .not('location', 'is', null);
@@ -152,55 +160,37 @@ export const useAdvancedFilters = () => {
 
   const validateFilters = async () => {
     try {
-      // Sample-based validation for performance
-      const sampleSize = 100;
-      const { data: sampleTransactions } = await supabase
-        .from('transactions')
-        .select(
-          `
-          id,
-          transaction_items(
-            products(
-              brands(category, is_client)
-            )
-          )
-        `
-        )
-        .limit(sampleSize);
+      let query = supabase.from('transactions').select('id');
 
-      let matchingCount = 0;
-      sampleTransactions?.forEach(transaction => {
-        const items = transaction.transaction_items || [];
-
-        // Check category filter
-        const matchesCategory =
-          filters.categories.length === 0 ||
-          items.some(item => filters.categories.includes(item.products?.brands?.category));
-
-        // Check Client filter
-        const matchesClient =
-          filters.client_only === null ||
-          items.some(item => item.products?.brands?.is_client === filters.client_only);
-
-        if (matchesCategory && matchesClient) {
-          matchingCount++;
-        }
+      filters.categories.forEach(category => {
+        query = query.eq('transaction_items.products.brands.category', category);
       });
 
-      const estimatedTotal = Math.round((matchingCount / sampleSize) * 18000);
-      const isValid = matchingCount > 0;
+      if (filters.client_only !== null) {
+        query = query.eq('transaction_items.products.brands.is_client', filters.client_only);
+      }
 
-      setIsValid(isValid);
-      setEstimatedResults(estimatedTotal);
+      const { count, error } = await query.count();
+
+      if (error) {
+        logger.error('Error applying advanced filters:', error);
+        setIsValid(false);
+        setEstimatedResults(0);
+        return;
+      }
+
+      setIsValid(true);
+      setEstimatedResults(count || 0);
     } catch (error) {
-      setIsValid(true); // Fail gracefully
+      setIsValid(false);
+      setEstimatedResults(0);
     }
   };
 
   const getBrandAnalysis = useCallback(
     async (category?: string, clientOnly?: boolean): Promise<BrandAnalysis | null> => {
       try {
-        const { data, error } = await supabase.rpc('get_brand_analysis_for_filters', {
+        const { data, error } = await supabaseClient.rpc('get_brand_analysis_for_filters', {
           p_category: category || null,
           p_client_only: clientOnly ?? null,
         });
@@ -217,8 +207,8 @@ export const useAdvancedFilters = () => {
   const getMarketShare = useCallback(async (): Promise<MarketShare | null> => {
     try {
       const [clientData, compData] = await Promise.all([
-        supabase.rpc('get_brand_analysis_for_filters', { p_client_only: true }),
-        supabase.rpc('get_brand_analysis_for_filters', { p_client_only: false }),
+        supabaseClient.rpc('get_brand_analysis_for_filters', { p_client_only: true }),
+        supabaseClient.rpc('get_brand_analysis_for_filters', { p_client_only: false }),
       ]);
 
       if (clientData.error || compData.error) {
@@ -335,3 +325,55 @@ export const useAdvancedFilters = () => {
     },
   };
 };
+
+export async function useAdvancedFilters(filters: AdvancedFilter[]): Promise<number> {
+  try {
+    let query = supabase.from('transactions').select('id');
+
+    filters.forEach(filter => {
+      switch (filter.operator) {
+        case 'eq':
+          query = query.eq(filter.field, filter.value);
+          break;
+        case 'neq':
+          query = query.neq(filter.field, filter.value);
+          break;
+        case 'gt':
+          query = query.gt(filter.field, filter.value);
+          break;
+        case 'gte':
+          query = query.gte(filter.field, filter.value);
+          break;
+        case 'lt':
+          query = query.lt(filter.field, filter.value);
+          break;
+        case 'lte':
+          query = query.lte(filter.field, filter.value);
+          break;
+        case 'like':
+          query = query.like(filter.field, `%${filter.value}%`);
+          break;
+        case 'ilike':
+          query = query.ilike(filter.field, `%${filter.value}%`);
+          break;
+        case 'in':
+          query = query.in(filter.field, filter.value);
+          break;
+        default:
+          logger.warn(`Unknown operator: ${filter.operator}`);
+      }
+    });
+
+    const { count, error } = await query.count();
+
+    if (error) {
+      logger.error('Error applying advanced filters:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    logger.error('Error in useAdvancedFilters:', error);
+    return 0;
+  }
+}

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
 import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
 import shallow from 'zustand/shallow';
+import { logger } from '@/utils/logger';
 
 export interface CustomerDensityData {
   area_name: string;
@@ -14,6 +15,13 @@ export interface CustomerDensityData {
   revenue: number;
   unique_customers: number;
   avg_transaction_value: number;
+}
+
+export interface CustomerDensity {
+  region: string;
+  density: number;
+  population: number;
+  stores: number;
 }
 
 // Mock location data for Philippines areas
@@ -197,4 +205,23 @@ export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'prov
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
+}
+
+export async function fetchCustomerDensityData(): Promise<CustomerDensity[]> {
+  try {
+    const { data, error } = await supabase
+      .from('customer_density')
+      .select('*')
+      .order('density', { ascending: false });
+
+    if (error) {
+      logger.error('Error fetching customer density data:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    logger.error('Error in fetchCustomerDensityData:', error);
+    return [];
+  }
 }

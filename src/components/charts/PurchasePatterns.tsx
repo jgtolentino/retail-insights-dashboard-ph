@@ -11,6 +11,8 @@ import {
   Line,
 } from 'recharts';
 import { dashboardService } from '@/services/dashboard';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface PurchasePatternsProps {
   startDate: string;
@@ -27,6 +29,31 @@ interface HourlyPattern {
   hour: number;
   transaction_count: number;
   avg_amount: number;
+}
+
+export interface HourlyData {
+  hour: number;
+  transactions: number;
+  revenue: number;
+}
+
+export async function usePurchasePatterns(): Promise<HourlyData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('hourly_transactions')
+      .select('*')
+      .order('hour', { ascending: true });
+
+    if (error) {
+      logger.error('Error fetching hourly transaction data:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    logger.error('Error in usePurchasePatterns:', error);
+    return [];
+  }
 }
 
 export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatternsProps) {

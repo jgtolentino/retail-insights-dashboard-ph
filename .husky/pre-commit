@@ -1,2 +1,51 @@
-npx lint-staged
-npm run test:unit
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run type checking
+echo "🔍 Running type check..."
+npm run type-check || exit 1
+
+# Run linting
+echo "🧹 Running linter..."
+npm run lint || exit 1
+
+# Check for common anti-patterns
+echo "🔎 Checking for common issues..."
+npx eslint --rule 'no-console: error' --rule 'no-debugger: error' src/ || exit 1
+
+# Check for mock data
+echo "🔍 Checking for mock data..."
+if grep -r "mock" --include="*.ts" --include="*.tsx" src/; then
+  echo "❌ Found mock data in source files. Please remove before committing."
+  exit 1
+fi
+
+# Check for hardcoded values
+echo "🔍 Checking for hardcoded values..."
+if grep -r "hardcoded" --include="*.ts" --include="*.tsx" src/; then
+  echo "❌ Found hardcoded values. Please use configuration or environment variables."
+  exit 1
+fi
+
+# Check for proper error handling
+echo "🔍 Checking for proper error handling..."
+if grep -r "catch" --include="*.ts" --include="*.tsx" src/ | grep -v "logger.error"; then
+  echo "❌ Found catch blocks without proper error logging. Please use logger.error."
+  exit 1
+fi
+
+# Check for proper date formatting
+echo "🔍 Checking for proper date formatting..."
+if grep -r "new Date" --include="*.ts" --include="*.tsx" src/ | grep -v "toISOString"; then
+  echo "❌ Found date creation without proper ISO formatting. Please use toISOString()."
+  exit 1
+fi
+
+# Check for proper null checks
+echo "🔍 Checking for proper null checks..."
+if grep -r ".toFixed" --include="*.ts" --include="*.tsx" src/ | grep -v "typeof.*=== 'number'"; then
+  echo "❌ Found .toFixed() without proper type checking. Please add type guards."
+  exit 1
+fi
+
+echo "✅ All checks passed!"

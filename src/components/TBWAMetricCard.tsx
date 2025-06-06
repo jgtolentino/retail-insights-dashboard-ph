@@ -169,3 +169,8 @@ export function CLIENTTransactionCard({
     />
   );
 }
+
+// Export aliases for backward compatibility
+export { CLIENTMetricCard as TBWAMetricCard };
+export { CLIENTRevenueCard as TBWARevenueCard };
+export { CLIENTTransactionCard as TBWATransactionCard };

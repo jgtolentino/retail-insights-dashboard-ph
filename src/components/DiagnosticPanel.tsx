@@ -3,12 +3,91 @@ import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
-interface DiagnosticResult {
-  test: string;
-  status: 'success' | 'error' | 'loading';
-  message: string;
-  details?: any;
+export interface DiagnosticResult {
+  rlsTest: {
+    status: 'pass' | 'fail';
+    details: {
+      data: any[];
+    };
+  };
+  queryTest: {
+    status: 'pass' | 'fail';
+    details: {
+      query: string;
+      result: any;
+    };
+  };
+  connectionTest: {
+    status: 'pass' | 'fail';
+    details: {
+      latency: number;
+    };
+  };
+}
+
+export async function useDiagnostics(): Promise<DiagnosticResult> {
+  try {
+    // Test RLS
+    const { data: rlsData, error: rlsError } = await supabase
+      .from('brands')
+      .select('*')
+      .limit(5);
+
+    // Test query performance
+    const startTime = performance.now();
+    const { data: queryData, error: queryError } = await supabase
+      .from('transactions')
+      .select('id, total_amount')
+      .limit(100);
+    const endTime = performance.now();
+
+    return {
+      rlsTest: {
+        status: rlsError ? 'fail' : 'pass',
+        details: {
+          data: rlsData || []
+        }
+      },
+      queryTest: {
+        status: queryError ? 'fail' : 'pass',
+        details: {
+          query: 'SELECT id, total_amount FROM transactions LIMIT 100',
+          result: queryData || []
+        }
+      },
+      connectionTest: {
+        status: 'pass',
+        details: {
+          latency: endTime - startTime
+        }
+      }
+    };
+  } catch (error) {
+    logger.error('Error in useDiagnostics:', error);
+    return {
+      rlsTest: {
+        status: 'fail',
+        details: {
+          data: []
+        }
+      },
+      queryTest: {
+        status: 'fail',
+        details: {
+          query: '',
+          result: []
+        }
+      },
+      connectionTest: {
+        status: 'fail',
+        details: {
+          latency: 0
+        }
+      }
+    };
+  }
 }
 
 export function DiagnosticPanel() {

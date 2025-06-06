@@ -23,6 +23,7 @@ import {
   Scatter,
   Cell,
 } from 'recharts';
+import { logger } from '@/utils/logger';
 
 const COLORS = [
   '#3b82f6',
@@ -47,21 +48,31 @@ export default function BasketBehavior() {
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('30');
 
   // Fetch basket size distribution
-  const { data: basketData, isLoading } = useQuery({
-    queryKey: ['basket-behavior', selectedRegion, selectedTimeframe],
+  const { data: basketData, error } = useQuery({
+    queryKey: ['basket-analysis'],
     queryFn: async () => {
-      // For now, return mock data until we implement proper basket analysis
-      // This would query transaction_items grouped by transaction_id to get basket sizes
-      return [
-        { basket_size: 1, transaction_count: 1200, avg_value: 45.5, total_revenue: 54600 },
-        { basket_size: 2, transaction_count: 850, avg_value: 89.25, total_revenue: 75862 },
-        { basket_size: 3, transaction_count: 420, avg_value: 135.75, total_revenue: 57015 },
-        { basket_size: 4, transaction_count: 180, avg_value: 178.9, total_revenue: 32202 },
-        { basket_size: 5, transaction_count: 85, avg_value: 225.4, total_revenue: 19159 },
-        { basket_size: '6+', transaction_count: 45, avg_value: 295.8, total_revenue: 13311 },
-      ] as BasketData[];
+      const { data, error } = await supabase
+        .from('basket_analysis')
+        .select('*')
+        .order('frequency', { ascending: false });
+
+      if (error) {
+        logger.error('Error fetching basket analysis:', error);
+        throw error;
+      }
+
+      return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  if (error) {
+    logger.error('Error fetching basket analysis:', error);
+  }
+
+  const totalRevenue = basketData?.reduce((sum, item) => sum + item.revenue, 0) || 0;
+  const totalTransactions = basketData?.reduce((sum, item) => sum + item.frequency, 0) || 0;
+  const weightedAvgBasketSize = basketData?.reduce((sum, item) => sum + (item.avg_items * item.frequency), 0) / totalTransactions || 0;
 
   // Mock co-purchase data (would come from market basket analysis)
   const coPurchaseData = [

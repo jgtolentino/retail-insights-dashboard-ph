@@ -1,33 +1,38 @@
-import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export interface SystemHealth {
-  status: 'Optimal' | 'Warning' | 'Error';
-  dbConnected: boolean;
-  responseTime: number;
+  database: boolean;
+  api: boolean;
+  cache: boolean;
+  lastChecked: string;
 }
 
-export function useSystemHealth() {
-  const [health, setHealth] = useState<SystemHealth>({
-    status: 'Optimal',
-    dbConnected: true,
-    responseTime: 150,
-  });
+export async function useSystemHealth(): Promise<SystemHealth> {
+  try {
+    // Check database health
+    const { error: dbError } = await supabase.from('system_health').select('id').limit(1);
+    const database = !dbError;
 
-  useEffect(() => {
-    // Simple mock health check for now
-    const checkHealth = () => {
-      setHealth({
-        status: 'Optimal',
-        dbConnected: true,
-        responseTime: Math.floor(Math.random() * 100) + 50,
-      });
+    // Check API health (you can replace this with your actual API health check)
+    const api = true; // Placeholder for actual API health check
+
+    // Check cache health (you can replace this with your actual cache health check)
+    const cache = true; // Placeholder for actual cache health check
+
+    return {
+      database,
+      api,
+      cache,
+      lastChecked: new Date().toISOString()
     };
-
-    checkHealth();
-    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return health;
+  } catch (error) {
+    logger.error('Error checking system health:', error);
+    return {
+      database: false,
+      api: false,
+      cache: false,
+      lastChecked: new Date().toISOString()
+    };
+  }
 }

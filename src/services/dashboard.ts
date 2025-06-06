@@ -313,11 +313,6 @@ export const dashboardService = {
         }
       }
 
-      ,
-        end: endDate.toISOString(),
-        timeRange,
-      });
-
       // Get total transaction count using count query (no 1000 row limit)
       const { count: totalTransactions, error: countError } = await supabase
         .from('transactions')
@@ -439,9 +434,6 @@ export const dashboardService = {
         }))
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 15); // Show top 15 brands
-
-      .map(b => `${b.name}: ${b.sales} (${typeof b.sales})`)
-      );
 
       logger.info('Successfully fetched dashboard data', {
         totalRevenue,

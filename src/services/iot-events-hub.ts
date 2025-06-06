@@ -293,8 +293,7 @@ export class IoTEventsHub {
 
       // Log critical alerts
       if (alert.severity === 'critical') {
-        } else {
-        `);
+        // Critical alert logged
       }
     } catch (error) {
       this.callbacks.onError?.(error as Error);
@@ -352,7 +351,8 @@ export class IoTEventsHub {
         };
       }
     } catch (error) {
-      }
+      this.callbacks.onError?.(error as Error);
+    }
   }
 
   /**
@@ -374,7 +374,8 @@ export class IoTEventsHub {
         }));
       }
     } catch (error) {
-      }
+      this.callbacks.onError?.(error as Error);
+    }
   }
 
   /**
@@ -387,13 +388,13 @@ export class IoTEventsHub {
     if (health.cpu_usage > 95) {
       alerts.push({
         type: 'cpu_high',
-        message: `Critical CPU usage: ${health.cpu_usage}%`,
+        message: 'Critical CPU usage: ' + health.cpu_usage + '%',
         severity: 'critical',
       });
     } else if (health.cpu_usage > 80) {
       alerts.push({
         type: 'cpu_high',
-        message: `High CPU usage: ${health.cpu_usage}%`,
+        message: 'High CPU usage: ' + health.cpu_usage + '%',
         severity: 'high',
       });
     }
@@ -402,13 +403,13 @@ export class IoTEventsHub {
     if (health.memory_usage > 95) {
       alerts.push({
         type: 'memory_high',
-        message: `Critical memory usage: ${health.memory_usage}%`,
+        message: 'Critical memory usage: ' + health.memory_usage + '%',
         severity: 'critical',
       });
     } else if (health.memory_usage > 85) {
       alerts.push({
         type: 'memory_high',
-        message: `High memory usage: ${health.memory_usage}%`,
+        message: 'High memory usage: ' + health.memory_usage + '%',
         severity: 'high',
       });
     }
@@ -417,13 +418,13 @@ export class IoTEventsHub {
     if (health.temperature > 80) {
       alerts.push({
         type: 'temperature',
-        message: `Critical temperature: ${health.temperature}°C`,
+        message: 'Critical temperature: ' + health.temperature + '°C',
         severity: 'critical',
       });
     } else if (health.temperature > 70) {
       alerts.push({
         type: 'temperature',
-        message: `High temperature: ${health.temperature}°C`,
+        message: 'High temperature: ' + health.temperature + '°C',
         severity: 'high',
       });
     }
@@ -432,13 +433,13 @@ export class IoTEventsHub {
     if (health.disk_usage > 90) {
       alerts.push({
         type: 'disk_full',
-        message: `Critical disk usage: ${health.disk_usage}%`,
+        message: 'Critical disk usage: ' + health.disk_usage + '%',
         severity: 'critical',
       });
     } else if (health.disk_usage > 80) {
       alerts.push({
         type: 'disk_full',
-        message: `High disk usage: ${health.disk_usage}%`,
+        message: 'High disk usage: ' + health.disk_usage + '%',
         severity: 'high',
       });
     }
@@ -447,7 +448,7 @@ export class IoTEventsHub {
     if (health.network_latency_ms > 3000) {
       alerts.push({
         type: 'network_down',
-        message: `High network latency: ${health.network_latency_ms}ms`,
+        message: 'High network latency: ' + health.network_latency_ms + 'ms',
         severity: 'high',
       });
     }
@@ -487,7 +488,8 @@ export class IoTEventsHub {
         });
       }
     } catch (error) {
-      }
+      this.callbacks.onError?.(error as Error);
+    }
   }
 
   /**
@@ -598,9 +600,6 @@ export class IoTEventsHub {
 
     this.reconnectAttempts++;
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff, max 30s
-
-    `
-    );
 
     setTimeout(async () => {
       await this.cleanup();

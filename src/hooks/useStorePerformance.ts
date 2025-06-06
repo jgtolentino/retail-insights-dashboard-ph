@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
 import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
 import shallow from 'zustand/shallow';
+import { logger } from '@/utils/logger';
 
 export interface StorePerformanceData {
   id: number;
@@ -170,7 +171,20 @@ export function useStorePerformance() {
         })
         .filter(store => store.transaction_count > 0); // Only show stores with transactions
 
-      return storePerformance.sort((a, b) => b.total_revenue - a.total_revenue);
+      const { data: storeData, error: storeError } = await supabase
+        .from('store_performance')
+        .select('*')
+        .order('revenue', { ascending: false });
+
+      if (storeError) {
+        logger.error('Error fetching store performance:', storeError);
+        return [];
+      }
+
+      return storeData?.map(store => ({
+        ...store,
+        growth_rate: store.growth_rate || 0 // Use actual growth rate from database
+      })) || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes

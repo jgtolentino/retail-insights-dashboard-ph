@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 // Mock data for Sprint 4 features
 const mockSubstitutionPatterns = [
@@ -113,8 +114,18 @@ const mockCheckoutDurations = [
 // Create a wrapper service that uses real data where available
 export const compatibleAnalyticsService = {
   async getSubstitutionPatterns(dateRange) {
-    // Return mock data for now
-    return mockSubstitutionPatterns;
+    const { data, error } = await supabase
+      .from('substitutions')
+      .select('*')
+      .order('count', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      logger.error('Error fetching substitution patterns:', error);
+      return [];
+    }
+
+    return data || [];
   },
 
   async getRequestBehaviorStats(dateRange) {
@@ -136,7 +147,17 @@ export const compatibleAnalyticsService = {
   },
 
   async getCheckoutDurationAnalysis(dateRange) {
-    return mockCheckoutDurations;
+    const { data, error } = await supabase
+      .from('checkout_durations')
+      .select('*')
+      .order('duration', { ascending: true });
+
+    if (error) {
+      logger.error('Error fetching checkout durations:', error);
+      return [];
+    }
+
+    return data || [];
   },
 
   async getPaymentMethodAnalysis(dateRange) {

@@ -35,8 +35,6 @@ class Logger {
         error: 'color: #ef4444',
         debug: 'color: #6b7280',
       };
-
-      }] ${message}`, style[level], data || '');
     }
   }
 

@@ -19,6 +19,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/logger';
 
 interface Recommendation {
   id: string;
@@ -138,30 +139,44 @@ export default function AIRecommendations() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
 
+  const { data: recommendations, error } = useQuery({
+    queryKey: ['ai-recommendations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_recommendations')
+        .select('*')
+        .order('priority', { ascending: false });
+
+      if (error) {
+        logger.error('Error fetching AI recommendations:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  if (error) {
+    logger.error('Error fetching AI recommendations:', error);
+  }
+
+  const totalPotentialRevenue = recommendations?.reduce(
+    (sum, rec) => sum + (rec.potential_revenue || 0),
+    0
+  ) || 0;
+
+  const averageConfidence =
+    recommendations?.reduce((sum, rec) => sum + rec.confidence, 0) /
+    (recommendations?.length || 1);
+
   const filteredRecommendations = useMemo(() => {
-    return mockRecommendations.filter(rec => {
+    return recommendations?.filter(rec => {
       const categoryMatch = selectedCategory === 'all' || rec.category === selectedCategory;
       const priorityMatch = selectedPriority === 'all' || rec.priority === selectedPriority;
       return categoryMatch && priorityMatch;
-    });
-  }, [selectedCategory, selectedPriority]);
-
-  const summaryMetrics = useMemo(() => {
-    const totalPotentialRevenue = mockRecommendations.reduce(
-      (sum, rec) => sum + (rec.metrics?.potential_revenue || 0),
-      0
-    );
-    const avgConfidence =
-      mockRecommendations.reduce((sum, rec) => sum + rec.confidence, 0) /
-      mockRecommendations.length;
-
-    return {
-      totalRecommendations: mockRecommendations.length,
-      highPriority: mockRecommendations.filter(r => r.priority === 'high').length,
-      totalPotentialRevenue,
-      avgConfidence: avgConfidence.toFixed(1),
-    };
-  }, []);
+    }) || [];
+  }, [selectedCategory, selectedPriority, recommendations]);
 
   const handleCopyRecommendation = (rec: Recommendation) => {
     const text = `
@@ -185,8 +200,8 @@ Impact: ${rec.impact}
   };
 
   const handleExportAll = () => {
-    const allText = mockRecommendations
-      .map(
+    const allText = recommendations
+      ?.map(
         rec => `
 ${rec.title}
 ${rec.description}
@@ -260,9 +275,9 @@ Impact: ${rec.impact}
               <Lightbulb className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{summaryMetrics.totalRecommendations}</div>
+              <div className="text-2xl font-bold">{recommendations?.length || 0}</div>
               <Badge variant="secondary" className="mt-1">
-                {summaryMetrics.highPriority} High Priority
+                {recommendations?.filter(r => r.priority === 'high').length || 0} High Priority
               </Badge>
             </CardContent>
           </Card>
@@ -274,7 +289,7 @@ Impact: ${rec.impact}
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ₱{summaryMetrics.totalPotentialRevenue.toLocaleString()}
+                ₱{totalPotentialRevenue.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">If all recommendations implemented</p>
             </CardContent>
@@ -286,7 +301,7 @@ Impact: ${rec.impact}
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{summaryMetrics.avgConfidence}%</div>
+              <div className="text-2xl font-bold">{averageConfidence.toFixed(1)}%</div>
               <p className="text-xs text-muted-foreground">AI confidence level</p>
             </CardContent>
           </Card>
