@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Scout | Retail Insights Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #1e293b;
+      line-height: 1.6;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-size: 2.8rem;
+      margin: 0;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin: 12px 0 0;
+      color: #64748b;
+    }
+    .badge {
+      display: inline-block;
+      background: #eff6ff;
+      color: #3b82f6;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 16px;
+      border: 1px solid #bfdbfe;
+    }
+    section.context {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 32px;
+      margin-bottom: 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    section.context h2 {
+      margin-top: 0;
+      color: #1e293b;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    section.context p {
+      margin: 0 0 16px 0;
+      font-size: 1rem;
+    }
+    section.context ul {
+      margin: 16px 0;
+      padding-left: 24px;
+    }
+    section.context li {
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .stat-card {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      border-left: 4px solid #3b82f6;
+      border: 1px solid #e2e8f0;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #1e293b;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .iframe-wrapper {
+      position: relative;
+      padding-top: 60%; /* Adjusted for dashboard content */
+      margin-bottom: 24px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      background: white;
+    }
+    .iframe-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .demo-note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #475569;
+      background: #eff6ff;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+      margin-bottom: 32px;
+      border: 1px solid #bfdbfe;
+    }
+    .instructions {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 32px;
+      border: 1px solid #e2e8f0;
+    }
+    .instructions h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    .instructions ul {
+      padding-left: 24px;
+    }
+    .instructions li {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+    .instructions strong {
+      color: #3b82f6;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin: 32px 0;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .btn-secondary {
+      background: white;
+      color: #3b82f6;
+      border: 2px solid #3b82f6;
+    }
+    .btn-secondary:hover {
+      background: #3b82f6;
+      color: white;
+      transform: translateY(-2px);
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 48px;
+      padding: 32px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .tech-stack {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 0.85rem;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+    .cost-highlight {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .cost-highlight strong {
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1) Header & One-Line Pitch -->
+    <header>
+      <h1>Project Scout</h1>
+      <p>IoT-powered retail insights with AI analytics for Philippine sari-sari stores</p>
+      <div class="badge">Live Demo • 18,000 Real Transactions • Azure OpenAI Powered</div>
+    </header>
+
+    <!-- 2) Brief Context & Dataset Description -->
+    <section class="context">
+      <h2>📊 Real-Time Retail Analytics Dashboard</h2>
+      <p>
+        Project Scout processes anonymized transaction data from IoT-enabled sari-sari stores across Metro Manila. 
+        This interactive demo showcases live analytics from our 18,000-row dataset captured in May 2025, featuring:
+      </p>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number">18,000</span>
+          <span class="stat-label">Transactions</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">90</span>
+          <span class="stat-label">IoT Devices</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">83%</span>
+          <span class="stat-label">Cost Savings</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">5</span>
+          <span class="stat-label">Regions</span>
+        </div>
+      </div>
+
+      <ul>
+        <li><strong>Transaction Analytics:</strong> Real-time volume, basket size, and dwell time per store</li>
+        <li><strong>Product Intelligence:</strong> SKU-level performance, top brands, and substitution patterns</li>
+        <li><strong>Customer Insights:</strong> Anonymous demographics, shopping behavior, and regional patterns</li>
+        <li><strong>AI Recommendations:</strong> Azure OpenAI-powered insights for inventory and merchandising</li>
+        <li><strong>IoT Health Monitoring:</strong> Live device status, temperature alerts, and network diagnostics</li>
+      </ul>
+
+      <div class="cost-highlight">
+        <strong>Architecture: Supabase + Vercel + Azure OpenAI</strong>
+        Delivering enterprise-grade analytics at $660/year vs $3,816/year Azure alternative
+      </div>
+
+      <div class="tech-stack">
+        <strong>Tech Stack:</strong> React + TypeScript, Supabase PostgreSQL, Vercel Edge Network, Azure OpenAI GPT-4, Real-time WebSocket subscriptions
+      </div>
+    </section>
+
+    <!-- 3) Embedded Interactive Demo -->
+    <div class="iframe-wrapper">
+      <iframe
+        src="https://retail-insights-dashboard-i5akq15tc-jakes-projects-e9f46c30.vercel.app/project-scout"
+        allowfullscreen
+        title="Project Scout Live Demo"
+        loading="lazy"></iframe>
+    </div>
+    
+    <div class="demo-note">
+      <strong>💡 Interactive Demo Tips:</strong> 
+      Navigate between Overview, IoT Devices, AI Insights, Analytics, and Architecture tabs. 
+      All data is live and real-time. Device health metrics update every 5 minutes.
+    </div>
+
+    <!-- 4) Quick "How to Use" Section -->
+    <section class="instructions">
+      <h2>🚀 How to Explore the Dashboard</h2>
+      <ul>
+        <li><strong>Overview Tab:</strong> 
+          View active IoT devices, store coverage metrics, cost savings analysis, and implementation roadmap.
+          See real-time health status of all 90 registered devices.
+        </li>
+        <li><strong>IoT Devices Tab:</strong>
+          Monitor live device health including CPU usage, temperature, disk space, and network latency.
+          View active alerts and device status changes in real-time.
+        </li>
+        <li><strong>AI Insights Tab:</strong>
+          Explore Azure OpenAI-powered analytics including sales predictions, anomaly detection, 
+          optimization suggestions, and Filipino consumer behavior analysis.
+        </li>
+        <li><strong>Analytics Tab:</strong>
+          Deep dive into transaction patterns, product performance, and operational metrics.
+          All analytics are enhanced with IoT device correlation data.
+        </li>
+        <li><strong>Architecture Tab:</strong>
+          Review the technical implementation, cost comparison with Azure alternatives,
+          and migration path for enterprise scaling.
+        </li>
+      </ul>
+
+      <div style="background: #f0f8ff; padding: 16px; border-radius: 8px; margin-top: 20px;">
+        <strong>🔥 Key Features to Try:</strong>
+        <ul style="margin: 8px 0;">
+          <li>Click "Refresh Insights" in AI tab to generate new OpenAI recommendations</li>
+          <li>Monitor device alerts in real-time (Device 003 currently has temperature warnings)</li>
+          <li>Explore the cost comparison showing 83% savings vs Azure architecture</li>
+          <li>View the implementation timeline and technical decisions</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5) Action Buttons -->
+    <div class="action-buttons">
+      <a href="https://retail-insights-dashboard-i5akq15tc-jakes-projects-e9f46c30.vercel.app/project-scout" 
+         target="_blank" class="btn btn-primary">
+        🔗 Open Full Dashboard
+      </a>
+      <a href="https://github.com/jgtolentino/retail-insights-dashboard-ph" 
+         target="_blank" class="btn btn-secondary">
+        📋 View Source Code
+      </a>
+      <a href="https://retail-insights-dashboard-i5akq15tc-jakes-projects-e9f46c30.vercel.app/overview" 
+         target="_blank" class="btn btn-secondary">
+        📊 Transaction Analytics
+      </a>
+    </div>
+
+    <!-- 6) Technical Implementation -->
+    <section class="context">
+      <h2>🛠️ Technical Implementation</h2>
+      <p>
+        Project Scout addresses critical challenges identified in our comprehensive analysis:
+      </p>
+      <ul>
+        <li><strong>Device Collision Prevention:</strong> Unique MAC-based ID generation prevents data integrity issues</li>
+        <li><strong>Real-time Health Monitoring:</strong> Supabase WebSocket subscriptions for live device status</li>
+        <li><strong>Cost Optimization:</strong> 83% reduction in infrastructure costs while maintaining enterprise features</li>
+        <li><strong>AI Integration:</strong> Azure OpenAI GPT-4 for contextual Filipino retail insights</li>
+        <li><strong>Scalable Architecture:</strong> Handles 90 devices with plan to scale to 500+ devices</li>
+      </ul>
+
+      <div style="background: #fff3cd; padding: 16px; border-radius: 8px; border-left: 4px solid #ffc107;">
+        <strong>⚠️ Important:</strong> This dashboard displays real operational data from our pilot deployment. 
+        Device health metrics, transaction volumes, and AI insights are generated from actual IoT sensors 
+        deployed in Metro Manila stores.
+      </div>
+    </section>
+
+    <!-- 7) Footer / Next Steps -->
+    <footer>
+      <p>
+        <strong>🔄 Live Environment:</strong> Data updates in real-time. Device health metrics refresh every 5 minutes. 
+        AI insights are generated on-demand using Azure OpenAI GPT-4.
+      </p>
+      <p style="margin-top: 16px;">
+        Questions about implementation? Want to deploy in your stores? 
+        <a href="mailto:team@projectscout.ph">Contact our team</a> or 
+        <a href="https://github.com/jgtolentino/retail-insights-dashboard-ph/issues" target="_blank">open an issue on GitHub</a>.
+      </p>
+      <p style="margin-top: 16px; font-size: 0.8rem; color: #aaa;">
+        © 2025 Project Scout • Powered by Supabase + Vercel + Azure OpenAI • 
+        <a href="https://retail-insights-dashboard-ph.vercel.app" style="color: #aaa;">retail-insights-dashboard-ph.vercel.app</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
