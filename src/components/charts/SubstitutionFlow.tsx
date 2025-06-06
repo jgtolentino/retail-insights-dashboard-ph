@@ -322,13 +322,13 @@ export function SubstitutionFlow({ dateRange, className }: SubstitutionFlowProps
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-600">
                       <span>{pattern.substitution_count} substitutions</span>
-                      <span>{(pattern.acceptance_rate * 100) || 0).toFixed(0)}% accepted</span>
-                      {pattern.avg_price_diff !== 0 && ((
+                      <span>{((pattern.acceptance_rate * 100) || 0).toFixed(0)}% accepted</span>
+                      {pattern.avg_price_diff !== 0 && (
                         <span
                           className={pattern.avg_price_diff > 0 ? 'text-red-600' : 'text-green-600'}
                         >
                           {pattern.avg_price_diff > 0 ? '+' : ''}₱
-                          {pattern.avg_price_diff || 0) || 0).toFixed(2)}
+                          {((pattern.avg_price_diff || 0) || 0).toFixed(2)}
                         </span>
                       )}
                     </div>

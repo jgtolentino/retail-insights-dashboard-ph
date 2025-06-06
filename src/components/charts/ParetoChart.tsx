@@ -94,7 +94,7 @@ export function ParetoChart({
         {thresholdIndex !== -1 && (
           <p className="text-sm text-muted-foreground">
             {thresholdIndex + 1} of {data.length} items (
-            {(((thresholdIndex + 1) / data.length) * 100) || 0).toFixed(0)}%) contribute to {threshold}%
+            {((((thresholdIndex + 1) / data.length) * 100) || 0).toFixed(0)}%) contribute to {threshold}%
             of {valueLabel.toLowerCase()}
           </p>
         )}

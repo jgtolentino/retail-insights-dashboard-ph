@@ -97,7 +97,7 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
       case 'transactions':
         return value.toLocaleString();
       case 'acceptance':
-        return `${value || 0).toFixed(1)}%`;
+        return `${(value || 0).toFixed(1)}%`;
     }
   };
 
@@ -203,7 +203,7 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
                 <YAxis
                   tick={{ fontSize: 12 }}
                   tickFormatter={value => {
-                    if (metric === 'revenue') return `₱${(value / 1000) || 0).toFixed(0)}K`;
+                    if (metric === 'revenue') return `₱${((value / 1000) || 0).toFixed(0)}K`;
                     if (metric === 'acceptance') return `${value}%`;
                     return value.toLocaleString();
                   }}
@@ -258,7 +258,7 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
                 <YAxis
                   tick={{ fontSize: 12 }}
                   tickFormatter={value => {
-                    if (metric === 'revenue') return `₱${(value / 1000) || 0).toFixed(0)}K`;
+                    if (metric === 'revenue') return `₱${((value / 1000) || 0).toFixed(0)}K`;
                     if (metric === 'acceptance') return `${value}%`;
                     return value.toLocaleString();
                   }}
@@ -296,10 +296,10 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
             <p className="text-sm text-gray-600">Average Weekly</p>
             <p className="text-lg font-semibold">
               {metric === 'revenue'
-                ? `₱${(data.reduce((sum, d) => sum + d.revenue, 0) / data.length || 0).toFixed(0).toLocaleString()}`
+                ? `₱${((data.reduce((sum, d) => sum + d.revenue, 0) / data.length) || 0).toFixed(0).toLocaleString()}`
                 : metric === 'transactions'
-                  ? (data.reduce((sum, d) => sum + d.transactions, 0) / data.length || 0).toFixed(0)
-                  : `${(data.reduce((sum, d) => sum + d.acceptanceRate, 0) / data.length || 0).toFixed(1)}%`}
+                  ? ((data.reduce((sum, d) => sum + d.transactions, 0) / data.length) || 0).toFixed(0)
+                  : `${((data.reduce((sum, d) => sum + d.acceptanceRate, 0) / data.length) || 0).toFixed(1)}%`}
             </p>
           </div>
           <div className="text-center">
@@ -314,7 +314,7 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
             <p className="text-sm text-gray-600">Growth Rate</p>
             <p className="text-lg font-semibold">
               {data.length > 1
-                ? `${(((getMetricValue(data[data.length - 1]) - getMetricValue(data[0])) / getMetricValue(data[0])) * 100) || 0).toFixed(1)}%`
+                ? `${((((getMetricValue(data[data.length - 1]) - getMetricValue(data[0])) / getMetricValue(data[0])) * 100) || 0).toFixed(1)}%`
                 : 'N/A'}
             </p>
           </div>
