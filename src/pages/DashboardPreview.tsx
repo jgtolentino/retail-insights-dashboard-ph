@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, TrendingUp, Users, ShoppingCart, Map } from 'lucide-react';
 import { useSalesTrend } from '@/hooks/useSalesTrend';
 import { useFilters } from '@/stores/dashboardStore';
+import { useDashboardSummary } from '@/hooks/useDashboardSummary';
 import {
   LineChart,
   Line,
@@ -36,16 +37,34 @@ function SummaryStats() {
   // Use unified filters from new dashboard store
   const filters = useFilters();
 
-  // Mock data - in real implementation, these would be separate data hooks
-  const stats = React.useMemo(
-    () => ({
-      totalRevenue: 1234567,
-      totalTransactions: 18000,
-      avgTransactionValue: 68.58,
-      uniqueCustomers: 6000,
-    }),
-    []
-  );
+  // Get real dashboard summary data
+  const { summary, isLoading, error } = useDashboardSummary();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map(i => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-6">
+              <div className="mb-2 h-4 w-3/4 rounded bg-gray-200"></div>
+              <div className="mb-2 h-8 w-1/2 rounded bg-gray-200"></div>
+              <div className="h-3 w-2/3 rounded bg-gray-200"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="col-span-full">
+        <CardContent className="p-6 text-center">
+          <p className="text-red-600">Error loading summary data: {error}</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -55,8 +74,13 @@ function SummaryStats() {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₱{stats.totalRevenue.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">+12.5% from last month</p>
+          <div className="text-2xl font-bold">₱{summary.totalRevenue.toLocaleString()}</div>
+          <p
+            className={`text-xs ${summary.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {summary.revenueGrowth >= 0 ? '+' : ''}
+            {summary.revenueGrowth}% from last month
+          </p>
         </CardContent>
       </Card>
 
@@ -66,8 +90,13 @@ function SummaryStats() {
           <ShoppingCart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalTransactions.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">+8.3% from last month</p>
+          <div className="text-2xl font-bold">{summary.totalTransactions.toLocaleString()}</div>
+          <p
+            className={`text-xs ${summary.transactionGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {summary.transactionGrowth >= 0 ? '+' : ''}
+            {summary.transactionGrowth}% from last month
+          </p>
         </CardContent>
       </Card>
 
@@ -77,8 +106,13 @@ function SummaryStats() {
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">₱{stats.avgTransactionValue}</div>
-          <p className="text-xs text-muted-foreground">+3.7% from last month</p>
+          <div className="text-2xl font-bold">₱{summary.avgTransactionValue}</div>
+          <p
+            className={`text-xs ${summary.avgValueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {summary.avgValueGrowth >= 0 ? '+' : ''}
+            {summary.avgValueGrowth}% from last month
+          </p>
         </CardContent>
       </Card>
 
@@ -88,8 +122,13 @@ function SummaryStats() {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.uniqueCustomers.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground">+15.2% from last month</p>
+          <div className="text-2xl font-bold">{summary.uniqueCustomers.toLocaleString()}</div>
+          <p
+            className={`text-xs ${summary.customerGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {summary.customerGrowth >= 0 ? '+' : ''}
+            {summary.customerGrowth}% from last month
+          </p>
         </CardContent>
       </Card>
     </div>

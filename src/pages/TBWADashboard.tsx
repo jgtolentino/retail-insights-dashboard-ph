@@ -72,6 +72,36 @@ export default function TBWADashboard() {
     }, 1000);
   };
 
+  // Show loading state
+  if (brandLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+          <p className="mt-2 text-gray-600">Loading brand performance data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (brandError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 rounded-full bg-red-100 p-3">
+            <RefreshCw className="h-6 w-6 text-red-600" />
+          </div>
+          <h3 className="mt-4 text-lg font-semibold text-gray-900">Error Loading Data</h3>
+          <p className="mt-2 text-gray-600">{brandError}</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen space-y-6 bg-gray-50 p-6">
       {/* Header */}
