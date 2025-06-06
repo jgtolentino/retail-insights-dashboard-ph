@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,7 +66,7 @@ const FilterBarFixed = () => {
             <div className="flex flex-wrap gap-1">
               {filters.categories.map(category => (
                 <Badge key={category} variant="secondary" className="gap-1 text-xs">
-                  Cat: {category}
+                  Cat: {safe(category)}
                   <button onClick={() => removeItem('categories', category)}>
                     <X className="h-3 w-3" />
                   </button>
@@ -74,7 +75,7 @@ const FilterBarFixed = () => {
 
               {filters.brands.map(brand => (
                 <Badge key={brand} variant="secondary" className="gap-1 text-xs">
-                  Brand: {brand}
+                  Brand: {safe(brand)}
                   <button onClick={() => removeItem('brands', brand)}>
                     <X className="h-3 w-3" />
                   </button>
@@ -92,7 +93,7 @@ const FilterBarFixed = () => {
 
               {filters.stores.map(store => (
                 <Badge key={store} variant="secondary" className="gap-1 text-xs">
-                  Store: {store}
+                  Store: {safe(store)}
                   <button onClick={() => removeItem('stores', store)}>
                     <X className="h-3 w-3" />
                   </button>

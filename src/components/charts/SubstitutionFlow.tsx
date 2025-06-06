@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 /**
  * SubstitutionFlow Component - Sankey Diagram for Product Substitution Patterns
  * Visualizes how customers substitute products when originals are unavailable
@@ -217,7 +218,7 @@ export function SubstitutionFlow({ dateRange, className }: SubstitutionFlowProps
               <SelectItem value="all">All</SelectItem>
               {getCategories().map(category => (
                 <SelectItem key={category} value={category}>
-                  {category}
+                  {safe(category)}
                 </SelectItem>
               ))}
             </SelectContent>

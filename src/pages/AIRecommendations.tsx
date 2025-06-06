@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -372,7 +373,7 @@ Impact: ${rec.impact}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
                           <CheckCircle className="mt-0.5 h-3 w-3 flex-shrink-0 text-green-500" />
-                          {item}
+                          {safe(item)}
                         </li>
                       ))}
                     </ul>

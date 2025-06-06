@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,7 +96,7 @@ const FilterBar = () => {
               <span className="text-sm font-medium text-gray-700">Brands:</span>
               {filters.brands.map(brand => (
                 <Badge key={brand} variant="outline" className="gap-1">
-                  {brand}
+                  {safe(brand)}
                   <button onClick={() => removeBrand(brand)} className="ml-1 hover:text-red-600">
                     <X className="h-3 w-3" />
                   </button>
@@ -110,7 +111,7 @@ const FilterBar = () => {
               <span className="text-sm font-medium text-gray-700">Categories:</span>
               {filters.categories.map(category => (
                 <Badge key={category} variant="outline" className="gap-1">
-                  {category}
+                  {safe(category)}
                   <button
                     onClick={() => removeCategory(category)}
                     className="ml-1 hover:text-red-600"
@@ -143,7 +144,7 @@ const FilterBar = () => {
               <span className="text-sm font-medium text-gray-700">Stores:</span>
               {filters.stores.map(store => (
                 <Badge key={store} variant="outline" className="gap-1">
-                  {store}
+                  {safe(store)}
                   <button onClick={() => removeStore(store)} className="ml-1 hover:text-red-600">
                     <X className="h-3 w-3" />
                   </button>

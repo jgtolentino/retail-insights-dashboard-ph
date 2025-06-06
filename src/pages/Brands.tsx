@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -252,7 +253,7 @@ export default function Brands() {
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories?.map(category => (
                   <SelectItem key={category} value={category}>
-                    {category}
+                    {safe(category)}
                   </SelectItem>
                 ))}
               </SelectContent>

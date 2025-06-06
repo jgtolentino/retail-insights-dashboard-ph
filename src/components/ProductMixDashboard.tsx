@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,7 +159,7 @@ export function ProductMixDashboard() {
                   <SelectItem value="all">All Categories</SelectItem>
                   {categories?.map(category => (
                     <SelectItem key={category} value={category}>
-                      {category}
+                      {safe(category)}
                     </SelectItem>
                   ))}
                 </SelectContent>

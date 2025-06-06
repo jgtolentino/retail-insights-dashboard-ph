@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
@@ -100,7 +101,7 @@ export function ProductCategories() {
               <div className="flex flex-col items-center text-center">
                 <Icon className="mb-1 h-6 w-6 text-gray-600 sm:mb-2 sm:h-8 sm:w-8" />
                 <h3 className="text-xs font-medium capitalize text-gray-700 sm:text-sm">
-                  {category}
+                  {safe(category)}
                 </h3>
                 <p className="text-lg font-bold text-gray-900 sm:text-2xl">{count}</p>
                 <p className="text-xs text-gray-500">products</p>

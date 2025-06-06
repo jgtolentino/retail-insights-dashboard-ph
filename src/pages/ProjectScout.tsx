@@ -1,3 +1,4 @@
+import { safe, safeOptions } from '@/utils/safe';
 /**
  * Project Scout Integration Page
  *

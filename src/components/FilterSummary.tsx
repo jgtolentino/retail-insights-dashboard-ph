@@ -1,3 +1,4 @@
+import { safe } from '@/utils/safe';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, Filter } from 'lucide-react';
@@ -42,7 +43,7 @@ export function FilterSummary({
 
       {summary.map((item, index) => (
         <Badge key={index} variant="secondary" className="text-xs">
-          {item}
+          {safe(item)}
           {onClearFilter && (
             <X
               className="ml-1 h-3 w-3 cursor-pointer"
