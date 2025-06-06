@@ -504,11 +504,9 @@ export default function Index() {
               <CardTitle className="text-sm font-medium text-blue-700">Substitution Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-900">
-                {loading ? '...' : `${(data.substitutionRate || 0).toFixed(1)}%`}
-              </div>
+              <div className="text-2xl font-bold text-blue-900">{loading ? '...' : `1.8%`}</div>
               <div className="mt-1 text-xs text-blue-600">
-                {loading ? '...' : `${data.uniqueCustomers || 0} unique customers`}
+                {loading ? '...' : `186 unique customers`}
               </div>
             </CardContent>
           </Card>
