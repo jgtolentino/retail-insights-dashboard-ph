@@ -6,110 +6,25 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
-// Mock data for Sprint 4 features
-const mockSubstitutionPatterns = [
-  {
-    original_brand: 'Coca-Cola',
-    substitute_brand: 'Pepsi',
-    original_product: 'Coca-Cola Regular 1.5L',
-    substitute_product: 'Pepsi Regular 1.5L',
-    substitution_count: 45,
-    acceptance_rate: 0.78,
-    avg_price_diff: -2.5,
-  },
-  {
-    original_brand: 'Alaska',
-    substitute_brand: 'Bear Brand',
-    original_product: 'Alaska Evaporated Milk',
-    substitute_product: 'Bear Brand Adult Plus',
-    substitution_count: 38,
-    acceptance_rate: 0.82,
-    avg_price_diff: 3.25,
-  },
-  {
-    original_brand: 'San Miguel',
-    substitute_brand: 'Red Horse',
-    original_product: 'San Miguel Pale Pilsen',
-    substitute_product: 'Red Horse Beer',
-    substitution_count: 32,
-    acceptance_rate: 0.65,
-    avg_price_diff: 5.0,
-  },
-  {
-    original_brand: 'Lucky Me',
-    substitute_brand: 'Nissin',
-    original_product: 'Lucky Me Pancit Canton',
-    substitute_product: 'Nissin Yakisoba',
-    substitution_count: 28,
-    acceptance_rate: 0.85,
-    avg_price_diff: -1.5,
-  },
-];
+// Remove mock data
+export interface SubstitutionPattern {
+  original_brand: string;
+  substituted_brand: string;
+  count: number;
+  percentage: number;
+}
 
-const mockRequestBehaviors = [
-  {
-    request_type: 'branded',
-    total_count: 10800,
-    avg_checkout_seconds: 65,
-    suggestion_acceptance_rate: 0.75,
-    avg_clarifications: 0.3,
-    gesture_usage_rate: 0.1,
-  },
-  {
-    request_type: 'unbranded',
-    total_count: 5400,
-    avg_checkout_seconds: 85,
-    suggestion_acceptance_rate: 0.82,
-    avg_clarifications: 1.2,
-    gesture_usage_rate: 0.05,
-  },
-  {
-    request_type: 'pointing',
-    total_count: 1800,
-    avg_checkout_seconds: 45,
-    suggestion_acceptance_rate: 0.68,
-    avg_clarifications: 0.8,
-    gesture_usage_rate: 0.95,
-  },
-];
+export interface RequestBehavior {
+  behavior: string;
+  total_count: number;
+  percentage: number;
+}
 
-const mockCheckoutDurations = [
-  {
-    duration_range: '0-30s',
-    transaction_count: 4500,
-    percentage: 25,
-    avg_amount: 180,
-    top_payment_method: 'cash',
-  },
-  {
-    duration_range: '30-60s',
-    transaction_count: 6300,
-    percentage: 35,
-    avg_amount: 250,
-    top_payment_method: 'gcash',
-  },
-  {
-    duration_range: '1-2min',
-    transaction_count: 4500,
-    percentage: 25,
-    avg_amount: 320,
-    top_payment_method: 'maya',
-  },
-  {
-    duration_range: '2-5min',
-    transaction_count: 2160,
-    percentage: 12,
-    avg_amount: 450,
-    top_payment_method: 'cash',
-  },
-  {
-    duration_range: '5min+',
-    transaction_count: 540,
-    percentage: 3,
-    avg_amount: 680,
-    top_payment_method: 'credit',
-  },
-];
+export interface CheckoutDuration {
+  duration_range: string;
+  count: number;
+  percentage: number;
+}
 
 // Create a wrapper service that uses real data where available
 export const compatibleAnalyticsService = {
@@ -365,5 +280,53 @@ export const compatibleAnalyticsService = {
       transcriptionInsights: await this.getTranscriptionInsights(dateRange),
       lastUpdated: new Date().toISOString(),
     };
+  },
+
+  async getCompatibleAnalytics() {
+    try {
+      const { data: transactions, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (!transactions) return null;
+
+      const totalTransactions = transactions.length;
+      const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
+      const avgTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+
+      // Get real substitution patterns
+      const { data: substitutions } = await supabase
+        .from('substitution_patterns')
+        .select('*')
+        .order('count', { ascending: false })
+        .limit(10);
+
+      // Get real request behaviors
+      const { data: behaviors } = await supabase
+        .from('request_behaviors')
+        .select('*')
+        .order('total_count', { ascending: false });
+
+      // Get real checkout durations
+      const { data: durations } = await supabase
+        .from('checkout_durations')
+        .select('*')
+        .order('count', { ascending: false });
+
+      return {
+        totalTransactions,
+        totalRevenue,
+        avgTransaction,
+        substitutionPatterns: substitutions || [],
+        requestBehaviors: behaviors || [],
+        checkoutDurations: durations || [],
+        lastUpdated: new Date().toISOString(),
+      };
+    } catch (error) {
+      logger.error('Error fetching compatible analytics:', error);
+      return null;
+    }
   },
 };

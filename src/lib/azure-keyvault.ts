@@ -1,142 +1,118 @@
 import { SecretClient } from '@azure/keyvault-secrets';
 import { DefaultAzureCredential, ClientSecretCredential } from '@azure/identity';
+import { logger } from '../utils/logger';
 
-interface CachedSecret {
+interface SecretCache {
   value: string;
-  expires: number;
+  expiresAt: number;
 }
 
 class AzureKeyVaultClient {
-  private client: SecretClient;
-  private cache = new Map<string, CachedSecret>();
-  private cacheTimeout = 5 * 60 * 1000; // 5 minutes
+  private client: SecretClient | null = null;
+  private cache: Map<string, SecretCache> = new Map();
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
-    const vaultUrl =
+    const keyVaultUrl = 
       process.env.AZURE_KEYVAULT_URL ||
       `https://${process.env.AZURE_KEYVAULT_NAME}.vault.azure.net/`;
 
-    if (!vaultUrl || vaultUrl.includes('undefined')) {
+    if (!keyVaultUrl) {
       throw new Error(
         'Azure Key Vault URL not configured. Set AZURE_KEYVAULT_URL or AZURE_KEYVAULT_NAME'
       );
     }
 
-    let credential;
-
-    // Use service principal if configured, otherwise use default credential
-    if (
-      process.env.AZURE_CLIENT_ID &&
-      process.env.AZURE_CLIENT_SECRET &&
-      process.env.AZURE_TENANT_ID
-    ) {
-      credential = new ClientSecretCredential(
-        process.env.AZURE_TENANT_ID,
-        process.env.AZURE_CLIENT_ID,
-        process.env.AZURE_CLIENT_SECRET
-      );
-    } else {
-      credential = new DefaultAzureCredential();
+    try {
+      const credential = new DefaultAzureCredential();
+      this.client = new SecretClient(keyVaultUrl, credential);
+      logger.info('Azure Key Vault client initialized');
+    } catch (error) {
+      logger.error('Failed to initialize Azure Key Vault client:', error);
+      throw error;
     }
-
-    this.client = new SecretClient(vaultUrl, credential);
   }
 
-  async getSecret(secretName: string, useCache = true): Promise<string> {
-    // Check cache first
-    if (useCache && this.cache.has(secretName)) {
-      const cached = this.cache.get(secretName)!;
-      if (Date.now() < cached.expires) {
+  private async getSecret(name: string): Promise<string> {
+    try {
+      // Check cache first
+      const cached = this.cache.get(name);
+      if (cached && Date.now() < cached.expiresAt) {
+        logger.debug(`Using cached secret: ${name}`);
         return cached.value;
       }
-    }
 
-    try {
-      const secret = await this.client.getSecret(secretName);
-      const value = secret.value || '';
+      if (!this.client) {
+        throw new Error('Key Vault client not initialized');
+      }
 
-      if (!value) {
-        throw new Error(`Secret ${secretName} is empty`);
+      const secret = await this.client.getSecret(name);
+      if (!secret.value) {
+        throw new Error(`Secret ${name} not found or has no value`);
       }
 
       // Cache the secret
-      if (useCache) {
-        this.cache.set(secretName, {
-          value,
-          expires: Date.now() + this.cacheTimeout,
-        });
-      }
+      this.cache.set(name, {
+        value: secret.value,
+        expiresAt: Date.now() + this.CACHE_TTL,
+      });
 
-      return value;
-    } catch (error: any) {
-      // Fallback to environment variable if Key Vault fails
-      const envFallback = this.getEnvironmentFallback(secretName);
-      if (envFallback) {
-        return envFallback;
-      }
-
-      throw new Error(`Secret ${secretName} not found in Key Vault and no fallback available`);
+      return secret.value;
+    } catch (error) {
+      logger.error(`Failed to get secret ${name}:`, error);
+      throw error;
     }
   }
 
-  private getEnvironmentFallback(secretName: string): string | null {
-    const fallbackMap: Record<string, string> = {
-      'supabase-url': 'VITE_SUPABASE_URL',
-      'supabase-anon-key': 'VITE_SUPABASE_ANON_KEY',
-      'supabase-service-key': 'SUPABASE_SERVICE_ROLE_KEY',
-      'azure-openai-endpoint': 'AZURE_OPENAI_ENDPOINT',
-      'azure-openai-key': 'AZURE_OPENAI_API_KEY',
-      'database-password': 'DATABASE_PASSWORD',
-      'iot-device-key': 'IOT_DEVICE_KEY',
-      'iot-connection-string': 'IOT_CONNECTION_STRING',
-    };
-
-    const envVarName = fallbackMap[secretName];
-    return envVarName ? process.env[envVarName] || null : null;
-  }
-
-  async getMultipleSecrets(secretNames: string[]): Promise<Record<string, string>> {
-    const secrets = await Promise.allSettled(
-      secretNames.map(async name => ({
-        name,
-        value: await this.getSecret(name),
-      }))
-    );
-
-    const result: Record<string, string> = {};
-    const failed: string[] = [];
-
-    secrets.forEach((secret, index) => {
-      const secretName = secretNames[index];
-      if (secret.status === 'fulfilled') {
-        result[secretName] = secret.value.value;
-      } else {
-        failed.push(secretName);
-        }
-    });
-
-    if (failed.length > 0) {
-      }`);
+  async getMultipleSecrets(names: string[]): Promise<Record<string, string>> {
+    try {
+      const secrets: Record<string, string> = {};
+      await Promise.all(
+        names.map(async (name) => {
+          secrets[name] = await this.getSecret(name);
+        })
+      );
+      return secrets;
+    } catch (error) {
+      logger.error('Failed to get multiple secrets:', error);
+      throw error;
     }
-
-    .length}/${secretNames.length} secrets`
-    );
-    return result;
   }
 
   clearCache(): void {
     this.cache.clear();
-    }
+    logger.info('Key Vault cache cleared');
+  }
 
-  getCacheStats(): { size: number; secrets: string[] } {
-    return {
-      size: this.cache.size,
-      secrets: Array.from(this.cache.keys()),
-    };
+  // Map environment variable names to Key Vault secret names
+  private readonly envToSecretMap: Record<string, string> = {
+    'VITE_SUPABASE_URL': 'supabase-url',
+    'VITE_SUPABASE_ANON_KEY': 'supabase-anon-key',
+    'SUPABASE_SERVICE_ROLE_KEY': 'supabase-service-role-key',
+    'AZURE_OPENAI_ENDPOINT': 'azure-openai-endpoint',
+    'AZURE_OPENAI_API_KEY': 'azure-openai-key',
+    'AZURE_OPENAI_DEPLOYMENT_NAME': 'azure-openai-deployment',
+    'EDGE_DEVICE_AUTH_TOKEN': 'edge-device-auth-token',
+  };
+
+  async syncEnvironmentVariables(): Promise<void> {
+    try {
+      const secrets = await this.getMultipleSecrets(Object.values(this.envToSecretMap));
+      
+      // Update environment variables
+      Object.entries(this.envToSecretMap).forEach(([envVar, secretName]) => {
+        if (secrets[secretName]) {
+          process.env[envVar] = secrets[secretName];
+          logger.info(`Updated environment variable: ${envVar}`);
+        }
+      });
+    } catch (error) {
+      logger.error('Failed to sync environment variables:', error);
+      throw error;
+    }
   }
 }
 
-// Singleton instance
 let keyVaultClient: AzureKeyVaultClient | null = null;
 
 export function getKeyVaultClient(): AzureKeyVaultClient {
@@ -151,7 +127,7 @@ export async function testKeyVaultConnection(): Promise<boolean> {
   try {
     const client = getKeyVaultClient();
     // Try to get a known secret (you might need to create a test secret)
-    await client.getSecret('connection-test', false);
+    await client.getSecret('connection-test');
     return true;
   } catch (error) {
     return false;

@@ -1,74 +1,77 @@
-type LogLevel = 'info' | 'warn' | 'error' | 'debug';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogEntry {
+  timestamp: string;
   level: LogLevel;
   message: string;
-  timestamp: string;
-  data?: any;
-  error?: any;
+  data?: unknown;
 }
 
 class Logger {
-  private isDevelopment = import.meta.env.DEV;
-  private logs: LogEntry[] = [];
-  private maxLogs = 100;
+  private static instance: Logger;
+  private isDevelopment: boolean;
 
-  private log(level: LogLevel, message: string, data?: any) {
-    const entry: LogEntry = {
+  private constructor() {
+    this.isDevelopment = process.env.NODE_ENV === 'development';
+  }
+
+  public static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
+    }
+    return Logger.instance;
+  }
+
+  private formatMessage(level: LogLevel, message: string, data?: unknown): LogEntry {
+    return {
+      timestamp: new Date().toISOString(),
       level,
       message,
-      timestamp: new Date().toISOString(),
       data,
     };
+  }
 
-    // Store in memory for debugging
-    this.logs.push(entry);
-    if (this.logs.length > this.maxLogs) {
-      this.logs.shift();
+  private log(level: LogLevel, message: string, data?: unknown): void {
+    const entry = this.formatMessage(level, message, data);
+
+    // In development, use console with colors
+    if (this.isDevelopment) {
+      const colors = {
+        debug: '\x1b[36m', // Cyan
+        info: '\x1b[32m',  // Green
+        warn: '\x1b[33m',  // Yellow
+        error: '\x1b[31m', // Red
+      };
+      const reset = '\x1b[0m';
+      
+      console.log(`${colors[level]}${entry.timestamp} [${level.toUpperCase()}] ${message}${reset}`);
+      if (data) console.log(data);
+      return;
     }
 
-    // Console output in development
-    if (this.isDevelopment) {
-      const style = {
-        info: 'color: #3b82f6',
-        warn: 'color: #f59e0b',
-        error: 'color: #ef4444',
-        debug: 'color: #6b7280',
-      };
+    // In production, send to monitoring service
+    // TODO: Implement production logging service
+    if (level === 'error') {
+      // For now, just use console.error in production for errors
+      console.error(entry);
     }
   }
 
-  info(message: string, data?: any) {
+  public debug(message: string, data?: unknown): void {
+    this.log('debug', message, data);
+  }
+
+  public info(message: string, data?: unknown): void {
     this.log('info', message, data);
   }
 
-  warn(message: string, data?: any) {
+  public warn(message: string, data?: unknown): void {
     this.log('warn', message, data);
   }
 
-  error(message: string, error?: any) {
-    this.log('error', message, error);
-
-    // In production, send to monitoring service
-    if (!this.isDevelopment && error) {
-      // Example: Send to Sentry, LogRocket, etc.
-      // window.Sentry?.captureException(error)
-    }
-  }
-
-  debug(message: string, data?: any) {
-    if (this.isDevelopment) {
-      this.log('debug', message, data);
-    }
-  }
-
-  getLogs() {
-    return this.logs;
-  }
-
-  clearLogs() {
-    this.logs = [];
+  public error(message: string, data?: unknown): void {
+    this.log('error', message, data);
   }
 }
 
-export const logger = new Logger();
+export const logger = Logger.getInstance();
