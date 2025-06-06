@@ -30,9 +30,11 @@ import { DeviceHealthDashboard } from '@/components/iot/DeviceHealthDashboard';
 import { ProjectScoutTour } from '@/components/GuidedTour';
 import { TransactionTrendsChart } from '@/components/charts/TransactionTrendsChart';
 import { GeospatialHeatmap } from '@/components/charts/GeospatialHeatmap';
+import { useSystemHealth } from '@/hooks/useSystemHealth';
 
 export default function ProjectScout() {
   const [activeTab, setActiveTab] = useState('overview');
+  const health = useSystemHealth();
 
   return (
     <div className="container mx-auto space-y-6 p-6">
@@ -60,10 +62,22 @@ export default function ProjectScout() {
         <div className="flex items-center space-x-4">
           <div className="text-right">
             <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600">System Health: Optimal</span>
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  health.status === 'Optimal'
+                    ? 'animate-pulse bg-green-500'
+                    : health.status === 'Warning'
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
+                }`}
+              ></div>
+              <span className="text-sm text-gray-600">System Health: {health.status}</span>
             </div>
-            <div className="text-xs text-gray-500">Database connected successfully</div>
+            <div className="text-xs text-gray-500">
+              {health.dbConnected
+                ? `Database connected (${health.responseTime}ms)`
+                : 'Database connection failed'}
+            </div>
           </div>
           <ProjectScoutTour />
           <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
