@@ -41,6 +41,50 @@ const mockApiPlugin = () => ({
         next();
       }
     });
+
+    server.middlewares.use('/api/chat', (req, res, next) => {
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => {
+          body += chunk.toString();
+        });
+        req.on('end', () => {
+          try {
+            const { question } = JSON.parse(body);
+            
+            const mockResponses = {
+              'how do i': 'To navigate the dashboard, use the tabs at the top. Start with Overview to see system status, then explore IoT Devices for hardware monitoring, AI Insights for predictive analytics, and Architecture to understand our tech stack.',
+              'what is': 'This is the Project Scout dashboard - an IoT-powered retail insights platform. It monitors sari-sari store performance using real-time device data and AI analytics, built on Supabase and Vercel for 83% cost savings vs Azure.',
+              'cost': "We've achieved 83% cost savings ($3,156/year) by using Supabase + Vercel instead of Azure. The annual infrastructure cost is only $660 compared to Azure's $3,816.",
+              'device': "IoT devices monitor store transactions in real-time. Currently, we're ready for device registration and targeting 90 stores for deployment.",
+              'ai': 'Our AI insights use Azure OpenAI to analyze Filipino consumer behavior, predict sales trends, and provide optimization recommendations.',
+              'data': "We've solved critical data integrity issues including device collision detection, session matching validation, and transaction integrity checks.",
+              'tour': "You can take a guided tour by clicking the 'Take a Tour' button at the top of the page. It will walk you through all the key features step by step.",
+              'help': "I'm ScoutBot, your dashboard assistant! I can help with navigation, explain features, provide cost information, discuss our IoT setup, or answer questions about the AI analytics."
+            };
+
+            const questionLower = question?.toLowerCase() || '';
+            let answer = "I'm here to help with the Project Scout dashboard! You can ask me about IoT devices, cost savings, AI insights, data integrity, navigation, or taking a tour. What specific area interests you?";
+
+            for (const [keyword, response] of Object.entries(mockResponses)) {
+              if (questionLower.includes(keyword)) {
+                answer = response;
+                break;
+              }
+            }
+
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ answer }));
+          } catch (error) {
+            res.setHeader('Content-Type', 'application/json');
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Sorry, I encountered an error. Please try again later.' }));
+          }
+        });
+      } else {
+        next();
+      }
+    });
   }
 });
 
