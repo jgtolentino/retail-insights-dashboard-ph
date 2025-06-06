@@ -47,7 +47,7 @@
     "migrate:status": "node scripts/migration-runner.js status",
     "migrate:all": "node scripts/migration-runner.js all",
     "migrate:force": "node scripts/migration-runner.js",
-    "sql:bootstrap": "echo '⚠️  Run this SQL in Supabase SQL Editor: scripts/bootstrap-sql-executor.sql'",
+    "sql:bootstrap": "node scripts/direct-sql-executor.js",
     "capture:visuals": "tsx scripts/capture-visuals.ts",
     "capture:visuals:watch": "nodemon --watch src --exec 'npm run capture:visuals'",
     "capture:current": "npm run capture:visuals",
