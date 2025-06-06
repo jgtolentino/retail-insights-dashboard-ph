@@ -94,42 +94,50 @@ async function validateSupabaseConnection() {
   header('Supabase Database Connection');
   
   try {
-    // Read local environment
-    const envVars = {};
-    if (fs.existsSync('.env')) {
-      const envContent = fs.readFileSync('.env', 'utf8');
-      envContent.split('\n').forEach(line => {
-        const [key, value] = line.split('=');
-        if (key && value) envVars[key] = value;
-      });
+    let supabaseUrl = process.env.VITE_SUPABASE_URL;
+    let supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      warning('Supabase credentials not found in process.env, trying .env file...');
+      if (fs.existsSync('.env')) {
+        const envContent = fs.readFileSync('.env', 'utf8');
+        const localEnvVars = {};
+        envContent.split('\n').forEach(line => {
+          const [key, value] = line.split('=');
+          if (key && value) localEnvVars[key] = value.trim().replace(/^['"]|['"]$/g, '');
+        });
+        supabaseUrl = supabaseUrl || localEnvVars.VITE_SUPABASE_URL;
+        supabaseKey = supabaseKey || localEnvVars.VITE_SUPABASE_ANON_KEY;
+      }
     }
     
-    const supabaseUrl = envVars.VITE_SUPABASE_URL;
-    const supabaseKey = envVars.VITE_SUPABASE_ANON_KEY;
-    
     if (!supabaseUrl || !supabaseKey) {
-      error('Supabase credentials not found in environment');
-      addTest('Supabase Connection', 'FAIL');
+      error('Supabase credentials NOT FOUND in environment variables or .env file.');
+      addTest('Supabase Credentials Check', 'FAIL', 'URL or Key missing');
+      addTest('Supabase Connection', 'FAIL', 'Credentials missing'); // Also fail the connection test
       return;
+    } else {
+       success('Supabase credentials found (source: process.env or .env).');
+       addTest('Supabase Credentials Check', 'PASS');
     }
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Test basic connection
-    const { data, error } = await supabase.from('transactions').select('count', { count: 'exact', head: true });
+    const { count, error: dbError } = await supabase.from('transactions').select('*', { count: 'exact', head: true });
     
-    if (error) {
-      error(`Supabase connection failed: ${error.message}`);
-      addTest('Supabase Connection', 'FAIL', error.message);
+    if (dbError) {
+      error(`Supabase connection failed: ${dbError.message}`);
+      addTest('Supabase Connection', 'FAIL', dbError.message);
     } else {
       success('Supabase database connection working');
       addTest('Supabase Connection', 'PASS');
-      info(`Database has ${data || 0} transactions`);
+      info(`Database has ${count || 0} transactions`);
     }
     
   } catch (err) {
-    error(`Supabase validation error: ${err.message}`);
-    addTest('Supabase Connection', 'FAIL', err.message);
+    error(`Supabase validation error: ${err.message}`); // This is for errors in the try block logic itself
+    addTest('Supabase Connection', 'FAIL', `Outer catch: ${err.message}`);
   }
 }
 
@@ -137,19 +145,31 @@ async function validateDashboardData() {
   header('Dashboard Data Loading');
   
   try {
-    const envVars = {};
-    if (fs.existsSync('.env')) {
-      const envContent = fs.readFileSync('.env', 'utf8');
-      envContent.split('\n').forEach(line => {
-        const [key, value] = line.split('=');
-        if (key && value) envVars[key] = value;
-      });
+    let supabaseUrl = process.env.VITE_SUPABASE_URL;
+    let supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      if (fs.existsSync('.env')) {
+        const envContent = fs.readFileSync('.env', 'utf8');
+        const localEnvVars = {};
+        envContent.split('\n').forEach(line => {
+          const [key, value] = line.split('=');
+          if (key && value) localEnvVars[key] = value.trim().replace(/^['"]|['"]$/g, '');
+        });
+        supabaseUrl = supabaseUrl || localEnvVars.VITE_SUPABASE_URL;
+        supabaseKey = supabaseKey || localEnvVars.VITE_SUPABASE_ANON_KEY;
+      }
     }
-    
-    const supabase = createClient(envVars.VITE_SUPABASE_URL, envVars.VITE_SUPABASE_ANON_KEY);
+
+    if (!supabaseUrl || !supabaseKey) {
+      error('Supabase credentials for Dashboard Data NOT FOUND.');
+      addTest('Dashboard Data', 'FAIL', 'Credentials missing for Dashboard Data');
+      return;
+    }
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Test KPI data
-    const { data: transactions, error: transError } = await supabase
+    const { data: kpiTransactions, error: transError } = await supabase // Renamed transactions to kpiTransactions
       .from('transactions')
       .select('total_amount')
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
@@ -158,7 +178,7 @@ async function validateDashboardData() {
       error(`Transaction data loading failed: ${transError.message}`);
       addTest('Transaction Data', 'FAIL', transError.message);
     } else {
-      success(`Loaded ${transactions?.length || 0} transactions`);
+      success(`Loaded ${kpiTransactions?.length || 0} transactions for KPI`);
       addTest('Transaction Data', 'PASS');
     }
     
@@ -178,7 +198,7 @@ async function validateDashboardData() {
     
   } catch (err) {
     error(`Dashboard data validation error: ${err.message}`);
-    addTest('Dashboard Data', 'FAIL', err.message);
+    addTest('Dashboard Data', 'FAIL', `Outer catch: ${err.message}`);
   }
 }
 
@@ -186,16 +206,28 @@ async function validateChartFunctions() {
   header('Chart Functions and RPC Calls');
   
   try {
-    const envVars = {};
-    if (fs.existsSync('.env')) {
-      const envContent = fs.readFileSync('.env', 'utf8');
-      envContent.split('\n').forEach(line => {
-        const [key, value] = line.split('=');
-        if (key && value) envVars[key] = value;
-      });
+    let supabaseUrl = process.env.VITE_SUPABASE_URL;
+    let supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      if (fs.existsSync('.env')) {
+        const envContent = fs.readFileSync('.env', 'utf8');
+        const localEnvVars = {};
+        envContent.split('\n').forEach(line => {
+          const [key, value] = line.split('=');
+          if (key && value) localEnvVars[key] = value.trim().replace(/^['"]|['"]$/g, '');
+        });
+        supabaseUrl = supabaseUrl || localEnvVars.VITE_SUPABASE_URL;
+        supabaseKey = supabaseKey || localEnvVars.VITE_SUPABASE_ANON_KEY;
+      }
     }
-    
-    const supabase = createClient(envVars.VITE_SUPABASE_URL, envVars.VITE_SUPABASE_ANON_KEY);
+
+    if (!supabaseUrl || !supabaseKey) {
+      error('Supabase credentials for Chart Functions NOT FOUND.');
+      addTest('Chart Functions', 'FAIL', 'Credentials missing for Chart Functions');
+      return;
+    }
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     const chartTests = [
       {
