@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Activity, Clock } from 'lucide-react';
+import { ChartErrorBoundary } from './ChartErrorBoundary';
 import { useTransactionTrends } from '@/hooks/useTransactionTrends';
 
 interface TransactionTrendsChartProps {
@@ -29,20 +30,22 @@ export function TransactionTrendsChart({
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5" />
-            <span>Transaction Trends</span>
-          </CardTitle>
-          <CardDescription>Loading hourly transaction patterns...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-64 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <ChartErrorBoundary title="Transaction Data Error">
+        <Card className={className}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5" />
+              <span>Transaction Trends</span>
+            </CardTitle>
+            <CardDescription>Loading hourly transaction patterns...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex h-64 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </ChartErrorBoundary>
     );
   }
 

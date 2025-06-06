@@ -46,7 +46,7 @@ export function useDashboardSummary() {
           .select(
             `
             id,
-            amount,
+            total_amount,
             customer_id,
             created_at
           `
@@ -62,7 +62,7 @@ export function useDashboardSummary() {
           .select(
             `
             id,
-            amount,
+            total_amount,
             customer_id,
             created_at
           `
@@ -74,14 +74,14 @@ export function useDashboardSummary() {
 
         // Calculate current month metrics
         const totalRevenue =
-          currentData?.reduce((sum, transaction) => sum + (transaction.amount || 0), 0) || 0;
+          currentData?.reduce((sum, transaction) => sum + (transaction.total_amount || 0), 0) || 0;
         const totalTransactions = currentData?.length || 0;
         const uniqueCustomers = new Set(currentData?.map(t => t.customer_id)).size;
         const avgTransactionValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
 
         // Calculate previous month metrics
         const prevRevenue =
-          prevData?.reduce((sum, transaction) => sum + (transaction.amount || 0), 0) || 0;
+          prevData?.reduce((sum, transaction) => sum + (transaction.total_amount || 0), 0) || 0;
         const prevTransactions = prevData?.length || 0;
         const prevCustomers = new Set(prevData?.map(t => t.customer_id)).size;
         const prevAvgValue = prevTransactions > 0 ? prevRevenue / prevTransactions : 0;

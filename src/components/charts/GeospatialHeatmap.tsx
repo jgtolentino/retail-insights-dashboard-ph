@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { MapPin, Store, Activity, TrendingUp, Filter, Zap } from 'lucide-react';
+import { ChartErrorBoundary } from './ChartErrorBoundary';
 import { useStoreHeatmap } from '@/hooks/useStoreHeatmap';
 
 interface GeospatialHeatmapProps {
@@ -33,20 +34,22 @@ export function GeospatialHeatmap({
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <MapPin className="h-5 w-5" />
-            <span>Store Performance Heatmap</span>
-          </CardTitle>
-          <CardDescription>Loading Philippine sari-sari store locations...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-96 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <ChartErrorBoundary title="Transaction Data Error">
+        <Card className={className}>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5" />
+              <span>Store Performance Heatmap</span>
+            </CardTitle>
+            <CardDescription>Loading Philippine sari-sari store locations...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex h-96 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </ChartErrorBoundary>
     );
   }
 

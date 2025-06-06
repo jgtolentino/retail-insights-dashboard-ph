@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
-interface SafeWrapperProps {
+interface ChartErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  title?: string;
 }
 
 interface State {
@@ -12,8 +13,8 @@ interface State {
   error?: Error;
 }
 
-export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
-  constructor(props: SafeWrapperProps) {
+export class ChartErrorBoundary extends React.Component<ChartErrorBoundaryProps, State> {
+  constructor(props: ChartErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -23,7 +24,7 @@ export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Component error caught:', error, errorInfo);
+    console.error('Chart error:', error, errorInfo);
   }
 
   render() {
@@ -37,13 +38,14 @@ export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-yellow-800">
               <AlertTriangle className="h-5 w-5" />
-              <span>Component Error</span>
+              <span>{this.props.title || 'Chart Error'}</span>
             </CardTitle>
-            <CardDescription>
-              This component encountered an error and is temporarily unavailable.
-            </CardDescription>
+            <CardDescription>Unable to render chart due to data format issues</CardDescription>
           </CardHeader>
           <CardContent>
+            <p className="text-sm text-yellow-700">
+              This chart is temporarily unavailable. The data structure may need adjustment.
+            </p>
             <button
               onClick={() => this.setState({ hasError: false })}
               className="mt-2 text-sm text-yellow-800 underline"
