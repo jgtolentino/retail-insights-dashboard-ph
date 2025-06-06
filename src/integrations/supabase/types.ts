@@ -14,21 +14,21 @@ export type Database = {
           category: string | null
           created_at: string | null
           id: number
-          is_tbwa: boolean | null
+          is_client: boolean | null
           name: string
         }
         Insert: {
           category?: string | null
           created_at?: string | null
           id?: number
-          is_tbwa?: boolean | null
+          is_client?: boolean | null
           name: string
         }
         Update: {
           category?: string | null
           created_at?: string | null
           id?: number
-          is_tbwa?: boolean | null
+          is_client?: boolean | null
           name?: string
         }
         Relationships: []
@@ -611,7 +611,7 @@ export type Database = {
         }[]
       }
       get_brand_analysis_for_filters: {
-        Args: { p_category?: string; p_tbwa_only?: boolean }
+        Args: { p_category?: string; p_client_only?: boolean }
         Returns: Json
       }
       get_brand_performance: {

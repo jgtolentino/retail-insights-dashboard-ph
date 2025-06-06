@@ -20,8 +20,8 @@ import { TransactionCounter } from '@/components/TransactionCounter';
 import { DashboardErrorBoundary } from '@/components/DashboardErrorBoundary';
 import { HierarchicalBrandView } from '@/components/charts/HierarchicalBrandView';
 import { SmartBrandFilter } from '@/components/charts/SmartBrandFilter';
-import { DebugDataLoader } from '@/components/DebugDataLoader';
-import { QuickDataCheck } from '@/components/QuickDataCheck';
+// Debug component removed for production
+// Debug component removed for production
 import { useBundleData } from '@/hooks/useBundleData';
 import { DiagnosticPanel } from '@/components/DiagnosticPanel';
 
@@ -93,14 +93,14 @@ export default function Index() {
         <div key={brand.id} className="flex items-center gap-4">
           <div className="flex w-32 items-center justify-end gap-1 text-right text-sm font-medium">
             {brand.name}
-            {brand.is_tbwa && (
-              <div className="h-2 w-2 rounded-full bg-green-500" title="TBWA Client" />
+            {brand.is_client && (
+              <div className="h-2 w-2 rounded-full bg-green-500" title="Client Client" />
             )}
           </div>
           <div className="relative h-6 flex-1 rounded-full bg-gray-200">
             <div
               className={`flex h-6 items-center justify-end rounded-full pr-2 transition-all duration-300 ${
-                brand.is_tbwa ? 'bg-green-500' : 'bg-blue-500'
+                brand.is_client ? 'bg-green-500' : 'bg-blue-500'
               }`}
               style={{ width: `${percentage}%` }}
             >
@@ -145,7 +145,6 @@ export default function Index() {
 
       setStores(Array.from(uniqueStores.values()).sort((a, b) => a.id - b.id));
     } catch (error) {
-      console.error('❌ Error fetching stores:', error);
       setStores([]);
     } finally {
       setLoadingStores(false);
@@ -187,9 +186,7 @@ export default function Index() {
           endDate,
           selectedStoreId || undefined
         );
-        console.log('🧠 Using behavioral dashboard data');
-      } catch (error) {
-        console.warn('⚠️ Behavioral dashboard unavailable, falling back to simple dashboard');
+        } catch (error) {
         dashboardData = await simpleDashboardService.getDashboardData();
       }
 
@@ -207,7 +204,6 @@ export default function Index() {
         }
       );
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
       setError('Failed to load dashboard data. Please check your connection.');
       setData({
         totalRevenue: 0,
@@ -299,7 +295,7 @@ export default function Index() {
     <DashboardErrorBoundary>
       <div className="space-y-6">
         {/* Data Check - Development only */}
-        {process.env.NODE_ENV === 'development' && <QuickDataCheck />}
+        {/* Production: Debug component removed */}
 
         {/* Header with Transaction Counter */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -665,7 +661,7 @@ export default function Index() {
                       name: brand.name,
                       sales: brand.sales,
                       category: brand.category || 'Other',
-                      is_tbwa: brand.is_tbwa || false,
+                      is_client: brand.is_client || false,
                     }))}
                   />
                 ) : (
@@ -676,7 +672,7 @@ export default function Index() {
                         name: brand.name,
                         sales: brand.sales,
                         category: brand.category || 'Other',
-                        is_tbwa: brand.is_tbwa || false,
+                        is_client: brand.is_client || false,
                       }))}
                       onFilteredDataChange={handleFilteredDataChange}
                     />

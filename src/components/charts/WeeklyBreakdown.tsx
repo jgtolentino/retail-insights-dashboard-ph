@@ -61,7 +61,6 @@ export function WeeklyBreakdown({ startDate, endDate, storeId }: WeeklyBreakdown
 
       setData(formattedData);
     } catch (err) {
-      console.error('Error fetching weekly data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load weekly data');
     } finally {
       setLoading(false);

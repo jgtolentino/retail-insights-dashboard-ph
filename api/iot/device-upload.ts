@@ -72,8 +72,6 @@ export default async function handler(
   }
 
   try {
-    console.log('📡 Received device upload request');
-
     // Validate authentication
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -116,7 +114,6 @@ export default async function handler(
       .single();
 
     if (deviceError || !device) {
-      console.error('❌ Device validation failed:', deviceError);
       return res.status(404).json({
         error: 'Device not found',
         message: `Device ${batchData.device_id} is not registered`
@@ -124,10 +121,6 @@ export default async function handler(
     }
 
     if (device.store_id !== batchData.store_id) {
-      console.error('❌ Store mismatch:', { 
-        deviceStore: device.store_id, 
-        requestStore: batchData.store_id 
-      });
       return res.status(403).json({
         error: 'Store mismatch',
         message: `Device ${batchData.device_id} is not authorized for store ${batchData.store_id}`
@@ -142,8 +135,6 @@ export default async function handler(
     }
 
     // Process the batch data
-    console.log(`📦 Processing batch from ${batchData.device_id}: ${batchData.transactions.length} transactions`);
-    
     const success = await IoTDataProcessor.processBatchUpload(batchData);
 
     if (!success) {
@@ -174,8 +165,6 @@ export default async function handler(
     }
 
     // Log successful upload
-    console.log(`✅ Successfully processed upload from ${batchData.device_id}`);
-
     // Return success response
     res.status(200).json({
       success: true,
@@ -190,8 +179,6 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('❌ Device upload handler error:', error);
-    
     res.status(500).json({
       error: 'Internal server error',
       message: 'An unexpected error occurred while processing the upload',

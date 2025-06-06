@@ -33,7 +33,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('QA status error:', error);
     res.status(500).json({
       unitTests: { passed: 0, total: 19, passRate: 0 },
       integrationTests: { passed: 0, total: 12, passRate: 0 },

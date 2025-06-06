@@ -1,10 +1,11 @@
+// Client-specific component - requires customization
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface TBWAMetricCardProps {
+interface CLIENTMetricCardProps {
   title: string;
   value: string | number;
   change?: number;
@@ -12,11 +13,11 @@ interface TBWAMetricCardProps {
   color?: string;
   trend?: 'up' | 'down' | 'neutral';
   subtitle?: string;
-  isTBWABrand?: boolean;
+  isCLIENTBrand?: boolean;
   className?: string;
 }
 
-export function TBWAMetricCard({
+export function CLIENTMetricCard({
   title,
   value,
   change,
@@ -24,9 +25,9 @@ export function TBWAMetricCard({
   color = '#0078d4',
   trend,
   subtitle,
-  isTBWABrand = false,
+  isCLIENTBrand = false,
   className,
-}: TBWAMetricCardProps) {
+}: CLIENTMetricCardProps) {
   const getTrendIcon = () => {
     if (change === undefined && !trend) return null;
 
@@ -73,11 +74,11 @@ export function TBWAMetricCard({
 
   return (
     <Card className={cn('relative overflow-hidden transition-all hover:shadow-lg', className)}>
-      {/* TBWA Brand Indicator */}
-      {isTBWABrand && (
+      {/* CLIENT Brand Indicator */}
+      {isCLIENTBrand && (
         <div className="absolute right-2 top-2">
-          <Badge variant="secondary" className="bg-tbwa-orange text-xs font-medium text-white">
-            TBWA
+          <Badge variant="secondary" className="bg-client-orange text-xs font-medium text-white">
+            CLIENT
           </Badge>
         </div>
       )}
@@ -116,54 +117,54 @@ export function TBWAMetricCard({
         </div>
       </CardContent>
 
-      {/* TBWA Brand Accent */}
-      {isTBWABrand && (
-        <div className="from-tbwa-blue to-tbwa-orange absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r" />
+      {/* CLIENT Brand Accent */}
+      {isCLIENTBrand && (
+        <div className="from-client-blue to-client-orange absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r" />
       )}
     </Card>
   );
 }
 
-// Pre-configured TBWA metric cards
-export function TBWARevenueCard({
+// Pre-configured CLIENT metric cards
+export function CLIENTRevenueCard({
   value,
   change,
-  isTBWABrand = false,
+  isCLIENTBrand = false,
 }: {
   value: string | number;
   change?: number;
-  isTBWABrand?: boolean;
+  isCLIENTBrand?: boolean;
 }) {
   return (
-    <TBWAMetricCard
+    <CLIENTMetricCard
       title="Total Revenue"
       value={value}
       change={change}
       icon={<TrendingUp className="h-4 w-4" />}
       color="#0078d4"
-      isTBWABrand={isTBWABrand}
+      isCLIENTBrand={isCLIENTBrand}
       subtitle="Monthly Performance"
     />
   );
 }
 
-export function TBWATransactionCard({
+export function CLIENTTransactionCard({
   value,
   change,
-  isTBWABrand = false,
+  isCLIENTBrand = false,
 }: {
   value: string | number;
   change?: number;
-  isTBWABrand?: boolean;
+  isCLIENTBrand?: boolean;
 }) {
   return (
-    <TBWAMetricCard
+    <CLIENTMetricCard
       title="Transactions"
       value={value}
       change={change}
       icon={<TrendingUp className="h-4 w-4" />}
       color="#F89E1B"
-      isTBWABrand={isTBWABrand}
+      isCLIENTBrand={isCLIENTBrand}
       subtitle="Total Count"
     />
   );

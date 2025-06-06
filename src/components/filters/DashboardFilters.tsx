@@ -138,10 +138,7 @@ export function DashboardFilters({ onFiltersChange, onDateRangeChange }: Dashboa
 
   // Debug logging after all hooks
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔍 DashboardFilters rendered ${renderCount.current} times`);
-
     if (renderCount.current > 100) {
-      console.error('🚨 INFINITE LOOP DETECTED in DashboardFilters!');
       return <div>Infinite loop detected in DashboardFilters - check console</div>;
     }
   }

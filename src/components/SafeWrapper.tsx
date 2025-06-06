@@ -23,8 +23,7 @@ export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Component error caught:', error, errorInfo);
-  }
+    }
 
   render() {
     if (this.state.hasError) {

@@ -61,7 +61,6 @@ export function RobustBrandChart({
   // Validate and prepare chart data
   const chartData = useMemo(() => {
     if (!data || !Array.isArray(data)) {
-      console.warn('RobustBrandChart: Invalid data format', data);
       return [];
     }
 

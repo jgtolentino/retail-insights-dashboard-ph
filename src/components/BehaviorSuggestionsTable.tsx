@@ -60,7 +60,6 @@ export function BehaviorSuggestionsTable({
       );
       setData(behaviorData);
     } catch (err) {
-      console.error('Error fetching behavior suggestions:', err);
       setError(err instanceof Error ? err.message : 'Failed to load behavior suggestions');
     } finally {
       setLoading(false);

@@ -19,7 +19,7 @@ interface BrandData {
   name: string;
   sales: number;
   category: string;
-  is_tbwa: boolean;
+  is_client: boolean;
 }
 
 interface HierarchicalBrandViewProps {
@@ -49,7 +49,7 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
   const categoryData = useMemo(() => {
     const categoryMap = new Map<
       string,
-      { name: string; sales: number; brandCount: number; tbwaCount: number }
+      { name: string; sales: number; brandCount: number; clientCount: number }
     >();
 
     brands.forEach(brand => {
@@ -57,12 +57,12 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
         name: brand.category,
         sales: 0,
         brandCount: 0,
-        tbwaCount: 0,
+        clientCount: 0,
       };
 
       existing.sales += brand.sales;
       existing.brandCount += 1;
-      if (brand.is_tbwa) existing.tbwaCount += 1;
+      if (brand.is_client) existing.clientCount += 1;
 
       categoryMap.set(brand.category, existing);
     });
@@ -227,7 +227,7 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                       <div>
                         <div className="font-medium">{category.name}</div>
                         <div className="text-sm text-gray-500">
-                          {category.brandCount} brands • {category.tbwaCount} TBWA clients
+                          {category.brandCount} brands • {category.clientCount} Client clients
                         </div>
                       </div>
                     </div>
@@ -280,13 +280,13 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                   key={brand.id}
                   onClick={() => handleBrandClick(brand.id)}
                   className={`cursor-pointer rounded-lg border p-3 transition-colors hover:bg-gray-50 ${
-                    brand.is_tbwa ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                    brand.is_client ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
                   }`}
                 >
                   <div className="truncate text-sm font-medium">{brand.name}</div>
                   <div className="text-xs text-gray-500">₱{(brand.sales / 1000).toFixed(0)}k</div>
-                  {brand.is_tbwa && (
-                    <div className="text-xs font-medium text-blue-600">TBWA Client</div>
+                  {brand.is_client && (
+                    <div className="text-xs font-medium text-blue-600">Client Client</div>
                   )}
                 </div>
               ))}
@@ -314,9 +314,9 @@ export function HierarchicalBrandView({ brands, className }: HierarchicalBrandVi
                     </div>
                   </div>
 
-                  {brand?.is_tbwa && (
+                  {brand?.is_client && (
                     <div className="mt-3 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                      TBWA Client
+                      Client Client
                     </div>
                   )}
                 </div>

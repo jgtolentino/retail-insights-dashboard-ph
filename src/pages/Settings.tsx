@@ -57,7 +57,6 @@ export default function Settings() {
 
   const handleSave = () => {
     // In a real app, this would save to localStorage or API
-    console.log('Settings saved!');
     // Show success message
   };
 
@@ -114,8 +113,7 @@ export default function Settings() {
           setFeatures({ ...FEATURE_FLAGS, ...settings.features });
         }
       } catch (error) {
-        console.error('Invalid settings file');
-      }
+        }
     };
     reader.readAsText(file);
   };
@@ -274,7 +272,7 @@ export default function Settings() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="default">Default Blue</SelectItem>
-                        <SelectItem value="green">TBWA Green</SelectItem>
+                        <SelectItem value="green">Client Green</SelectItem>
                         <SelectItem value="purple">Corporate Purple</SelectItem>
                         <SelectItem value="orange">Energetic Orange</SelectItem>
                       </SelectContent>

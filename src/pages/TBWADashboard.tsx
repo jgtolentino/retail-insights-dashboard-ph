@@ -1,3 +1,4 @@
+// Client-specific component - requires customization
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,16 +17,16 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-// Import our enhanced TBWA components
-import { TBWAMetricCard } from '@/components/TBWAMetricCard';
-import { TBWABrandPerformanceGrid } from '@/components/TBWABrandPerformanceGrid';
+// Import our enhanced CLIENT components
+import { TBWAMetricCard as CLIENTMetricCard } from '@/components/TBWAMetricCard';
+import { TBWABrandPerformanceGrid as CLIENTBrandPerformanceGrid } from '@/components/TBWABrandPerformanceGrid';
 import FilterBar from '@/components/FilterBar';
 import { useFilters } from '@/stores/dashboardStore';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeData';
 import { useBrandPerformance } from '@/hooks/useBrandPerformance';
 
-export default function TBWADashboard() {
+export default function CLIENTDashboard() {
   const filters = useFilters();
   const { brandData, isLoading: brandLoading, error: brandError } = useBrandPerformance();
   const [isLoading, setIsLoading] = useState(false);
@@ -49,9 +50,9 @@ export default function TBWADashboard() {
   // Calculate aggregated metrics from real data
   const totalRevenue = brandData.reduce((sum, brand) => sum + brand.revenue, 0);
   const totalTransactions = brandData.reduce((sum, brand) => sum + brand.transactions, 0);
-  const tbwaBrands = brandData.filter(brand => brand.isTBWA);
-  const tbwaRevenue = tbwaBrands.reduce((sum, brand) => sum + brand.revenue, 0);
-  const tbwaMarketShare = totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0;
+  const clientBrands = brandData.filter(brand => brand.isCLIENT);
+  const clientRevenue = clientBrands.reduce((sum, brand) => sum + brand.revenue, 0);
+  const clientMarketShare = totalRevenue > 0 ? (clientRevenue / totalRevenue) * 100 : 0;
 
   // Calculate average growth rates
   const avgGrowthRate =
@@ -59,8 +60,8 @@ export default function TBWADashboard() {
       ? brandData.reduce((sum, brand) => sum + brand.growth, 0) / brandData.length
       : 0;
   const avgTbwaGrowthRate =
-    tbwaBrands.length > 0
-      ? tbwaBrands.reduce((sum, brand) => sum + brand.growth, 0) / tbwaBrands.length
+    clientBrands.length > 0
+      ? clientBrands.reduce((sum, brand) => sum + brand.growth, 0) / clientBrands.length
       : 0;
 
   const handleRefresh = async () => {
@@ -107,8 +108,8 @@ export default function TBWADashboard() {
       {/* Header */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-tbwa-gray">
-            TBWA <span className="text-tbwa-orange">Dashboard</span>
+          <h1 className="text-3xl font-bold text-client-gray">
+            CLIENT <span className="text-client-orange">Dashboard</span>
           </h1>
           <p className="mt-1 text-gray-600">Real-time brand performance analytics and insights</p>
         </div>
@@ -155,7 +156,7 @@ export default function TBWADashboard() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <TBWAMetricCard
+        <CLIENTMetricCard
           title="Total Revenue"
           value={`₱${(totalRevenue / 1000000).toFixed(1)}M`}
           change={Math.round(avgGrowthRate * 10) / 10}
@@ -164,33 +165,33 @@ export default function TBWADashboard() {
           subtitle="All Brands Combined"
         />
 
-        <TBWAMetricCard
-          title="TBWA Revenue"
-          value={`₱${(tbwaRevenue / 1000000).toFixed(1)}M`}
+        <CLIENTMetricCard
+          title="CLIENT Revenue"
+          value={`₱${(clientRevenue / 1000000).toFixed(1)}M`}
           change={Math.round(avgTbwaGrowthRate * 10) / 10}
           icon={<Target className="h-5 w-5" />}
           color="#F89E1B"
-          isTBWABrand={true}
-          subtitle="TBWA Brands Only"
+          isCLIENTBrand={true}
+          subtitle="CLIENT Brands Only"
         />
 
-        <TBWAMetricCard
+        <CLIENTMetricCard
           title="Market Share"
-          value={`${tbwaMarketShare.toFixed(1)}%`}
+          value={`${clientMarketShare.toFixed(1)}%`}
           change={Math.round(avgTbwaGrowthRate * 10) / 10}
           icon={<BarChart3 className="h-5 w-5" />}
           color="#28a745"
-          isTBWABrand={true}
-          subtitle="TBWA vs Competition"
+          isCLIENTBrand={true}
+          subtitle="CLIENT vs Competition"
         />
 
-        <TBWAMetricCard
+        <CLIENTMetricCard
           title="Active Brands"
-          value={tbwaBrands.length}
+          value={clientBrands.length}
           icon={<Award className="h-5 w-5" />}
           color="#6f42c1"
-          isTBWABrand={true}
-          subtitle="TBWA Portfolio"
+          isCLIENTBrand={true}
+          subtitle="CLIENT Portfolio"
         />
       </div>
 
@@ -207,13 +208,13 @@ export default function TBWADashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Brand Performance Grid */}
             <div className="lg:col-span-2">
-              <TBWABrandPerformanceGrid brands={brandData} maxBrands={6} showTBWAFirst={true} />
+              <CLIENTBrandPerformanceGrid brands={brandData} maxBrands={6} showCLIENTFirst={true} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="brands" className="space-y-4">
-          <TBWABrandPerformanceGrid brands={brandData} maxBrands={12} showTBWAFirst={true} />
+          <CLIENTBrandPerformanceGrid brands={brandData} maxBrands={12} showCLIENTFirst={true} />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-4">
@@ -237,7 +238,7 @@ export default function TBWADashboard() {
                 <div className="rounded-lg border-l-4 border-orange-500 bg-orange-50 p-4">
                   <h3 className="font-semibold text-orange-900">Market Share Alert</h3>
                   <p className="mt-1 text-sm text-orange-800">
-                    TBWA brands currently hold {tbwaMarketShare.toFixed(1)}% market share. Target is
+                    CLIENT brands currently hold {clientMarketShare.toFixed(1)}% market share. Target is
                     60% by Q4.
                   </p>
                 </div>
@@ -261,9 +262,9 @@ export default function TBWADashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <Button className="tbwa-button">Download Brand Report</Button>
-                <Button className="tbwa-button">Export Performance Data</Button>
-                <Button className="tbwa-button">Generate Executive Summary</Button>
+                <Button className="client-button">Download Brand Report</Button>
+                <Button className="client-button">Export Performance Data</Button>
+                <Button className="client-button">Generate Executive Summary</Button>
               </div>
             </CardContent>
           </Card>
@@ -273,7 +274,7 @@ export default function TBWADashboard() {
       {/* Footer */}
       <div className="py-4 text-center text-sm text-gray-500">
         Last updated: {lastUpdated.toLocaleString()} | Powered by{' '}
-        <span className="font-semibold text-tbwa-blue">TBWA Analytics</span>
+        <span className="font-semibold text-client-blue">CLIENT Analytics</span>
       </div>
     </div>
   );

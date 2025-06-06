@@ -31,7 +31,7 @@ import {
 import SubstitutionFlow from '@/components/charts/SubstitutionFlow';
 import RequestBehaviorAnalysis from '@/components/charts/RequestBehaviorAnalysis';
 import AIRecommendations from '@/components/AIRecommendations';
-import { Sprint4DataVerification } from '@/components/Sprint4DataVerification';
+// Debug component removed for production
 import {
   DashboardSkeleton,
   AnalyticsSkeleton,
@@ -101,8 +101,7 @@ export default function Sprint4Dashboard() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Export failed:', error);
-    } finally {
+      } finally {
       setIsLoading(false);
     }
   };
@@ -202,8 +201,7 @@ export default function Sprint4Dashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Data Verification */}
-          <Sprint4DataVerification />
+          {/* Production: Data verification removed */}
 
           {/* Quick Stats Overview */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

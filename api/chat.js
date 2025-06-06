@@ -62,7 +62,6 @@ export default async function handler(req, res) {
     res.status(200).json({ answer });
 
   } catch (error) {
-    console.error('Error in chat API:', error);
     res.status(500).json({ 
       error: 'Sorry, I encountered an error. Please try again later.' 
     });

@@ -50,7 +50,6 @@ export function DeviceHealthDashboard() {
         const currentAlerts = await iotEventsHub.getActiveAlerts();
         setAlerts(currentAlerts);
       } catch (error) {
-        console.error('Failed to initialize IoT Events Hub:', error);
         setIsConnected(false);
       }
     };
@@ -98,15 +97,12 @@ export function DeviceHealthDashboard() {
       },
 
       onDeviceOnline: (device: IoTDevice) => {
-        console.log(`✅ Device ${device.device_id} came online`);
-      },
+        },
 
       onDeviceOffline: (device: IoTDevice) => {
-        console.log(`❌ Device ${device.device_id} went offline`);
-      },
+        },
 
       onError: (error: Error) => {
-        console.error('IoT Events Hub error:', error);
         setIsConnected(false);
       },
     };
@@ -181,8 +177,7 @@ export function DeviceHealthDashboard() {
       const currentAlerts = await iotEventsHub.getActiveAlerts();
       setAlerts(currentAlerts);
     } catch (error) {
-      console.error('Failed to refresh data:', error);
-    }
+      }
   };
 
   const dismissAlert = async (alertId: string) => {

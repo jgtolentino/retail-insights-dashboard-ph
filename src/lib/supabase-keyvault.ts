@@ -28,10 +28,8 @@ export async function getSupabaseClient(): Promise<SupabaseClient> {
       },
     });
 
-    console.log('✅ Supabase client initialized');
     return supabaseClient;
   } catch (error) {
-    console.error('❌ Failed to initialize Supabase client:', error);
     throw error;
   }
 }
@@ -54,10 +52,8 @@ export async function getSupabaseServiceClient(): Promise<SupabaseClient> {
       },
     });
 
-    console.log('✅ Supabase service client initialized');
     return supabaseServiceClient;
   } catch (error) {
-    console.error('❌ Failed to initialize Supabase service client:', error);
     throw error;
   }
 }
@@ -68,8 +64,7 @@ export async function getSupabaseServiceClient(): Promise<SupabaseClient> {
 export function resetSupabaseClients(): void {
   supabaseClient = null;
   supabaseServiceClient = null;
-  console.log('🔄 Supabase clients reset');
-}
+  }
 
 /**
  * Test Supabase connectivity
@@ -80,14 +75,11 @@ export async function testSupabaseConnection(): Promise<boolean> {
     const { data, error } = await client.from('transactions').select('id').limit(1);
 
     if (error) {
-      console.error('Supabase connection test failed:', error);
       return false;
     }
 
-    console.log('✅ Supabase connection test passed');
     return true;
   } catch (error) {
-    console.error('Supabase connection test error:', error);
     return false;
   }
 }
@@ -149,8 +141,7 @@ export async function getSupabaseHealth(): Promise<{
       health.status = 'unhealthy';
     }
   } catch (error) {
-    console.error('Health check failed:', error);
-  }
+    }
 
   return health;
 }

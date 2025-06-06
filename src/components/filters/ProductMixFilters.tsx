@@ -124,10 +124,7 @@ export function ProductMixFilters({ onFiltersChange, className }: ProductMixFilt
 
   // Debug logging after all hooks
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔍 ProductMixFilters rendered ${renderCount.current} times`);
-
     if (renderCount.current > 100) {
-      console.error('🚨 INFINITE LOOP DETECTED in ProductMixFilters!');
       return <div>Infinite loop detected in ProductMixFilters - check console</div>;
     }
   }

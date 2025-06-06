@@ -44,8 +44,6 @@ export function initSentry() {
 
 // Wrapper for error logging with context
 export function logError(error: Error, context?: Record<string, any>) {
-  console.error('Error:', error, context);
-
   if (Sentry && import.meta.env.PROD) {
     Sentry.captureException(error, {
       contexts: {

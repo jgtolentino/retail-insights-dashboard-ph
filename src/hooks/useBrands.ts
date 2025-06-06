@@ -17,7 +17,6 @@ export function useBrands() {
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching brands:', error);
         throw error;
       }
 
@@ -41,7 +40,6 @@ export function useAllBrands() {
         .order('name', { ascending: true });
 
       if (error) {
-        console.error('Error fetching brands:', error);
         throw error;
       }
 

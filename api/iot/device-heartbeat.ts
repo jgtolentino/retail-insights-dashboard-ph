@@ -102,8 +102,6 @@ export default async function handler(
     // Check for health-based alerts
     await checkHealthAlerts(heartbeatData.device_id, heartbeatData.health_metrics);
 
-    console.log(`💓 Heartbeat received from ${heartbeatData.device_id}: ${heartbeatData.status}`);
-
     res.status(200).json({
       success: true,
       message: 'Heartbeat processed successfully',
@@ -113,7 +111,6 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('❌ Heartbeat handler error:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to process heartbeat'

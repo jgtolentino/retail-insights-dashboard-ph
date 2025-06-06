@@ -101,8 +101,6 @@ export class IoTEventsHub {
    */
   async initialize(): Promise<void> {
     try {
-      console.log('🔌 Initializing IoT Events Hub...');
-
       // Subscribe to device status changes
       await this.subscribeToDeviceStatus();
 
@@ -118,9 +116,7 @@ export class IoTEventsHub {
       this.isConnected = true;
       this.reconnectAttempts = 0;
 
-      console.log('✅ IoT Events Hub initialized successfully');
-    } catch (error) {
-      console.error('❌ Failed to initialize IoT Events Hub:', error);
+      } catch (error) {
       this.callbacks.onError?.(error as Error);
       await this.handleReconnection();
     }
@@ -245,9 +241,7 @@ export class IoTEventsHub {
         this.callbacks.onDeviceOffline?.(device);
       }
 
-      console.log(`📱 Device ${device.device_id} status changed to: ${device.status}`);
-    } catch (error) {
-      console.error('Failed to handle device status change:', error);
+      } catch (error) {
       this.callbacks.onError?.(error as Error);
     }
   }
@@ -275,11 +269,7 @@ export class IoTEventsHub {
       // Check for health-based alerts
       this.checkHealthThresholds(health);
 
-      console.log(
-        `💓 Health update from ${health.device_id}: CPU ${health.cpu_usage}%, Temp ${health.temperature}°C`
-      );
-    } catch (error) {
-      console.error('Failed to handle health update:', error);
+      } catch (error) {
       this.callbacks.onError?.(error as Error);
     }
   }
@@ -303,12 +293,10 @@ export class IoTEventsHub {
 
       // Log critical alerts
       if (alert.severity === 'critical') {
-        console.error(`🚨 CRITICAL ALERT from ${alert.device_id}: ${alert.message}`);
-      } else {
-        console.warn(`⚠️ Alert from ${alert.device_id}: ${alert.message} (${alert.severity})`);
+        } else {
+        `);
       }
     } catch (error) {
-      console.error('Failed to handle alert:', error);
       this.callbacks.onError?.(error as Error);
     }
   }
@@ -340,11 +328,7 @@ export class IoTEventsHub {
 
       this.callbacks.onTransaction?.(transaction);
 
-      console.log(
-        `🛒 New transaction from ${transaction.device_id} at store ${transaction.store_id}`
-      );
-    } catch (error) {
-      console.error('Failed to handle transaction:', error);
+      } catch (error) {
       this.callbacks.onError?.(error as Error);
     }
   }
@@ -368,8 +352,7 @@ export class IoTEventsHub {
         };
       }
     } catch (error) {
-      console.error('Failed to enrich device with store data:', error);
-    }
+      }
   }
 
   /**
@@ -391,8 +374,7 @@ export class IoTEventsHub {
         }));
       }
     } catch (error) {
-      console.error('Failed to enrich transaction with items:', error);
-    }
+      }
   }
 
   /**
@@ -505,8 +487,7 @@ export class IoTEventsHub {
         });
       }
     } catch (error) {
-      console.error('Failed to create alert:', error);
-    }
+      }
   }
 
   /**
@@ -550,7 +531,6 @@ export class IoTEventsHub {
         },
       }));
     } catch (error) {
-      console.error('Failed to get device status:', error);
       return [];
     }
   }
@@ -576,7 +556,6 @@ export class IoTEventsHub {
 
       return data || [];
     } catch (error) {
-      console.error('Failed to get active alerts:', error);
       return [];
     }
   }
@@ -603,10 +582,8 @@ export class IoTEventsHub {
 
       if (error) throw error;
 
-      console.log(`📤 Command sent to ${deviceId}: ${command.type}`);
       return true;
     } catch (error) {
-      console.error('Failed to send device command:', error);
       return false;
     }
   }
@@ -616,15 +593,13 @@ export class IoTEventsHub {
    */
   private async handleReconnection(): Promise<void> {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('❌ Max reconnection attempts reached');
       return;
     }
 
     this.reconnectAttempts++;
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff, max 30s
 
-    console.log(
-      `🔄 Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+    `
     );
 
     setTimeout(async () => {
@@ -637,12 +612,9 @@ export class IoTEventsHub {
    * Cleanup connections
    */
   async cleanup(): Promise<void> {
-    console.log('🧹 Cleaning up IoT Events Hub connections...');
-
     for (const [name, channel] of this.channels) {
       await supabase.removeChannel(channel);
-      console.log(`📡 Unsubscribed from ${name}`);
-    }
+      }
 
     this.channels.clear();
     this.isConnected = false;
@@ -726,12 +698,8 @@ export class IoTDataProcessor {
         })
         .eq('device_id', batchData.device_id);
 
-      console.log(
-        `✅ Processed batch upload from ${batchData.device_id}: ${batchData.transactions.length} transactions`
-      );
       return true;
     } catch (error) {
-      console.error('❌ Failed to process batch upload:', error);
       return false;
     }
   }

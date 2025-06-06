@@ -36,7 +36,6 @@ class AzureOpenAIService {
       this.config = config.azureOpenAI;
 
       if (!this.config.endpoint || !this.config.apiKey) {
-        console.warn('⚠️  Azure OpenAI not configured, using mock responses');
         return null;
       }
 
@@ -48,10 +47,8 @@ class AzureOpenAIService {
         deploymentName: this.config.deploymentName,
       };
 
-      console.log('✅ Azure OpenAI service initialized');
       return this.client;
     } catch (error) {
-      console.error('❌ Failed to initialize Azure OpenAI client:', error);
       return null;
     }
   }
@@ -68,7 +65,6 @@ class AzureOpenAIService {
       const response = await this.callAzureOpenAI(prompt);
       return this.parseInsightsResponse(response);
     } catch (error) {
-      console.error('Azure OpenAI API call failed:', error);
       return this.getMockInsights(request);
     }
   }
@@ -82,11 +78,11 @@ IMPORTANT CONTEXT: This analysis is for the Filipino retail market. Consider:
 - Filipino family shopping behaviors and bulk buying patterns
 - Regional preferences and seasonal shopping trends
 - Local language terms and cultural shopping occasions
-- TBWA client brands vs competitor analysis in Philippine market
+- Client client brands vs competitor analysis in Philippine market
 `
       : '';
 
-    return `You are an expert retail analytics AI specializing in Filipino consumer behavior and TBWA client insights.
+    return `You are an expert retail analytics AI specializing in Filipino consumer behavior and Client client insights.
 
 ${contextualInfo}
 
@@ -99,7 +95,7 @@ TRANSACTION DATA SUMMARY:
 
 BRAND ANALYSIS:
 - Total brands analyzed: ${request.brands.length}
-- TBWA clients vs competitors included
+- Client clients vs competitors included
 
 SAMPLE TRANSACTIONS:
 ${JSON.stringify(request.transactions.slice(0, 5), null, 2)}
@@ -128,7 +124,7 @@ Please provide 3-5 specific, actionable insights in JSON format with this struct
 
 Focus on:
 1. Filipino consumer behavior patterns
-2. TBWA client performance vs competitors
+2. Client client performance vs competitors
 3. Local payment method preferences
 4. Cultural shopping occasions and timing
 5. Regional performance variations`;
@@ -142,7 +138,7 @@ Focus on:
         {
           role: 'system',
           content:
-            'You are a retail analytics AI specializing in Filipino consumer behavior and TBWA client insights. Provide precise, actionable insights in JSON format.',
+            'You are a retail analytics AI specializing in Filipino consumer behavior and Client client insights. Provide precise, actionable insights in JSON format.',
         },
         {
           role: 'user',
@@ -179,7 +175,6 @@ Focus on:
       const parsed = JSON.parse(response);
       return parsed.insights || [];
     } catch (error) {
-      console.error('Failed to parse AI response:', error);
       return [];
     }
   }
@@ -206,8 +201,8 @@ Focus on:
       },
       {
         type: 'recommendation',
-        title: 'TBWA Client Visibility Opportunity',
-        description: `Analysis shows TBWA clients have 23% higher suggestion acceptance rates. Recommend increasing product placement visibility and staff training on suggesting premium alternatives.`,
+        title: 'Client Client Visibility Opportunity',
+        description: `Analysis shows Client clients have 23% higher suggestion acceptance rates. Recommend increasing product placement visibility and staff training on suggesting premium alternatives.`,
         confidence: 0.76,
         actionable: true,
         priority: 'medium',
@@ -248,17 +243,17 @@ Focus on:
     ];
   }
 
-  async generateBrandCompetitiveAnalysis(tbwaBrands: any[], competitorBrands: any[]): Promise<any> {
+  async generateBrandCompetitiveAnalysis(clientBrands: any[], competitorBrands: any[]): Promise<any> {
     const client = await this.getClient();
 
     if (!client) {
-      return this.getMockCompetitiveAnalysis(tbwaBrands, competitorBrands);
+      return this.getMockCompetitiveAnalysis(clientBrands, competitorBrands);
     }
 
-    const prompt = `Analyze competitive positioning for TBWA clients vs competitors in the Filipino market:
+    const prompt = `Analyze competitive positioning for Client clients vs competitors in the Filipino market:
 
-TBWA CLIENTS (${tbwaBrands.length} brands):
-${JSON.stringify(tbwaBrands.slice(0, 5), null, 2)}
+Client CLIENTS (${clientBrands.length} brands):
+${JSON.stringify(clientBrands.slice(0, 5), null, 2)}
 
 COMPETITORS (${competitorBrands.length} brands):
 ${JSON.stringify(competitorBrands.slice(0, 5), null, 2)}
@@ -276,15 +271,14 @@ Return detailed JSON analysis.`;
       const response = await this.callAzureOpenAI(prompt);
       return JSON.parse(response);
     } catch (error) {
-      console.error('Competitive analysis failed:', error);
-      return this.getMockCompetitiveAnalysis(tbwaBrands, competitorBrands);
+      return this.getMockCompetitiveAnalysis(clientBrands, competitorBrands);
     }
   }
 
-  private getMockCompetitiveAnalysis(tbwaBrands: any[], competitorBrands: any[]): any {
+  private getMockCompetitiveAnalysis(clientBrands: any[], competitorBrands: any[]): any {
     return {
       summary: {
-        tbwa_market_share: 34.2,
+        client_market_share: 34.2,
         competitor_market_share: 65.8,
         growth_rate: 12.3,
         recommendation: 'Focus on premium positioning and local partnerships',
@@ -301,7 +295,6 @@ Return detailed JSON analysis.`;
     try {
       const client = await this.getClient();
       if (!client) {
-        console.log('⚠️  Azure OpenAI not configured, but service is functional with mocks');
         return true; // Consider mocks as working
       }
 
@@ -309,7 +302,6 @@ Return detailed JSON analysis.`;
       const response = await this.callAzureOpenAI('Test connection. Respond with "OK".');
       return response.includes('OK');
     } catch (error) {
-      console.error('Azure OpenAI connection test failed:', error);
       return false;
     }
   }

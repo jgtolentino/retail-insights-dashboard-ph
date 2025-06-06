@@ -82,13 +82,10 @@ export function PerformanceMonitor() {
       if (!response.ok) throw new Error('Load test failed');
       const results = await response.json();
 
-      console.log('Load test results:', results);
-
       // Refresh metrics after load test
       queryClient.invalidateQueries({ queryKey: ['performance-metrics'] });
     } catch (error) {
-      console.error('Error running load test:', error);
-    } finally {
+      } finally {
       setIsLoadTesting(false);
     }
   };

@@ -57,7 +57,6 @@ export function HierarchicalSubstitutions({
 
       setData(substitutions || []);
     } catch (err) {
-      console.error('Error fetching substitution data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load substitution data');
     } finally {
       setLoading(false);

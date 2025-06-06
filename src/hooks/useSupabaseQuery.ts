@@ -19,8 +19,7 @@ export function useSupabaseQuery<T>(queryFn: () => Promise<T>, fallback: T) {
       } catch (err) {
         if (!cancelled) {
           setError(err as Error);
-          console.error('Query error:', err);
-        }
+          }
       } finally {
         if (!cancelled) {
           setLoading(false);

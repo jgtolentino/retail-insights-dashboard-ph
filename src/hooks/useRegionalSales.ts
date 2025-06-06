@@ -81,7 +81,6 @@ export function useRegionalSales() {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching regional sales:', error);
         throw error;
       }
 

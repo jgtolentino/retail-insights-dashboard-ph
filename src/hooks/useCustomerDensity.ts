@@ -101,7 +101,6 @@ export function useCustomerDensity(aggregationLevel: 'barangay' | 'city' | 'prov
       const { data: transactions, error } = await transactionsQuery;
 
       if (error) {
-        console.error('Error fetching customer density:', error);
         throw error;
       }
 

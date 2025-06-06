@@ -36,7 +36,7 @@ class Logger {
         debug: 'color: #6b7280',
       };
 
-      console.log(`%c[${level.toUpperCase()}] ${message}`, style[level], data || '');
+      }] ${message}`, style[level], data || '');
     }
   }
 

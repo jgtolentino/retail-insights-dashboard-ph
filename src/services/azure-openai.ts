@@ -71,7 +71,6 @@ export class AzureOpenAIService {
 
       return this.parseInsightsResponse(completion);
     } catch (error) {
-      console.error('❌ Failed to generate AI insights:', error);
       return this.getFallbackInsights(salesData);
     }
   }
@@ -94,7 +93,6 @@ export class AzureOpenAIService {
 
       return this.parsePredictionResponse(completion);
     } catch (error) {
-      console.error('❌ Failed to generate predictions:', error);
       return this.getFallbackPredictions(salesData);
     }
   }
@@ -121,7 +119,6 @@ export class AzureOpenAIService {
 
       return this.parseAnomaliesResponse(completion);
     } catch (error) {
-      console.error('❌ Failed to detect anomalies:', error);
       return [];
     }
   }
@@ -149,7 +146,6 @@ export class AzureOpenAIService {
 
       return this.parseOptimizationResponse(completion);
     } catch (error) {
-      console.error('❌ Failed to generate optimization suggestions:', error);
       return this.getFallbackOptimizations();
     }
   }
@@ -173,7 +169,6 @@ export class AzureOpenAIService {
 
       return this.parseConsumerBehaviorResponse(completion);
     } catch (error) {
-      console.error('❌ Failed to analyze consumer behavior:', error);
       return {
         insights: ['Unable to analyze consumer patterns at this time'],
         culturalFactors: [],
@@ -419,7 +414,6 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
       const parsed = JSON.parse(response);
       return parsed.insights || [];
     } catch (error) {
-      console.error('Failed to parse insights response:', error);
       return [];
     }
   }
@@ -432,7 +426,6 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
       const parsed = JSON.parse(response);
       return parsed.predictions || [];
     } catch (error) {
-      console.error('Failed to parse prediction response:', error);
       return [];
     }
   }
@@ -445,7 +438,6 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
       const parsed = JSON.parse(response);
       return parsed.anomalies || [];
     } catch (error) {
-      console.error('Failed to parse anomalies response:', error);
       return [];
     }
   }
@@ -458,7 +450,6 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
       const parsed = JSON.parse(response);
       return parsed.optimizations || [];
     } catch (error) {
-      console.error('Failed to parse optimization response:', error);
       return [];
     }
   }
@@ -470,7 +461,6 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
     try {
       return JSON.parse(response);
     } catch (error) {
-      console.error('Failed to parse consumer behavior response:', error);
       return {
         insights: [],
         culturalFactors: [],

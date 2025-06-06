@@ -44,7 +44,6 @@ const apiCall = async <T>(fn: () => Promise<{ data: T | null; error: any }>): Pr
     const { data, error } = await fn();
 
     if (error) {
-      console.error('Supabase error:', error);
       handleApiError(error);
       throw new Error(error.message || 'Database query failed');
     }
@@ -55,7 +54,6 @@ const apiCall = async <T>(fn: () => Promise<{ data: T | null; error: any }>): Pr
 
     return data;
   } catch (error) {
-    console.error('API call failed:', error);
     handleApiError(error);
     throw error;
   }
@@ -64,7 +62,7 @@ const apiCall = async <T>(fn: () => Promise<{ data: T | null; error: any }>): Pr
 // Brands API
 export const brandsApi = {
   getAll: () =>
-    apiCall(() => supabase.from('brands').select('id, name, category, is_tbwa').order('name')),
+    apiCall(() => supabase.from('brands').select('id, name, category, is_client').order('name')),
 
   getById: (id: string) => apiCall(() => supabase.from('brands').select('*').eq('id', id).single()),
 };
@@ -163,7 +161,7 @@ export const salesApi = {
           id,
           name,
           category,
-          is_tbwa
+          is_client
         )
       `);
 

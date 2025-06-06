@@ -313,8 +313,7 @@ export const dashboardService = {
         }
       }
 
-      console.log('📅 Using date range:', {
-        start: startDate.toISOString(),
+      ,
         end: endDate.toISOString(),
         timeRange,
       });
@@ -405,7 +404,7 @@ export const dashboardService = {
       const brandMap = new Map(brands?.map(b => [b.id, b]) || []);
 
       // Calculate sales by brand using proper ID matching
-      const brandSalesMap = new Map<string, { sales: number; is_tbwa: boolean }>();
+      const brandSalesMap = new Map<string, { sales: number; is_client: boolean }>();
 
       transactionItems?.forEach(item => {
         const product = productMap.get(item.product_id);
@@ -424,7 +423,7 @@ export const dashboardService = {
             } else {
               brandSalesMap.set(brand.name, {
                 sales: sales,
-                is_tbwa: brand.is_tbwa || false,
+                is_client: brand.is_client || false,
               });
             }
           }
@@ -436,14 +435,12 @@ export const dashboardService = {
         .map(([name, data]) => ({
           name,
           sales: Number(data.sales), // Explicitly convert to number
-          is_tbwa: data.is_tbwa,
+          is_client: data.is_client,
         }))
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 15); // Show top 15 brands
 
-      console.log(
-        '🔢 Sales values check:',
-        topBrands.slice(0, 3).map(b => `${b.name}: ${b.sales} (${typeof b.sales})`)
+      .map(b => `${b.name}: ${b.sales} (${typeof b.sales})`)
       );
 
       logger.info('Successfully fetched dashboard data', {
@@ -461,8 +458,6 @@ export const dashboardService = {
       };
     } catch (error) {
       logger.error('Failed to fetch dashboard data', error);
-      console.error('Dashboard service error:', error);
-
       // Return empty data when there's an error
       return {
         totalRevenue: 0,
@@ -593,7 +588,6 @@ export const dashboardService = {
       return timeSeriesData;
     } catch (error) {
       logger.error('Failed to fetch time series data', error);
-      console.error('Time series service error:', error);
       // Return empty array to prevent dashboard crash
       return [];
     }
@@ -633,7 +627,6 @@ export const dashboardService = {
       return timeSeriesData;
     } catch (error) {
       logger.error('Failed to fetch time series data by date range', error);
-      console.error('Time series by date range service error:', error);
       return [];
     }
   },

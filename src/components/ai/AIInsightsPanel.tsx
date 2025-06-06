@@ -45,8 +45,6 @@ export function AIInsightsPanel({ className }: AIInsightsPanelProps) {
     setError('');
 
     try {
-      console.log('🤖 Generating AI insights...');
-
       // Get current dashboard data
       const dashboardData = await simpleDashboardService.getDashboardData();
 
@@ -79,9 +77,7 @@ export function AIInsightsPanel({ className }: AIInsightsPanelProps) {
       setConsumerBehavior(behaviorAnalysis);
       setLastUpdated(new Date().toLocaleString());
 
-      console.log('✅ AI insights generated successfully');
-    } catch (error) {
-      console.error('❌ Failed to generate AI insights:', error);
+      } catch (error) {
       setError('Failed to generate AI insights. Please try again.');
     } finally {
       setIsLoading(false);

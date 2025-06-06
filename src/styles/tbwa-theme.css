@@ -1,13 +1,14 @@
-/* TBWA Brand Theme Integration */
+// Client-specific component - requires customization
+/* CLIENT Brand Theme Integration */
 /* Based on Project Scout design system */
 
 :root {
-  /* TBWA Brand Colors */
-  --tbwa-blue: #0078d4;
-  --tbwa-orange: #f89e1b;
-  --tbwa-gray: #2e2f33;
-  --tbwa-light-gray: #f5f5f5;
-  --tbwa-dark-blue: #002b49;
+  /* CLIENT Brand Colors */
+  --client-blue: #0078d4;
+  --client-orange: #f89e1b;
+  --client-gray: #2e2f33;
+  --client-light-gray: #f5f5f5;
+  --client-dark-blue: #002b49;
 
   /* Extended Color Palette */
   --success: #28a745;
@@ -23,94 +24,94 @@
   --chart-5: #6f42c1;
 
   /* Shadows and Effects */
-  --tbwa-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  --tbwa-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
-  --tbwa-border-radius: 8px;
+  --client-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --client-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --client-border-radius: 8px;
 }
 
-/* TBWA CSS Custom Properties for Tailwind */
-.bg-tbwa-blue {
-  background-color: var(--tbwa-blue);
+/* CLIENT CSS Custom Properties for Tailwind */
+.bg-client-blue {
+  background-color: var(--client-blue);
 }
-.bg-tbwa-orange {
-  background-color: var(--tbwa-orange);
+.bg-client-orange {
+  background-color: var(--client-orange);
 }
-.bg-tbwa-gray {
-  background-color: var(--tbwa-gray);
+.bg-client-gray {
+  background-color: var(--client-gray);
 }
-.bg-tbwa-light-gray {
-  background-color: var(--tbwa-light-gray);
+.bg-client-light-gray {
+  background-color: var(--client-light-gray);
 }
-.bg-tbwa-dark-blue {
-  background-color: var(--tbwa-dark-blue);
-}
-
-.text-tbwa-blue {
-  color: var(--tbwa-blue);
-}
-.text-tbwa-orange {
-  color: var(--tbwa-orange);
-}
-.text-tbwa-gray {
-  color: var(--tbwa-gray);
-}
-.text-tbwa-dark-blue {
-  color: var(--tbwa-dark-blue);
+.bg-client-dark-blue {
+  background-color: var(--client-dark-blue);
 }
 
-.border-tbwa-blue {
-  border-color: var(--tbwa-blue);
+.text-client-blue {
+  color: var(--client-blue);
 }
-.border-tbwa-orange {
-  border-color: var(--tbwa-orange);
+.text-client-orange {
+  color: var(--client-orange);
+}
+.text-client-gray {
+  color: var(--client-gray);
+}
+.text-client-dark-blue {
+  color: var(--client-dark-blue);
 }
 
-.from-tbwa-blue {
-  --tw-gradient-from: var(--tbwa-blue) var(--tw-gradient-from-position);
+.border-client-blue {
+  border-color: var(--client-blue);
 }
-.to-tbwa-orange {
-  --tw-gradient-to: var(--tbwa-orange) var(--tw-gradient-to-position);
+.border-client-orange {
+  border-color: var(--client-orange);
 }
 
-/* TBWA Card Styles */
-.tbwa-card {
+.from-client-blue {
+  --tw-gradient-from: var(--client-blue) var(--tw-gradient-from-position);
+}
+.to-client-orange {
+  --tw-gradient-to: var(--client-orange) var(--tw-gradient-to-position);
+}
+
+/* CLIENT Card Styles */
+.client-card {
   background-color: white;
-  border-radius: var(--tbwa-border-radius);
-  box-shadow: var(--tbwa-shadow);
+  border-radius: var(--client-border-radius);
+  box-shadow: var(--client-shadow);
   transition: all 0.3s ease;
   border: 1px solid #e5e7eb;
 }
 
-.tbwa-card:hover {
-  box-shadow: var(--tbwa-shadow-hover);
+.client-card:hover {
+  box-shadow: var(--client-shadow-hover);
   transform: translateY(-2px);
 }
 
-.tbwa-card.featured {
-  border: 2px solid var(--tbwa-orange);
+.client-card.featured {
+  border: 2px solid var(--client-orange);
   position: relative;
 }
 
-.tbwa-card.featured::before {
+.client-card.featured::before {
   content: '';
   position: absolute;
   top: -1px;
   left: -1px;
   right: -1px;
   bottom: -1px;
-  background: linear-gradient(45deg, var(--tbwa-blue), var(--tbwa-orange));
-  border-radius: var(--tbwa-border-radius);
+  background: linear-gradient(45deg, var(--client-blue), var(--client-orange));
+  border-radius: var(--client-border-radius);
   z-index: -1;
 }
 
-/* TBWA Metric Card Enhancements */
-.tbwa-metric-card {
+/* CLIENT Metric Card Enhancements */
+.client-metric-card {
   position: relative;
   overflow: hidden;
 }
 
-.tbwa-metric-card .metric-icon {
-  background: linear-gradient(135deg, var(--tbwa-blue), var(--tbwa-orange));
+.client-metric-card .metric-icon {
+  background: linear-gradient(135deg, var(--client-blue), var(--client-orange));
   color: white;
   padding: 8px;
   border-radius: 6px;
@@ -119,28 +120,28 @@
   justify-content: center;
 }
 
-.tbwa-metric-value {
+.client-metric-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--tbwa-gray);
+  color: var(--client-gray);
   line-height: 1.2;
 }
 
-.tbwa-metric-trend.positive {
+.client-metric-trend.positive {
   color: var(--success);
 }
 
-.tbwa-metric-trend.negative {
+.client-metric-trend.negative {
   color: var(--danger);
 }
 
-.tbwa-metric-trend.neutral {
+.client-metric-trend.neutral {
   color: #6b7280;
 }
 
-/* TBWA Brand Badge */
-.tbwa-brand-badge {
-  background: linear-gradient(135deg, var(--tbwa-orange), #ff7b00);
+/* CLIENT Brand Badge */
+.client-brand-badge {
+  background: linear-gradient(135deg, var(--client-orange), #ff7b00);
   color: white;
   font-size: 0.75rem;
   font-weight: 600;
@@ -150,24 +151,24 @@
   box-shadow: 0 1px 3px rgba(248, 158, 27, 0.3);
 }
 
-/* TBWA Accent Lines */
-.tbwa-accent-line {
+/* CLIENT Accent Lines */
+.client-accent-line {
   height: 3px;
-  background: linear-gradient(90deg, var(--tbwa-blue), var(--tbwa-orange));
+  background: linear-gradient(90deg, var(--client-blue), var(--client-orange));
   border-radius: 1.5px;
 }
 
-.tbwa-accent-line.thin {
+.client-accent-line.thin {
   height: 1px;
 }
 
-/* TBWA Button Styles */
-.tbwa-button {
-  background: linear-gradient(135deg, var(--tbwa-blue), var(--tbwa-orange));
+/* CLIENT Button Styles */
+.client-button {
+  background: linear-gradient(135deg, var(--client-blue), var(--client-orange));
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: var(--tbwa-border-radius);
+  border-radius: var(--client-border-radius);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -176,74 +177,74 @@
   letter-spacing: 0.5px;
 }
 
-.tbwa-button:hover {
+.client-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
 }
 
-.tbwa-button.secondary {
+.client-button.secondary {
   background: white;
-  color: var(--tbwa-blue);
-  border: 2px solid var(--tbwa-blue);
+  color: var(--client-blue);
+  border: 2px solid var(--client-blue);
 }
 
-.tbwa-button.secondary:hover {
-  background: var(--tbwa-light-gray);
+.client-button.secondary:hover {
+  background: var(--client-light-gray);
 }
 
-/* TBWA Progress Bar */
-.tbwa-progress {
+/* CLIENT Progress Bar */
+.client-progress {
   height: 8px;
   background-color: #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
 }
 
-.tbwa-progress-fill {
+.client-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--tbwa-blue), var(--tbwa-orange));
+  background: linear-gradient(90deg, var(--client-blue), var(--client-orange));
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
-/* TBWA Chart Enhancements */
-.tbwa-chart-container {
+/* CLIENT Chart Enhancements */
+.client-chart-container {
   background: white;
-  border-radius: var(--tbwa-border-radius);
+  border-radius: var(--client-border-radius);
   padding: 1.5rem;
-  box-shadow: var(--tbwa-shadow);
+  box-shadow: var(--client-shadow);
 }
 
-.tbwa-chart-title {
-  color: var(--tbwa-gray);
+.client-chart-title {
+  color: var(--client-gray);
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
-/* TBWA Status Indicators */
-.tbwa-status-online {
+/* CLIENT Status Indicators */
+.client-status-online {
   color: var(--success);
 }
 
-.tbwa-status-warning {
+.client-status-warning {
   color: var(--warning);
 }
 
-.tbwa-status-error {
+.client-status-error {
   color: var(--danger);
 }
 
-.tbwa-status-info {
+.client-status-info {
   color: var(--info);
 }
 
-/* TBWA Animation Classes */
-.tbwa-fade-in {
-  animation: tbwaFadeIn 0.5s ease-in-out;
+/* CLIENT Animation Classes */
+.client-fade-in {
+  animation: clientFadeIn 0.5s ease-in-out;
 }
 
-@keyframes tbwaFadeIn {
+@keyframes clientFadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -254,11 +255,11 @@
   }
 }
 
-.tbwa-pulse {
-  animation: tbwaPulse 2s infinite;
+.client-pulse {
+  animation: clientPulse 2s infinite;
 }
 
-@keyframes tbwaPulse {
+@keyframes clientPulse {
   0%,
   100% {
     opacity: 1;
@@ -268,51 +269,51 @@
   }
 }
 
-/* TBWA Dark Mode Support */
-.dark .tbwa-card {
+/* CLIENT Dark Mode Support */
+.dark .client-card {
   background-color: #1f2937;
   border-color: #374151;
 }
 
-.dark .tbwa-metric-value {
+.dark .client-metric-value {
   color: #f9fafb;
 }
 
-.dark .tbwa-chart-container {
+.dark .client-chart-container {
   background-color: #1f2937;
 }
 
-/* TBWA Mobile Responsive */
+/* CLIENT Mobile Responsive */
 @media (max-width: 768px) {
-  .tbwa-metric-value {
+  .client-metric-value {
     font-size: 1.5rem;
   }
 
-  .tbwa-button {
+  .client-button {
     padding: 10px 20px;
     font-size: 0.8rem;
   }
 
-  .tbwa-card {
+  .client-card {
     margin-bottom: 1rem;
   }
 }
 
-/* TBWA Focus States for Accessibility */
-.tbwa-button:focus,
-.tbwa-card:focus {
-  outline: 2px solid var(--tbwa-blue);
+/* CLIENT Focus States for Accessibility */
+.client-button:focus,
+.client-card:focus {
+  outline: 2px solid var(--client-blue);
   outline-offset: 2px;
 }
 
-/* TBWA Loading States */
-.tbwa-skeleton {
+/* CLIENT Loading States */
+.client-skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
-  animation: tbwaLoading 1.5s infinite;
+  animation: clientLoading 1.5s infinite;
 }
 
-@keyframes tbwaLoading {
+@keyframes clientLoading {
   0% {
     background-position: 200% 0;
   }
@@ -321,7 +322,7 @@
   }
 }
 
-/* TBWA Brand Specific Component Styles */
+/* CLIENT Brand Specific Component Styles */
 .brand-comparison-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -332,14 +333,14 @@
 .brand-card {
   position: relative;
   padding: 1.5rem;
-  border-radius: var(--tbwa-border-radius);
+  border-radius: var(--client-border-radius);
   background: white;
-  box-shadow: var(--tbwa-shadow);
+  box-shadow: var(--client-shadow);
   transition: all 0.3s ease;
 }
 
-.brand-card.tbwa-brand {
-  border-left: 4px solid var(--tbwa-orange);
+.brand-card.client-brand {
+  border-left: 4px solid var(--client-orange);
 }
 
 .brand-card.competitor-brand {
@@ -348,7 +349,7 @@
 
 .brand-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--tbwa-shadow-hover);
+  box-shadow: var(--client-shadow-hover);
 }
 
 /* Performance Indicator Styles */

@@ -45,7 +45,7 @@ interface BrandData {
   brand_id: number;
   brand_name: string;
   category: string;
-  is_tbwa: boolean;
+  is_client: boolean;
   total_revenue: number;
   total_transactions: number;
   total_quantity: number;
@@ -62,8 +62,6 @@ export default function Brands() {
   const { data: brandData, isLoading: brandLoading } = useQuery({
     queryKey: ['brand-performance', selectedCategory, dateRange],
     queryFn: async () => {
-      console.log('Fetching brand performance data...');
-
       // Get comprehensive brand data
       const query = supabase.from('transaction_items').select(
         `
@@ -75,7 +73,7 @@ export default function Brands() {
               id,
               name,
               category,
-              is_tbwa
+              is_client
             )
           ),
           transactions!inner(
@@ -96,7 +94,6 @@ export default function Brands() {
         .lte('transactions.created_at', new Date().toISOString());
 
       if (error) {
-        console.error('Error fetching brand data:', error);
         throw error;
       }
 
@@ -122,7 +119,7 @@ export default function Brands() {
             brand_id: brand.id,
             brand_name: brand.name,
             category: brand.category,
-            is_tbwa: brand.is_tbwa,
+            is_client: brand.is_client,
             total_revenue: revenue,
             total_transactions: 1,
             total_quantity: item.quantity,
@@ -197,12 +194,12 @@ export default function Brands() {
     if (!brandData) return;
 
     const csvContent = [
-      ['Brand', 'Category', 'TBWA Client', 'Revenue', 'Transactions', 'Market Share %'].join(','),
+      ['Brand', 'Category', 'Client Client', 'Revenue', 'Transactions', 'Market Share %'].join(','),
       ...brandData.map(brand =>
         [
           brand.brand_name,
           brand.category,
-          brand.is_tbwa ? 'Yes' : 'No',
+          brand.is_client ? 'Yes' : 'No',
           brand.total_revenue.toFixed(2),
           brand.total_transactions,
           brand.market_share.toFixed(2),
@@ -299,9 +296,9 @@ export default function Brands() {
             <CardContent className="flex items-center p-6">
               <Target className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">TBWA Brands</p>
+                <p className="text-sm font-medium text-muted-foreground">Client Brands</p>
                 <p className="text-2xl font-bold">
-                  {brandData?.filter(b => b.is_tbwa).length || 0}
+                  {brandData?.filter(b => b.is_client).length || 0}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">Client brands</p>
               </div>
@@ -362,9 +359,9 @@ export default function Brands() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-medium text-gray-900">{brand.brand_name}</h4>
-                          {brand.is_tbwa && (
+                          {brand.is_client && (
                             <Badge variant="default" className="text-xs">
-                              TBWA
+                              Client
                             </Badge>
                           )}
                         </div>
@@ -495,15 +492,15 @@ export default function Brands() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>TBWA vs Competitors</CardTitle>
+                  <CardTitle>Client vs Competitors</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
                       <div>
-                        <h4 className="font-medium text-blue-900">TBWA Clients</h4>
+                        <h4 className="font-medium text-blue-900">Client Clients</h4>
                         <p className="text-sm text-blue-700">
-                          {brandData?.filter(b => b.is_tbwa).length || 0} brands
+                          {brandData?.filter(b => b.is_client).length || 0} brands
                         </p>
                       </div>
                       <div className="text-right">
@@ -511,7 +508,7 @@ export default function Brands() {
                           ₱
                           {(
                             brandData
-                              ?.filter(b => b.is_tbwa)
+                              ?.filter(b => b.is_client)
                               .reduce((sum, b) => sum + b.total_revenue, 0) || 0
                           ).toLocaleString()}
                         </div>
@@ -523,7 +520,7 @@ export default function Brands() {
                       <div>
                         <h4 className="font-medium text-gray-900">Competitors</h4>
                         <p className="text-sm text-gray-700">
-                          {brandData?.filter(b => !b.is_tbwa).length || 0} brands
+                          {brandData?.filter(b => !b.is_client).length || 0} brands
                         </p>
                       </div>
                       <div className="text-right">
@@ -531,7 +528,7 @@ export default function Brands() {
                           ₱
                           {(
                             brandData
-                              ?.filter(b => !b.is_tbwa)
+                              ?.filter(b => !b.is_client)
                               .reduce((sum, b) => sum + b.total_revenue, 0) || 0
                           ).toLocaleString()}
                         </div>
@@ -567,9 +564,9 @@ export default function Brands() {
                             <div className="text-sm font-medium">
                               ₱{leader.total_revenue.toLocaleString()}
                             </div>
-                            {leader.is_tbwa && (
+                            {leader.is_client && (
                               <Badge variant="default" className="mt-1 text-xs">
-                                TBWA
+                                Client
                               </Badge>
                             )}
                           </div>

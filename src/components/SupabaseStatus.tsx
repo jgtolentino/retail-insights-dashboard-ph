@@ -23,13 +23,6 @@ export function SupabaseStatus() {
         setError(error.message);
 
         // Log helpful information
-        console.error('🚨 Supabase Connection Error:', {
-          message: error.message,
-          code: error.code,
-          hint: error.hint,
-          details: error.details,
-        });
-
         // Check if it's an RLS issue
         if (error.message.includes('row-level security') || error.code === '42501') {
           setError(
@@ -38,13 +31,11 @@ export function SupabaseStatus() {
         }
       } else {
         setStatus('connected');
-        console.log('✅ Supabase connected successfully. Brands table has', count, 'records');
-      }
+        }
     } catch (err: any) {
       setStatus('error');
       setError(err.message || 'Unknown error');
-      console.error('🚨 Network error:', err);
-    }
+      }
   };
 
   if (status === 'checking') return null;

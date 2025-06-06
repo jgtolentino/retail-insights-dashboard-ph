@@ -65,7 +65,6 @@ export function useStorePerformance() {
       const { data: transactions, error } = await transactionsQuery;
 
       if (error) {
-        console.error('Error fetching store performance:', error);
         throw error;
       }
 

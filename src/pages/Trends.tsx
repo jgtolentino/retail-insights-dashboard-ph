@@ -97,12 +97,6 @@ export default function Trends() {
   } = useQuery({
     queryKey: ['trends', selectedMetric, selectedDimension, selectedTimeframe],
     queryFn: async () => {
-      console.log('Fetching trend data for:', {
-        selectedMetric,
-        selectedDimension,
-        selectedTimeframe,
-      });
-
       let query = supabase.from('transaction_items').select(`
           quantity,
           price,
@@ -131,7 +125,6 @@ export default function Trends() {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching trend data:', error);
         throw error;
       }
 

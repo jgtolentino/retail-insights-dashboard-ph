@@ -24,11 +24,9 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
       });
 
       if (error) {
-        console.error('Consumer profile error:', error);
         throw error;
       }
 
-      console.log('Consumer profile data:', data);
       return data;
     },
   });
@@ -63,8 +61,6 @@ export function AgeDistribution({ startDate, endDate }: AgeDistributionProps) {
       percentage: total > 0 ? Math.round((count / total) * 100) : 0,
     }));
   }, [profileData]);
-
-  console.log('Processed chart data:', chartData);
 
   if (isLoading) {
     return (

@@ -22,8 +22,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('Dashboard error:', error, errorInfo);
-  }
+    }
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null });

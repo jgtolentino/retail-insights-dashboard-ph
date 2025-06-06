@@ -36,10 +36,7 @@ class ConfigManager {
       process.env.NODE_ENV === 'production'
     );
 
-    console.log(
-      `🔧 Config mode: ${this.useKeyVault ? 'Azure Key Vault' : 'Environment Variables'}`
-    );
-  }
+    }
 
   async getConfig(): Promise<AppConfig> {
     if (this.config) {
@@ -54,8 +51,6 @@ class ConfigManager {
   }
 
   private async loadFromKeyVault(): Promise<AppConfig> {
-    console.log('🔐 Loading configuration from Azure Key Vault...');
-
     try {
       const keyVault = getKeyVaultClient();
 
@@ -96,17 +91,13 @@ class ConfigManager {
         },
       };
 
-      console.log('✅ Configuration loaded from Key Vault');
       return this.config;
     } catch (error) {
-      console.error('❌ Failed to load from Key Vault, falling back to environment variables');
       return await this.loadFromEnvironment();
     }
   }
 
   private async loadFromEnvironment(): Promise<AppConfig> {
-    console.log('📁 Loading configuration from environment variables...');
-
     // Validate required environment variables
     const required = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
 
@@ -139,13 +130,10 @@ class ConfigManager {
       },
     };
 
-    console.log('✅ Configuration loaded from environment variables');
     return this.config;
   }
 
   async refreshConfig(): Promise<void> {
-    console.log('🔄 Refreshing configuration...');
-
     if (this.useKeyVault) {
       const keyVault = getKeyVaultClient();
       keyVault.clearCache();
@@ -153,8 +141,7 @@ class ConfigManager {
 
     this.config = null;
     await this.getConfig();
-    console.log('✅ Configuration refreshed');
-  }
+    }
 
   getConfigSummary(): any {
     if (!this.config) {

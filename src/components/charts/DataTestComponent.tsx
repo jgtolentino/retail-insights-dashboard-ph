@@ -16,7 +16,6 @@ export function DataTestComponent() {
 
     try {
       // Test 1: Age Distribution
-      console.log('🧪 Testing age distribution...');
       const { data: ageData, error: ageError } = await supabase.rpc('get_age_distribution', {
         start_date: '2025-04-30T00:00:00Z',
         end_date: '2025-05-30T23:59:59Z',
@@ -31,7 +30,6 @@ export function DataTestComponent() {
       };
 
       // Test 2: Consumer Profile (includes gender distribution)
-      console.log('🧪 Testing consumer profile...');
       const { data: consumerData, error: consumerError } = await supabase.rpc(
         'get_consumer_profile' as any,
         {
@@ -54,7 +52,6 @@ export function DataTestComponent() {
       };
 
       // Test 3: Raw transaction sample
-      console.log('🧪 Testing raw transactions...');
       const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
         .select('customer_age, customer_gender, amount, created_at')
@@ -68,10 +65,8 @@ export function DataTestComponent() {
         sampleData: transactionData,
       };
 
-      console.log('📊 All test results:', results);
       setTestResults(results);
     } catch (error) {
-      console.error('💥 Test failed:', error);
       results.error = error;
       setTestResults(results);
     } finally {

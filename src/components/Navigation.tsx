@@ -25,12 +25,12 @@ const navItems = [
     iot: true,
   },
   {
-    href: '/tbwa',
-    label: 'TBWA Dashboard',
+    href: '/client',
+    label: 'Client Dashboard',
     icon: Target,
     feature: null,
     highlight: true,
-    tbwa: true,
+    client: true,
   },
   {
     href: '/dashboard-preview',
@@ -78,10 +78,10 @@ export function Navigation() {
                 location.pathname === item.href ||
                 (item.href === '/sprint4' && location.pathname === '/advanced-analytics') ||
                 (item.href === '/dashboard-preview' && location.pathname === '/filter-preview') ||
-                (item.href === '/tbwa' && location.pathname === '/tbwa-dashboard') ||
+                (item.href === '/client' && location.pathname === '/client-dashboard') ||
                 (item.href === '/project-scout' && location.pathname === '/iot');
               const isHighlight = item.highlight;
-              const isTBWA = (item as any).tbwa;
+              const isClient = (item as any).client;
               const isIoT = (item as any).iot;
               return (
                 <Link
@@ -90,14 +90,14 @@ export function Navigation() {
                   className={
                     `relative flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ` +
                     (isActive
-                      ? isTBWA
-                        ? 'bg-gradient-to-r from-tbwa-blue to-tbwa-orange text-white'
+                      ? isClient
+                        ? 'bg-gradient-to-r from-client-blue to-client-orange text-white'
                         : isIoT
                           ? 'bg-gradient-to-r from-green-500 to-blue-600 text-white'
                           : isHighlight
                             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
                             : 'bg-blue-50 text-blue-700'
-                      : isTBWA
+                      : isClient
                         ? 'bg-gradient-to-r from-orange-100 to-blue-100 text-orange-800 hover:from-orange-200 hover:to-blue-200'
                         : isIoT
                           ? 'bg-gradient-to-r from-green-100 to-blue-100 text-green-800 hover:from-green-200 hover:to-blue-200'

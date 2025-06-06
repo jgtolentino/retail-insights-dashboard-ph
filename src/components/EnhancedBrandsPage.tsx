@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TBWACompetitiveToggle, MarketShareWidget } from './TBWACompetitiveToggle';
+import { ClientCompetitiveToggle, MarketShareWidget } from './ClientCompetitiveToggle';
 import { useAdvancedFilters } from '@/hooks/useAdvancedFilters';
 import {
   BarChart,
@@ -25,7 +25,7 @@ export const EnhancedBrandsPage: React.FC = () => {
     getBrandAnalysis,
     getMarketShare,
     getCategoryPerformance,
-    setTBWAOnly,
+    setClientOnly,
   } = useAdvancedFilters();
 
   const [marketShare, setMarketShare] = useState<any>(null);
@@ -54,7 +54,7 @@ export const EnhancedBrandsPage: React.FC = () => {
   // Load top brands based on current filter
   useEffect(() => {
     const loadTopBrands = async () => {
-      const data = await getBrandAnalysis(selectedCategory || undefined, filters.tbwa_only);
+      const data = await getBrandAnalysis(selectedCategory || undefined, filters.client_only);
       if (data?.brands) {
         const sorted = data.brands
           .sort((a, b) => b.metrics.revenue - a.metrics.revenue)
@@ -63,7 +63,7 @@ export const EnhancedBrandsPage: React.FC = () => {
       }
     };
     loadTopBrands();
-  }, [getBrandAnalysis, selectedCategory, filters.tbwa_only]);
+  }, [getBrandAnalysis, selectedCategory, filters.client_only]);
 
   const formatCurrency = (amount: number) => `₱${amount.toLocaleString()}`;
 
@@ -86,15 +86,15 @@ export const EnhancedBrandsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Brand Intelligence</h1>
-          <p className="mt-1 text-gray-600">TBWA competitive analysis and market insights</p>
+          <p className="mt-1 text-gray-600">Client competitive analysis and market insights</p>
         </div>
 
-        {/* TBWA Toggle */}
+        {/* Client Toggle */}
         <div className="w-96">
-          <TBWACompetitiveToggle
-            value={filters.tbwa_only}
-            onValueChange={setTBWAOnly}
-            tbwaStats={filterOptions?.tbwa_stats}
+          <ClientCompetitiveToggle
+            value={filters.client_only}
+            onValueChange={setClientOnly}
+            clientStats={filterOptions?.client_stats}
             size="md"
           />
         </div>
@@ -105,8 +105,8 @@ export const EnhancedBrandsPage: React.FC = () => {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <MarketShareWidget
-              tbwaShare={marketShare.tbwa_share}
-              tbwaRevenue={marketShare.tbwa_revenue}
+              clientShare={marketShare.client_share}
+              clientRevenue={marketShare.client_revenue}
               competitorRevenue={marketShare.competitor_revenue}
             />
           </div>
@@ -120,9 +120,9 @@ export const EnhancedBrandsPage: React.FC = () => {
                     <Sparkles className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">TBWA Revenue</p>
+                    <p className="text-sm text-gray-600">Client Revenue</p>
                     <p className="text-xl font-bold text-yellow-600">
-                      {formatCurrency(marketShare.tbwa_revenue)}
+                      {formatCurrency(marketShare.client_revenue)}
                     </p>
                   </div>
                 </div>
@@ -167,10 +167,10 @@ export const EnhancedBrandsPage: React.FC = () => {
                 <Tooltip
                   formatter={(value: number, name: string) => [
                     formatCurrency(value),
-                    name === 'tbwa_revenue' ? 'TBWA Revenue' : 'Competitor Revenue',
+                    name === 'client_revenue' ? 'Client Revenue' : 'Competitor Revenue',
                   ]}
                 />
-                <Bar dataKey="tbwa_revenue" fill="#fbbf24" name="TBWA" />
+                <Bar dataKey="client_revenue" fill="#fbbf24" name="Client" />
                 <Bar dataKey="competitor_revenue" fill="#3b82f6" name="Competitors" />
               </BarChart>
             </ResponsiveContainer>
@@ -182,7 +182,7 @@ export const EnhancedBrandsPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
-              TBWA Market Dominance
+              Client Market Dominance
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -193,8 +193,8 @@ export const EnhancedBrandsPage: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   outerRadius={100}
-                  dataKey="tbwa_share"
-                  label={({ category, tbwa_share }) => `${category}: ${tbwa_share.toFixed(1)}%`}
+                  dataKey="client_share"
+                  label={({ category, client_share }) => `${category}: ${client_share.toFixed(1)}%`}
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -246,10 +246,10 @@ export const EnhancedBrandsPage: React.FC = () => {
             <Award className="h-5 w-5" />
             Top Performing Brands
             {selectedCategory && <Badge variant="secondary">{selectedCategory}</Badge>}
-            {filters.tbwa_only === true && (
-              <Badge className="bg-yellow-100 text-yellow-800">TBWA Clients Only</Badge>
+            {filters.client_only === true && (
+              <Badge className="bg-yellow-100 text-yellow-800">Client Clients Only</Badge>
             )}
-            {filters.tbwa_only === false && (
+            {filters.client_only === false && (
               <Badge className="bg-blue-100 text-blue-800">Competitors Only</Badge>
             )}
           </CardTitle>
@@ -282,10 +282,10 @@ export const EnhancedBrandsPage: React.FC = () => {
                       <Badge variant="outline">{brand.category}</Badge>
                     </td>
                     <td className="p-3">
-                      {brand.is_tbwa ? (
+                      {brand.is_client ? (
                         <div className="flex items-center gap-1">
                           <Sparkles className="h-4 w-4 text-yellow-600" />
-                          <span className="font-medium text-yellow-600">TBWA</span>
+                          <span className="font-medium text-yellow-600">Client</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">

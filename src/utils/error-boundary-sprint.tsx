@@ -68,7 +68,7 @@ export class SprintErrorBoundary extends Component<Props, State> {
 
     const isExpected = this.expectedErrors[sprint]?.some(msg => errorMessage.includes(msg));
 
-    console.error(`Sprint ${sprint} Error (${isExpected ? 'Expected' : 'Unexpected'}):`, {
+    :`, {
       error,
       errorInfo,
       sprint,

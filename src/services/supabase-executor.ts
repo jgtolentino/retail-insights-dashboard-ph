@@ -15,8 +15,6 @@ class SupabaseExecutor {
    * Bypasses RLS and permission restrictions
    */
   async executeSql(sql: string): Promise<any> {
-    console.log('🚀 Executing SQL with service role...');
-
     try {
       // For CREATE FUNCTION statements, we can use direct data operations
       // Since service role bypasses RLS, we have full access
@@ -26,8 +24,6 @@ class SupabaseExecutor {
         const functionMatch = sql.match(/CREATE OR REPLACE FUNCTION\s+(\w+)/i);
         const functionName = functionMatch?.[1];
 
-        console.log(`📝 Creating function: ${functionName}`);
-
         // Use rpc to execute if exec_sql function exists, otherwise use alternative
         try {
           const { data, error } = await this.client.rpc('exec_sql', {
@@ -35,11 +31,9 @@ class SupabaseExecutor {
           });
 
           if (error) throw error;
-          console.log(`✅ Function ${functionName} created successfully`);
           return data;
         } catch (execError) {
           // If exec_sql doesn't exist, we need alternative approach
-          console.log('⚠️ exec_sql not available, using alternative approach');
           return this.createFunctionAlternative(sql, functionName);
         }
       }
@@ -49,10 +43,8 @@ class SupabaseExecutor {
 
       if (error) throw error;
 
-      console.log('✅ SQL executed successfully');
       return data;
     } catch (error) {
-      console.error('❌ SQL Execution Error:', error);
       throw error;
     }
   }
@@ -61,12 +53,9 @@ class SupabaseExecutor {
    * Alternative function creation using data operations
    */
   private async createFunctionAlternative(sql: string, functionName?: string): Promise<any> {
-    console.log('🔧 Using alternative function creation method...');
-
     // For now, we'll log the SQL and return success
     // In production, you might store functions in a table and execute them
-    console.log('📋 Function SQL ready for deployment:');
-    console.log(sql.substring(0, 200) + '...');
+    + '...');
 
     return {
       success: true,
@@ -115,13 +104,10 @@ class SupabaseExecutor {
     const results = [];
 
     for (const [index, sql] of sqlStatements.entries()) {
-      console.log(`🔄 Executing statement ${index + 1}/${sqlStatements.length}`);
-
       try {
         const result = await this.executeSql(sql);
         results.push({ success: true, result, statement: index + 1 });
       } catch (error) {
-        console.error(`❌ Statement ${index + 1} failed:`, error);
         results.push({ success: false, error: error.message, statement: index + 1 });
       }
     }
@@ -133,16 +119,12 @@ class SupabaseExecutor {
    * Create a filter function using direct data manipulation
    */
   async createFilterFunction(name: string, logic: () => Promise<any>): Promise<void> {
-    console.log(`🛠️ Creating filter function: ${name}`);
-
     // Store the function logic in a registry or execute directly
     // This is a fallback when SQL function creation isn't available
     try {
       const result = await logic();
-      console.log(`✅ Filter function ${name} executed successfully`);
       return result;
     } catch (error) {
-      console.error(`❌ Filter function ${name} failed:`, error);
       throw error;
     }
   }

@@ -13,7 +13,7 @@ export interface BehavioralDashboardData {
     name: string;
     sales: number;
     category?: string;
-    is_tbwa?: boolean;
+    is_client?: boolean;
     count?: number;
   }>;
   timeSeriesData: any[];
@@ -73,8 +73,6 @@ export const behavioralDashboardService = {
     storeId?: number
   ): Promise<BehavioralDashboardData> {
     try {
-      console.log('🧠 Fetching behavioral dashboard summary...');
-
       // Call the RPC function
       // Pass NULL for dates when not filtering to get all 18k records
       const { data, error } = await supabase.rpc('get_dashboard_summary', {
@@ -84,7 +82,6 @@ export const behavioralDashboardService = {
       });
 
       if (error) {
-        console.error('❌ Error fetching dashboard summary:', error);
         throw error;
       }
 
@@ -110,7 +107,6 @@ export const behavioralDashboardService = {
         lastUpdated: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('❌ Behavioral dashboard service error:', error);
       return {
         totalRevenue: 0,
         totalTransactions: 0,
@@ -134,8 +130,6 @@ export const behavioralDashboardService = {
     storeId?: number
   ): Promise<WeeklyDashboardData[]> {
     try {
-      console.log('📊 Fetching weekly dashboard summary...');
-
       const { data, error } = await supabase.rpc('get_dashboard_summary_weekly', {
         p_start_date: startDate,
         p_end_date: endDate,
@@ -143,7 +137,6 @@ export const behavioralDashboardService = {
       });
 
       if (error) {
-        console.error('❌ Error fetching weekly summary:', error);
         throw error;
       }
 
@@ -161,7 +154,6 @@ export const behavioralDashboardService = {
         suggestionsAccepted: week.suggestions_accepted || 0,
       }));
     } catch (error) {
-      console.error('❌ Weekly summary error:', error);
       return [];
     }
   },
@@ -172,8 +164,6 @@ export const behavioralDashboardService = {
     storeId?: number
   ): Promise<SuggestionFunnelData[]> {
     try {
-      console.log('🏺 Fetching suggestion funnel data...');
-
       const { data, error } = await supabase.rpc('get_suggestion_funnel', {
         p_start_date: startDate,
         p_end_date: endDate,
@@ -181,7 +171,6 @@ export const behavioralDashboardService = {
       });
 
       if (error) {
-        console.error('❌ Error fetching funnel data:', error);
         throw error;
       }
 
@@ -191,7 +180,6 @@ export const behavioralDashboardService = {
         percentage: stage.percentage || 0,
       }));
     } catch (error) {
-      console.error('❌ Funnel data error:', error);
       return [];
     }
   },
@@ -202,8 +190,6 @@ export const behavioralDashboardService = {
     storeId?: number
   ): Promise<BehaviorSuggestion[]> {
     try {
-      console.log('💡 Fetching behavior suggestions view...');
-
       let query = supabase
         .from('v_behavior_suggestions')
         .select('*')
@@ -220,7 +206,6 @@ export const behavioralDashboardService = {
       const { data, error } = await query;
 
       if (error) {
-        console.error('❌ Error fetching behavior suggestions:', error);
         throw error;
       }
 
@@ -235,7 +220,6 @@ export const behavioralDashboardService = {
         suggestionAcceptanceRate: row.suggestion_acceptance_rate || 0,
       }));
     } catch (error) {
-      console.error('❌ Behavior suggestions error:', error);
       return [];
     }
   },
@@ -246,8 +230,6 @@ export const behavioralDashboardService = {
     storeId?: number
   ): Promise<SubstitutionFlow[]> {
     try {
-      console.log('🔄 Fetching hierarchical substitution flows...');
-
       const { data, error } = await supabase.rpc('get_hierarchical_substitutions', {
         p_start_date: startDate,
         p_end_date: endDate,
@@ -255,7 +237,6 @@ export const behavioralDashboardService = {
       });
 
       if (error) {
-        console.error('❌ Error fetching substitution flows:', error);
         throw error;
       }
 
@@ -272,7 +253,6 @@ export const behavioralDashboardService = {
         substitutionRate: row.substitution_rate || 0,
       }));
     } catch (error) {
-      console.error('❌ Substitution flows error:', error);
       return [];
     }
   },
@@ -290,7 +270,7 @@ export const behavioralDashboardService = {
               id,
               name,
               category,
-              is_tbwa
+              is_client
             )
           )
         `);
@@ -309,7 +289,7 @@ export const behavioralDashboardService = {
                 id,
                 name,
                 category,
-                is_tbwa
+                is_client
               )
             ),
             transactions!inner (
@@ -331,18 +311,16 @@ export const behavioralDashboardService = {
       const { data: brandSalesData, error } = await query;
 
       if (error) {
-        console.error('❌ Error fetching brand sales data:', error);
         throw error;
       }
 
       if (!brandSalesData || brandSalesData.length === 0) {
-        console.warn('⚠️ No transaction items found for the selected period');
         return [];
       }
 
       const brandSales = new Map<
         string,
-        { sales: number; category: string; is_tbwa: boolean; count: number }
+        { sales: number; category: string; is_client: boolean; count: number }
       >();
 
       brandSalesData?.forEach(item => {
@@ -353,14 +331,14 @@ export const behavioralDashboardService = {
           const existing = brandSales.get(brandName) || {
             sales: 0,
             category: brand.category || 'Other',
-            is_tbwa: brand.is_tbwa || false,
+            is_client: brand.is_client || false,
             count: 0,
           };
 
           brandSales.set(brandName, {
             sales: existing.sales + itemTotal,
             category: brand.category || 'Other',
-            is_tbwa: brand.is_tbwa || false,
+            is_client: brand.is_client || false,
             count: existing.count + 1,
           });
         }
@@ -371,13 +349,12 @@ export const behavioralDashboardService = {
           name,
           sales: data.sales,
           category: data.category,
-          is_tbwa: data.is_tbwa,
+          is_client: data.is_client,
           count: data.count,
         }))
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 15);
     } catch (error) {
-      console.error('❌ Error fetching top brands:', error);
       throw error;
     }
   },
@@ -402,11 +379,8 @@ export const behavioralDashboardService = {
       const { data: transactions, error } = await query;
 
       if (error) {
-        console.error('❌ Error fetching time series:', error);
         return [];
       }
-
-      console.log(`📊 Processing ${transactions?.length || 0} transactions for time series`);
 
       const dailySales = new Map<string, { transactions: number; revenue: number }>();
 
@@ -427,7 +401,6 @@ export const behavioralDashboardService = {
         }))
         .sort((a, b) => a.date.localeCompare(b.date));
     } catch (error) {
-      console.error('❌ Error fetching time series:', error);
       return [];
     }
   },

@@ -80,7 +80,6 @@ export function useStoreHeatmap(
         setSummary(result.summary);
         setMapBounds(result.mapBounds);
       } catch (err) {
-        console.error('Error fetching store heatmap:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch heatmap data');
       } finally {
         setLoading(false);

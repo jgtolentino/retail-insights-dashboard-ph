@@ -38,8 +38,7 @@ export function GuidedTour({ steps, tourName, className = '' }: GuidedTourProps)
         })
         .start();
     } else {
-      console.warn('Intro.js not loaded. Please check if the script is included.');
-    }
+      }
   };
 
   return (

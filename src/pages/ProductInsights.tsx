@@ -55,7 +55,7 @@ interface BrandData {
   brand_id: number;
   brand_name: string;
   category: string;
-  is_tbwa: boolean;
+  is_client: boolean;
   total_revenue: number;
   total_transactions: number;
   total_quantity: number;
@@ -106,15 +106,15 @@ export default function ProductInsights() {
 
     const totalRevenue = brandData.reduce((sum, brand) => sum + brand.total_revenue, 0);
     const totalTransactions = brandData.reduce((sum, brand) => sum + brand.total_transactions, 0);
-    const tbwaBrands = brandData.filter(brand => brand.is_tbwa);
-    const tbwaRevenue = tbwaBrands.reduce((sum, brand) => sum + brand.total_revenue, 0);
+    const clientBrands = brandData.filter(brand => brand.is_client);
+    const clientRevenue = clientBrands.reduce((sum, brand) => sum + brand.total_revenue, 0);
 
     return {
       totalBrands: brandData.length,
       totalRevenue,
       totalTransactions,
-      tbwaBrands: tbwaBrands.length,
-      tbwaShare: ((tbwaRevenue / totalRevenue) * 100).toFixed(1),
+      clientBrands: clientBrands.length,
+      clientShare: ((clientRevenue / totalRevenue) * 100).toFixed(1),
       avgTransactionValue: totalRevenue / totalTransactions,
     };
   }, [brandData]);
@@ -127,7 +127,7 @@ export default function ProductInsights() {
       revenue: brand.total_revenue,
       transactions: brand.total_transactions,
       marketShare: brand.market_share,
-      isTbwa: brand.is_tbwa,
+      isTbwa: brand.is_client,
     }));
   }, [brandData]);
 
@@ -257,7 +257,7 @@ export default function ProductInsights() {
                   <CardContent>
                     <div className="text-2xl font-bold">{brandMetrics.totalBrands}</div>
                     <Badge variant="secondary" className="mt-1">
-                      {brandMetrics.tbwaBrands} TBWA Clients
+                      {brandMetrics.clientBrands} Client Clients
                     </Badge>
                   </CardContent>
                 </Card>
@@ -272,7 +272,7 @@ export default function ProductInsights() {
                       ₱{brandMetrics.totalRevenue.toLocaleString()}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      TBWA Share: {brandMetrics.tbwaShare}%
+                      Client Share: {brandMetrics.clientShare}%
                     </p>
                   </CardContent>
                 </Card>

@@ -68,7 +68,6 @@ export function SubstitutionFlow({ dateRange, className }: SubstitutionFlowProps
         const sankeyTransformed = transformToSankeyData(patterns, selectedCategory);
         setSankeyData(sankeyTransformed);
       } catch (err) {
-        console.error('Error loading substitution data:', err);
         setError('Failed to load substitution patterns');
       } finally {
         setLoading(false);

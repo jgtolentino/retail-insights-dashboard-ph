@@ -329,7 +329,7 @@ function DashboardPreviewContent() {
             height="400px"
             showLegend={true}
             enableDrillDown={true}
-            onRegionClick={regionId => console.log('Region clicked:', regionId)}
+            onRegionClick={regionId => {/* Region click handler */}}
           />
 
           {/* Store Locations Map */}
@@ -338,7 +338,7 @@ function DashboardPreviewContent() {
             showClusters={true}
             showRevenue={true}
             enableDrillDown={true}
-            onStoreClick={storeId => console.log('Store clicked:', storeId)}
+            onStoreClick={storeId => {/* Store click handler */}}
           />
         </div>
 

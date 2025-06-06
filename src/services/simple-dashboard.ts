@@ -8,7 +8,7 @@ export interface DashboardDataResult {
     name: string;
     sales: number;
     category?: string;
-    is_tbwa?: boolean;
+    is_client?: boolean;
     count?: number;
   }>;
   timeSeriesData: any[];
@@ -20,61 +20,51 @@ export interface DashboardDataResult {
 export const simpleDashboardService = {
   async getDashboardData(): Promise<DashboardDataResult> {
     try {
-      console.log('🔍 Fetching dashboard data from your 18,000 records...');
-
       // Get ALL transactions - processing complete dataset
       const { count: totalCount } = await supabase
         .from('transactions')
         .select('*', { count: 'exact', head: true });
-
-      console.log(`📊 Total records available: ${totalCount}`);
 
       // Get all transactions with proper pagination to handle 18,000 records
       // Processing all 18,000 records with efficient pagination
       const allTransactions = [];
       const batchSize = 1000;
 
-      for (let offset = 0; offset < totalCount; offset += batchSize) {
-        const { data: batch, error: batchError } = await supabase
-          .from('transactions')
-          .select('*')
-          .range(offset, offset + batchSize - 1);
+      try {
+        for (let offset = 0; offset < totalCount; offset += batchSize) {
+          const { data: batch, error: batchError } = await supabase
+            .from('transactions')
+            .select('*')
+            .range(offset, offset + batchSize - 1);
 
-        if (batchError) {
-          console.error(`❌ Error fetching batch at offset ${offset}:`, batchError);
-          throw batchError;
+          if (batchError) {
+            throw batchError;
+          }
+
+          if (batch && batch.length > 0) {
+            allTransactions.push(...batch);
+          }
         }
-
-        if (batch && batch.length > 0) {
-          allTransactions.push(...batch);
-        }
-
-        console.log(
-          `📦 Fetched batch: ${batch?.length || 0} records (${offset + 1}-${offset + (batch?.length || 0)})`
-        );
+      } catch (batchError) {
+        throw batchError;
       }
 
       const transactions = allTransactions;
 
       if (!transactions || transactions.length === 0) {
-        console.warn('⚠️ No transactions found');
         return this.getEmptyDashboardData();
       }
-
-      console.log(`✅ Found ${transactions.length} transactions`);
 
       // Calculate totals from your actual data
       const totalRevenue = transactions.reduce((sum, t) => sum + (t.total_amount || 0), 0);
       const totalTransactions = transactions.length;
       const avgTransaction = totalRevenue / totalTransactions;
 
-      console.log(`💰 Total Revenue: ₱${totalRevenue.toLocaleString()}`);
-      console.log(`📊 Total Transactions: ${totalTransactions.toLocaleString()}`);
-      console.log(`📈 Average Transaction: ₱${avgTransaction.toFixed(2)}`);
+      }`);
+      }`);
+      }`);
 
       // Get actual brand sales from transaction_items, products, and brands tables
-      console.log('📦 Fetching brand sales data...');
-
       let topBrands = [];
 
       // Get all transaction items with product and brand info
@@ -88,7 +78,7 @@ export const simpleDashboardService = {
               id,
               name,
               category,
-              is_tbwa
+              is_client
             )
           )
         `
@@ -99,10 +89,6 @@ export const simpleDashboardService = {
       const { data: brandSalesData, error: brandError } = await brandItemsQuery;
 
       if (brandError) {
-        console.warn(
-          '⚠️ Could not fetch brand data, falling back to location data:',
-          brandError.message
-        );
         // Fallback to location-based analysis
         const locationSales = new Map<string, number>();
         transactions.forEach(transaction => {
@@ -118,7 +104,7 @@ export const simpleDashboardService = {
             name,
             sales,
             category: 'Location',
-            is_tbwa: false,
+            is_client: false,
             count: transactions.filter(t => (t.store_location || '').includes(name)).length,
           }))
           .sort((a, b) => b.sales - a.sales)
@@ -127,7 +113,7 @@ export const simpleDashboardService = {
         // Calculate brand sales from actual product data
         const brandSales = new Map<
           string,
-          { sales: number; category: string; is_tbwa: boolean; count: number }
+          { sales: number; category: string; is_client: boolean; count: number }
         >();
 
         brandSalesData?.forEach(item => {
@@ -138,14 +124,14 @@ export const simpleDashboardService = {
             const existing = brandSales.get(brandName) || {
               sales: 0,
               category: brand.category || 'Other',
-              is_tbwa: brand.is_tbwa || false,
+              is_client: brand.is_client || false,
               count: 0,
             };
 
             brandSales.set(brandName, {
               sales: existing.sales + itemTotal,
               category: brand.category || 'Other',
-              is_tbwa: brand.is_tbwa || false,
+              is_client: brand.is_client || false,
               count: existing.count + 1,
             });
           }
@@ -156,16 +142,16 @@ export const simpleDashboardService = {
             name,
             sales: data.sales,
             category: data.category,
-            is_tbwa: data.is_tbwa,
+            is_client: data.is_client,
             count: data.count,
           }))
           .sort((a, b) => b.sales - a.sales)
           .slice(0, 15);
 
-        console.log('🏆 Top brands with TBWA data:', topBrands.slice(0, 5));
+        );
       }
 
-      console.log('🏆 Top locations by sales:', topBrands.slice(0, 3));
+      );
 
       // Create simple time series from created_at dates
       const dailySales = new Map<string, { transactions: number; revenue: number }>();
@@ -197,7 +183,6 @@ export const simpleDashboardService = {
         lastUpdated: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('❌ Dashboard service error:', error);
       return {
         ...this.getEmptyDashboardData(),
         isError: true,

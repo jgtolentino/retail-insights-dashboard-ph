@@ -1,3 +1,4 @@
+// Client-specific component - requires customization
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,32 +13,32 @@ interface BrandData {
   transactions: number;
   marketShare: number;
   growth: number;
-  isTBWA: boolean;
+  isCLIENT: boolean;
   category: string;
   avgTransactionValue: number;
 }
 
-interface TBWABrandPerformanceGridProps {
+interface CLIENTBrandPerformanceGridProps {
   brands: BrandData[];
   className?: string;
   maxBrands?: number;
-  showTBWAFirst?: boolean;
+  showCLIENTFirst?: boolean;
 }
 
-export function TBWABrandPerformanceGrid({
+export function CLIENTBrandPerformanceGrid({
   brands,
   className,
   maxBrands = 8,
-  showTBWAFirst = true,
-}: TBWABrandPerformanceGridProps) {
+  showCLIENTFirst = true,
+}: CLIENTBrandPerformanceGridProps) {
   const sortedBrands = useMemo(() => {
     const sortedData = [...brands];
 
-    if (showTBWAFirst) {
-      // Sort TBWA brands first, then by revenue
+    if (showCLIENTFirst) {
+      // Sort CLIENT brands first, then by revenue
       sortedData.sort((a, b) => {
-        if (a.isTBWA && !b.isTBWA) return -1;
-        if (!a.isTBWA && b.isTBWA) return 1;
+        if (a.isCLIENT && !b.isCLIENT) return -1;
+        if (!a.isCLIENT && b.isCLIENT) return 1;
         return b.revenue - a.revenue;
       });
     } else {
@@ -46,7 +47,7 @@ export function TBWABrandPerformanceGrid({
     }
 
     return sortedData.slice(0, maxBrands);
-  }, [brands, showTBWAFirst, maxBrands]);
+  }, [brands, showCLIENTFirst, maxBrands]);
 
   const topRevenue = sortedBrands[0]?.revenue || 1;
 
@@ -88,7 +89,7 @@ export function TBWABrandPerformanceGrid({
               key={brand.id}
               className={cn(
                 'relative transition-all hover:shadow-md',
-                brand.isTBWA && 'ring-2 ring-tbwa-orange/20'
+                brand.isCLIENT && 'ring-2 ring-client-orange/20'
               )}
             >
               <CardContent className="p-4">
@@ -102,9 +103,9 @@ export function TBWABrandPerformanceGrid({
                     </div>
                   </div>
 
-                  {brand.isTBWA && (
-                    <Badge className="bg-tbwa-orange text-white hover:bg-tbwa-orange/90">
-                      TBWA
+                  {brand.isCLIENT && (
+                    <Badge className="bg-client-orange text-white hover:bg-client-orange/90">
+                      CLIENT
                     </Badge>
                   )}
                 </div>
@@ -120,7 +121,7 @@ export function TBWABrandPerformanceGrid({
                     className="h-2"
                     style={
                       {
-                        '--progress-background': brand.isTBWA ? '#F89E1B' : '#0078d4',
+                        '--progress-background': brand.isCLIENT ? '#F89E1B' : '#0078d4',
                       } as React.CSSProperties
                     }
                   />
@@ -163,9 +164,9 @@ export function TBWABrandPerformanceGrid({
                   )}
                 </div>
 
-                {/* TBWA Brand Accent */}
-                {brand.isTBWA && (
-                  <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-tbwa-blue to-tbwa-orange" />
+                {/* CLIENT Brand Accent */}
+                {brand.isCLIENT && (
+                  <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-client-blue to-client-orange" />
                 )}
               </CardContent>
             </Card>
@@ -176,16 +177,16 @@ export function TBWABrandPerformanceGrid({
         <div className="mt-6 rounded-lg bg-gray-50 p-4">
           <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
             <div>
-              <div className="text-sm text-gray-600">Total TBWA Brands</div>
-              <div className="text-lg font-semibold text-tbwa-blue">
-                {sortedBrands.filter(b => b.isTBWA).length}
+              <div className="text-sm text-gray-600">Total CLIENT Brands</div>
+              <div className="text-lg font-semibold text-client-blue">
+                {sortedBrands.filter(b => b.isCLIENT).length}
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-600">TBWA Revenue Share</div>
-              <div className="text-lg font-semibold text-tbwa-orange">
+              <div className="text-sm text-gray-600">CLIENT Revenue Share</div>
+              <div className="text-lg font-semibold text-client-orange">
                 {(
-                  (sortedBrands.filter(b => b.isTBWA).reduce((sum, b) => sum + b.revenue, 0) /
+                  (sortedBrands.filter(b => b.isCLIENT).reduce((sum, b) => sum + b.revenue, 0) /
                     sortedBrands.reduce((sum, b) => sum + b.revenue, 0)) *
                   100
                 ).toFixed(1)}

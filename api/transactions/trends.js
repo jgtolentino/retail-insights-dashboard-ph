@@ -89,7 +89,6 @@ export default async function handler(req, res) {
     res.status(200).json(mockTrends);
 
   } catch (error) {
-    console.error('Trends API error:', error);
     res.status(500).json({ 
       error: 'Failed to fetch transaction trends',
       details: error.message 

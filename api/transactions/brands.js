@@ -98,7 +98,6 @@ export default async function handler(req, res) {
     res.status(200).json(mockBrandData);
 
   } catch (error) {
-    console.error('Brands API error:', error);
     res.status(500).json({ 
       error: 'Failed to fetch brand data',
       details: error.message 

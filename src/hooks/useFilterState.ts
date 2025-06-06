@@ -33,8 +33,7 @@ export function useFilterState({
           return JSON.parse(stored);
         }
       } catch (error) {
-        console.warn(`Failed to parse localStorage filter_${key}:`, error);
-      }
+        }
     }
 
     // 3. Use default
@@ -67,8 +66,7 @@ export function useFilterState({
           window.localStorage.setItem(`filter_${key}`, JSON.stringify(value));
         }
       } catch (error) {
-        console.warn(`Failed to save filter_${key} to localStorage:`, error);
-      }
+        }
     }
   }, [value, key, useLocalStorage]);
 

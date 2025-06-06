@@ -128,10 +128,7 @@ export function ConsumerInsightsFilters({
 
   // Debug logging after all hooks
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🔍 ConsumerInsightsFilters rendered ${renderCount.current} times`);
-
     if (renderCount.current > 100) {
-      console.error('🚨 INFINITE LOOP DETECTED in ConsumerInsightsFilters!');
       return <div>Infinite loop detected in ConsumerInsightsFilters - check console</div>;
     }
   }

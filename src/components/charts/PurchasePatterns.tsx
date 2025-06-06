@@ -35,13 +35,10 @@ export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatter
 
   useEffect(() => {
     setLoading(true);
-    console.log('🔍 PurchasePatterns: Fetching data...', { startDate, endDate, filters });
-
     // For now, we'll use the purchase behavior function we have
     dashboardService
       .getPurchaseBehaviorByAge(startDate, endDate)
       .then(result => {
-        console.log('📊 PurchasePatterns: Data received:', result);
         // Transform age group data to hourly patterns for demo
         const mockHourlyData = Array.from({ length: 24 }, (_, hour) => ({
           hour,
@@ -51,7 +48,6 @@ export function PurchasePatterns({ startDate, endDate, filters }: PurchasePatter
         setData(mockHourlyData);
       })
       .catch(error => {
-        console.error('❌ PurchasePatterns: Error fetching data:', error);
         setData([]);
       })
       .finally(() => setLoading(false));

@@ -62,7 +62,6 @@ export function SuggestionFunnel({
 
       setData(formattedData);
     } catch (err) {
-      console.error('Error fetching funnel data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load funnel data');
     } finally {
       setLoading(false);

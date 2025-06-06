@@ -19,7 +19,6 @@ export function DatabaseStatus() {
       setStatus('connected');
       setMessage('Database connected');
     } catch (error) {
-      console.error('Database connection error:', error);
       setStatus('error');
       setMessage('Database connection failed');
     }

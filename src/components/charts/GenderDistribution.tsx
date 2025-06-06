@@ -38,11 +38,10 @@ export function GenderDistribution({ startDate, endDate }: GenderDistributionPro
         });
 
         if (error) {
-          console.error('Consumer profile error:', error);
           throw error;
         }
 
-        console.log('Raw consumer profile data:', data); // Debug log
+        // Debug log
 
         // Since it returns JSONB, we need to parse it differently
         if (data && typeof data === 'object') {
@@ -87,7 +86,6 @@ export function GenderDistribution({ startDate, endDate }: GenderDistributionPro
         }
 
         // Fallback: query transactions directly
-        console.log('Falling back to direct transaction query');
         const { data: transactions, error: txError } = await supabase
           .from('transactions')
           .select('customer_gender')
@@ -116,7 +114,6 @@ export function GenderDistribution({ startDate, endDate }: GenderDistributionPro
           percentage: total > 0 ? Math.round((count / total) * 100) : 0,
         }));
       } catch (error) {
-        console.error('Gender distribution query failed:', error);
         throw error;
       }
     },
@@ -140,13 +137,6 @@ export function GenderDistribution({ startDate, endDate }: GenderDistributionPro
     femaleData?.percentage || (total > 0 ? Math.round((femaleCount / total) * 100) : 0);
 
   // Debug logging
-  console.log('Processed gender data:', {
-    data,
-    maleData,
-    femaleData,
-    counts: { total, maleCount, femaleCount, malePercentage, femalePercentage },
-  });
-
   if (isLoading) {
     return (
       <Card className="border-gray-200">

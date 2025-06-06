@@ -14,7 +14,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   global: {
     fetch: (url, options = {}) => {
       // Add logging for debugging
-      console.log('🔍 Supabase Request:', url);
       return fetch(url, {
         ...options,
         // Add timeout to prevent hanging requests
@@ -22,12 +21,10 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       })
         .then(response => {
           if (!response.ok) {
-            console.error('❌ Supabase Error:', response.status, response.statusText);
-          }
+            }
           return response;
         })
         .catch(error => {
-          console.error('🚨 Network Error:', error.message);
           throw error;
         });
     },
@@ -57,28 +54,19 @@ export async function getSupabaseClient() {
       // Create client with MCP URL and token
       return createClient<Database>(MCP_URL, token);
     } catch (error) {
-      console.error('Error initializing Supabase client with MCP:', error);
       // Fallback to standard client using environment variables
-      console.log('ℹ️ Falling back to standard Supabase client using environment variables.');
       const standardSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const standardSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       if (!standardSupabaseUrl || !standardSupabaseAnonKey) {
-        console.error('❌ Standard Supabase environment variables are not set. Cannot fallback.');
         throw new Error('Supabase environment variables not set for fallback.');
       }
       return createClient<Database>(standardSupabaseUrl, standardSupabaseAnonKey);
     }
   } else {
     // If MCP is not configured, use standard client with environment variables
-    console.log(
-      'ℹ️ MCP is not configured. Using standard Supabase client using environment variables.'
-    );
     const standardSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const standardSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     if (!standardSupabaseUrl || !standardSupabaseAnonKey) {
-      console.error(
-        '❌ Standard Supabase environment variables are not set. Cannot create client.'
-      );
       throw new Error('Supabase environment variables not set.');
     }
     return createClient<Database>(standardSupabaseUrl, standardSupabaseAnonKey);

@@ -15,7 +15,7 @@ interface BrandData {
   name: string;
   sales: number;
   category: string;
-  is_tbwa: boolean;
+  is_client: boolean;
 }
 
 interface SmartBrandFilterProps {
@@ -24,7 +24,7 @@ interface SmartBrandFilterProps {
   className?: string;
 }
 
-type FilterMode = 'top10' | 'tbwa' | 'category' | 'performance' | 'all';
+type FilterMode = 'top10' | 'client' | 'category' | 'performance' | 'all';
 
 export function SmartBrandFilter({
   brands,
@@ -69,8 +69,8 @@ export function SmartBrandFilter({
       case 'top10':
         return filtered.sort((a, b) => b.sales - a.sales).slice(0, 10);
 
-      case 'tbwa':
-        return filtered.filter(b => b.is_tbwa).sort((a, b) => b.sales - a.sales);
+      case 'client':
+        return filtered.filter(b => b.is_client).sort((a, b) => b.sales - a.sales);
 
       case 'performance':
         const threshold = performanceThresholds[performanceThreshold];
@@ -92,10 +92,10 @@ export function SmartBrandFilter({
   const getFilterStats = () => {
     const total = brands.length;
     const filtered = filteredBrands.length;
-    const tbwaCount = filteredBrands.filter(b => b.is_tbwa).length;
+    const clientCount = filteredBrands.filter(b => b.is_client).length;
     const totalRevenue = filteredBrands.reduce((sum, b) => sum + b.sales, 0);
 
-    return { total, filtered, tbwaCount, totalRevenue };
+    return { total, filtered, clientCount, totalRevenue };
   };
 
   const stats = getFilterStats();
@@ -109,10 +109,10 @@ export function SmartBrandFilter({
       color: 'bg-blue-100 text-blue-800',
     },
     {
-      mode: 'tbwa' as FilterMode,
-      label: 'TBWA Clients',
+      mode: 'client' as FilterMode,
+      label: 'Client Clients',
       icon: Star,
-      description: 'TBWA client brands only',
+      description: 'Client client brands only',
       color: 'bg-green-100 text-green-800',
     },
     {
@@ -209,11 +209,11 @@ export function SmartBrandFilter({
           </Badge>
         </div>
 
-        {stats.tbwaCount > 0 && (
+        {stats.clientCount > 0 && (
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 text-green-600" />
             <span className="text-sm text-green-700">
-              {stats.tbwaCount} TBWA client{stats.tbwaCount !== 1 ? 's' : ''}
+              {stats.clientCount} Client client{stats.clientCount !== 1 ? 's' : ''}
             </span>
           </div>
         )}

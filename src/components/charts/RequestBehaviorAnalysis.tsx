@@ -68,7 +68,6 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
         setCheckoutAnalysis(checkoutData);
         setTranscriptionInsights(transcriptionData);
       } catch (err) {
-        console.error('Error loading request behavior data:', err);
         setError('Failed to load request behavior analysis');
       } finally {
         setLoading(false);

@@ -35,7 +35,7 @@ const Trends = React.lazy(() => import('./pages/Trends'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
 const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
-const TBWADashboard = React.lazy(() => import('./pages/TBWADashboard'));
+const ClientDashboard = React.lazy(() => import('./pages/TBWADashboard'));
 const ProjectScout = React.lazy(() => import('./pages/ProjectScout'));
 
 // Enhanced Query Client with better defaults - Fixed deprecated cacheTime
@@ -68,13 +68,11 @@ function useRenderCounter(componentName: string) {
 
   useEffect(() => {
     if (renders.current > 50) {
-      console.error(`🚨 ${componentName} rendered ${renders.current} times!`);
-      console.trace();
+      // Production: Excessive renders detected
     }
   });
 
-  console.log(`${componentName} render #${renders.current}`);
-}
+  }
 
 // Main App Component with all improvements
 const App = () => {
@@ -141,20 +139,20 @@ const App = () => {
                       }
                     />
 
-                    {/* TBWA Integrated Dashboard */}
+                    {/* Client Integrated Dashboard */}
                     <Route
-                      path="/tbwa"
+                      path="/client"
                       element={
-                        <SafeWrapper name="TBWADashboard" maxRenders={50}>
-                          <TBWADashboard />
+                        <SafeWrapper name="ClientDashboard" maxRenders={50}>
+                          <ClientDashboard />
                         </SafeWrapper>
                       }
                     />
                     <Route
-                      path="/tbwa-dashboard"
+                      path="/client-dashboard"
                       element={
-                        <SafeWrapper name="TBWADashboard" maxRenders={50}>
-                          <TBWADashboard />
+                        <SafeWrapper name="ClientDashboard" maxRenders={50}>
+                          <ClientDashboard />
                         </SafeWrapper>
                       }
                     />

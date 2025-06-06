@@ -173,8 +173,7 @@ class ExportService {
             }
           }
         } catch (error) {
-          console.warn('Could not export chart:', error);
-        }
+          }
       }
     }
 

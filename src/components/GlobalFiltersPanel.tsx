@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useDashboardStore, useFilters, useFilterActions } from '@/stores/dashboardStore';
-import { useRenderMonitor } from '@/hooks/debugging/useRenderMonitor';
-import { useEmergencyRenderLimit } from '@/hooks/debugging/useEmergencyRenderLimit';
+// Debug // Debug import removed: useEmergencyRenderLimit
 import { useBrands } from '@/hooks/useBrands';
 import Select, { MultiValue, Options } from 'react-select';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,10 +13,7 @@ export function GlobalFiltersPanel() {
   useEmergencyRenderLimit('GlobalFiltersPanel');
 
   // 🔍 DEBUGGING: Monitor renders for infinite loop detection
-  const { trackReason } = useRenderMonitor('GlobalFiltersPanel', {
-    maxRenders: 50,
-    warnThreshold: 20,
-  });
+  // Debug hook removed: useRenderMonitor
 
   // ✅ NEW ARCHITECTURE: Direct Zustand store access (no prop drilling!)
   const filters = useFilters();
@@ -105,7 +101,6 @@ export function GlobalFiltersPanel() {
           setAllStores(uniqueStores);
         }
       } catch (error) {
-        console.error('Error fetching filter data:', error);
         // Fallback data
         setAllCategories(['Dairy', 'Beverages', 'Snacks', 'Personal Care', 'Household']);
       }

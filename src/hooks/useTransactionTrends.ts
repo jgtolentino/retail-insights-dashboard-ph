@@ -50,7 +50,6 @@ export function useTransactionTrends(region: string = 'All Regions', period: num
         setData(result.hourlyVolume);
         setSummary(result.summary);
       } catch (err) {
-        console.error('Error fetching transaction trends:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch trends');
       } finally {
         setLoading(false);

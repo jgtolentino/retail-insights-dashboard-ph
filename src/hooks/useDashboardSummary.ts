@@ -109,7 +109,6 @@ export function useDashboardSummary() {
           avgValueGrowth: Math.round(avgValueGrowth * 10) / 10,
         });
       } catch (err) {
-        console.error('Error fetching dashboard summary:', err);
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
 
         // Fallback to zero values on error

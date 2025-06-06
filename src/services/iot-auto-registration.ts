@@ -52,8 +52,6 @@ export class IoTAutoRegistrationHub {
    */
   async autoRegisterDevice(registrationData: DeviceRegistrationData): Promise<string> {
     try {
-      console.log('🔧 Starting auto-registration for device...');
-
       // Step 1: Validate MAC address format
       if (!this.isValidMacAddress(registrationData.macAddress)) {
         throw new Error('Invalid MAC address format');
@@ -100,11 +98,8 @@ export class IoTAutoRegistrationHub {
         .single();
 
       if (error) {
-        console.error('❌ Failed to register device:', error);
         throw error;
       }
-
-      console.log(`✅ Device registered successfully: ${uniqueDeviceId}`);
 
       // Step 6: Create installation record
       await this.createInstallationRecord(uniqueDeviceId, registrationData);
@@ -114,7 +109,6 @@ export class IoTAutoRegistrationHub {
 
       return uniqueDeviceId;
     } catch (error) {
-      console.error('❌ Auto-registration failed:', error);
       throw error;
     }
   }
@@ -204,7 +198,6 @@ export class IoTAutoRegistrationHub {
     const { error } = await supabase.from('device_installations').insert(installationData);
 
     if (error) {
-      console.error('⚠️ Failed to create installation record:', error);
       // Don't throw - installation record is secondary
     }
   }
@@ -229,7 +222,6 @@ export class IoTAutoRegistrationHub {
     const { error } = await supabase.from('device_health_metrics').insert(initialHealthData);
 
     if (error) {
-      console.error('⚠️ Failed to initialize health monitoring:', error);
       // Don't throw - health monitoring can be set up later
     }
   }
@@ -283,8 +275,7 @@ export class IoTAutoRegistrationHub {
       throw error;
     }
 
-    console.log(`✅ Device ${deviceId} status updated to: ${status}`);
-  }
+    }
 
   /**
    * Detect and report device collisions
@@ -298,17 +289,14 @@ export class IoTAutoRegistrationHub {
     const { data, error } = await supabase.rpc('detect_device_collisions');
 
     if (error) {
-      console.error('❌ Failed to detect collisions:', error);
       return [];
     }
 
     const collisions = data || [];
 
     if (collisions.length > 0) {
-      console.warn(`⚠️ Detected ${collisions.length} potential device collisions!`);
       collisions.forEach(collision => {
-        console.warn(
-          `Device ${collision.deviceId} appears in ${collision.storeCount} stores: ${collision.stores.join(', ')}`
+        }`
         );
       });
     }

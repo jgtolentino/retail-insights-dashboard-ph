@@ -87,7 +87,6 @@ export async function getFilteredTransactionIds(filters: GlobalFilterState) {
   const { data: filteredItems, error } = await itemQuery;
 
   if (error) {
-    console.error('Error filtering by products:', error);
     return null;
   }
 
@@ -163,10 +162,8 @@ export async function getFilterOptions() {
     .order('name');
 
   if (brandsError) {
-    console.error('Error fetching brands:', brandsError);
-  } else {
-    console.log(`📋 Fetched ${brands?.length || 0} brands for filter dropdown`);
-  }
+    } else {
+    }
 
   // Fetch categories
   const { data: categoriesRaw } = await supabase

@@ -8,7 +8,7 @@ export interface BrandPerformance {
   transactions: number;
   marketShare: number;
   growth: number;
-  isTBWA: boolean;
+  isClient: boolean;
   category: string;
   avgTransactionValue: number;
 }
@@ -52,7 +52,7 @@ export function useBrandPerformance() {
                   id,
                   name,
                   category,
-                  is_tbwa_client
+                  is_client_client
                 )
               )
             )
@@ -82,7 +82,7 @@ export function useBrandPerformance() {
                   id,
                   name,
                   category,
-                  is_tbwa_client
+                  is_client_client
                 )
               )
             )
@@ -100,7 +100,7 @@ export function useBrandPerformance() {
             id: string;
             name: string;
             category: string;
-            isTBWA: boolean;
+            isClient: boolean;
             revenue: number;
             transactions: number;
             totalRevenue: number;
@@ -122,7 +122,7 @@ export function useBrandPerformance() {
                   id: brandId,
                   name: brand.name,
                   category: brand.category || 'Other',
-                  isTBWA: brand.is_tbwa_client || false,
+                  isClient: brand.is_client_client || false,
                   revenue: 0,
                   transactions: 0,
                   totalRevenue: 0,
@@ -171,7 +171,7 @@ export function useBrandPerformance() {
               transactions: brand.transactions,
               marketShare: Math.round(marketShare * 10) / 10, // Round to 1 decimal
               growth: Math.round(growth * 10) / 10, // Round to 1 decimal
-              isTBWA: brand.isTBWA,
+              isClient: brand.isClient,
               category: brand.category,
               avgTransactionValue: Math.round(avgTransactionValue * 100) / 100, // Round to 2 decimals
             };
@@ -181,7 +181,6 @@ export function useBrandPerformance() {
 
         setBrandData(brandPerformanceData);
       } catch (err) {
-        console.error('Error fetching brand performance:', err);
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
 
         // Fallback to empty array on error

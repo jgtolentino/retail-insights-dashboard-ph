@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'tbwa';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'client';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -45,10 +45,10 @@ const buttonVariants = {
     'disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-500)]',
   ].join(' '),
 
-  tbwa: [
-    'bg-[var(--color-tbwa-primary)] text-white',
+  client: [
+    'bg-[var(--color-client-primary)] text-white',
     'hover:bg-[#e55a4d]',
-    'focus:ring-2 focus:ring-[var(--color-tbwa-primary)] focus:ring-offset-2',
+    'focus:ring-2 focus:ring-[var(--color-client-primary)] focus:ring-offset-2',
     'disabled:bg-[var(--color-gray-300)] disabled:text-[var(--color-gray-500)]',
   ].join(' '),
 };

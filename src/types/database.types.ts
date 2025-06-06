@@ -1,7 +1,7 @@
 export interface Brand {
   id: number;
   name: string;
-  is_tbwa: boolean;
+  is_client: boolean;
   category: string;
   created_at: string;
 }
@@ -30,6 +30,6 @@ export interface DashboardData {
   topBrands: Array<{
     name: string;
     sales: number;
-    is_tbwa: boolean;
+    is_client: boolean;
   }>;
 }

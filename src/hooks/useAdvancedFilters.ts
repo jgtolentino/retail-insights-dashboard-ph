@@ -12,13 +12,13 @@ export interface FilterOptions {
     value: string;
     label: string;
     category: string;
-    is_tbwa: boolean;
+    is_client: boolean;
     count?: number;
   }>;
   locations: Array<{ value: string; label: string }>;
-  tbwa_stats: {
+  client_stats: {
     total_brands: number;
-    tbwa_brands: number;
+    client_brands: number;
     competitor_brands: number;
   };
 }
@@ -27,7 +27,7 @@ export interface FilterState {
   categories: string[];
   brands: string[];
   locations: string[];
-  tbwa_only: boolean | null; // null = all, true = TBWA only, false = competitors only
+  client_only: boolean | null; // null = all, true = Client only, false = competitors only
 }
 
 export interface ValidationResult {
@@ -37,10 +37,10 @@ export interface ValidationResult {
 }
 
 export interface MarketShare {
-  tbwa_revenue: number;
+  client_revenue: number;
   competitor_revenue: number;
   total_revenue: number;
-  tbwa_share: number;
+  client_share: number;
 }
 
 export interface BrandAnalysis {
@@ -48,7 +48,7 @@ export interface BrandAnalysis {
     id: number;
     name: string;
     category: string;
-    is_tbwa: boolean;
+    is_client: boolean;
     metrics: {
       transactions: number;
       items: number;
@@ -70,7 +70,7 @@ export const useAdvancedFilters = () => {
     categories: [],
     brands: [],
     locations: [],
-    tbwa_only: null,
+    client_only: null,
   });
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
@@ -85,7 +85,7 @@ export const useAdvancedFilters = () => {
 
   // Validate filters when they change
   useEffect(() => {
-    if (filters.categories.length > 0 || filters.brands.length > 0 || filters.tbwa_only !== null) {
+    if (filters.categories.length > 0 || filters.brands.length > 0 || filters.client_only !== null) {
       validateFilters();
     } else {
       setIsValid(true);
@@ -104,10 +104,10 @@ export const useAdvancedFilters = () => {
 
       const categories = [...new Set(brandCategories?.map(b => b.category) || [])];
 
-      // Get brands with TBWA status
+      // Get brands with Client status
       const { data: allBrands } = await supabase
         .from('brands')
-        .select('id, name, category, is_tbwa')
+        .select('id, name, category, is_client')
         .not('name', 'is', null)
         .order('name');
 
@@ -130,23 +130,22 @@ export const useAdvancedFilters = () => {
             value: brand.id.toString(),
             label: brand.name,
             category: brand.category,
-            is_tbwa: brand.is_tbwa || false,
+            is_client: brand.is_client || false,
           })) || [],
         locations: locations.map(loc => ({
           value: loc,
           label: loc,
         })),
-        tbwa_stats: {
+        client_stats: {
           total_brands: allBrands?.length || 0,
-          tbwa_brands: allBrands?.filter(b => b.is_tbwa === true).length || 0,
-          competitor_brands: allBrands?.filter(b => b.is_tbwa === false).length || 0,
+          client_brands: allBrands?.filter(b => b.is_client === true).length || 0,
+          competitor_brands: allBrands?.filter(b => b.is_client === false).length || 0,
         },
       };
 
       setFilterOptions(options);
     } catch (error) {
-      console.error('Error loading filter options:', error);
-    } finally {
+      } finally {
       setIsLoading(false);
     }
   };
@@ -162,7 +161,7 @@ export const useAdvancedFilters = () => {
           id,
           transaction_items(
             products(
-              brands(category, is_tbwa)
+              brands(category, is_client)
             )
           )
         `
@@ -178,12 +177,12 @@ export const useAdvancedFilters = () => {
           filters.categories.length === 0 ||
           items.some(item => filters.categories.includes(item.products?.brands?.category));
 
-        // Check TBWA filter
-        const matchesTBWA =
-          filters.tbwa_only === null ||
-          items.some(item => item.products?.brands?.is_tbwa === filters.tbwa_only);
+        // Check Client filter
+        const matchesClient =
+          filters.client_only === null ||
+          items.some(item => item.products?.brands?.is_client === filters.client_only);
 
-        if (matchesCategory && matchesTBWA) {
+        if (matchesCategory && matchesClient) {
           matchingCount++;
         }
       });
@@ -194,23 +193,21 @@ export const useAdvancedFilters = () => {
       setIsValid(isValid);
       setEstimatedResults(estimatedTotal);
     } catch (error) {
-      console.error('Error validating filters:', error);
       setIsValid(true); // Fail gracefully
     }
   };
 
   const getBrandAnalysis = useCallback(
-    async (category?: string, tbwaOnly?: boolean): Promise<BrandAnalysis | null> => {
+    async (category?: string, clientOnly?: boolean): Promise<BrandAnalysis | null> => {
       try {
         const { data, error } = await supabase.rpc('get_brand_analysis_for_filters', {
           p_category: category || null,
-          p_tbwa_only: tbwaOnly ?? null,
+          p_client_only: clientOnly ?? null,
         });
 
         if (error) throw error;
         return data;
       } catch (error) {
-        console.error('Error getting brand analysis:', error);
         return null;
       }
     },
@@ -219,27 +216,26 @@ export const useAdvancedFilters = () => {
 
   const getMarketShare = useCallback(async (): Promise<MarketShare | null> => {
     try {
-      const [tbwaData, compData] = await Promise.all([
-        supabase.rpc('get_brand_analysis_for_filters', { p_tbwa_only: true }),
-        supabase.rpc('get_brand_analysis_for_filters', { p_tbwa_only: false }),
+      const [clientData, compData] = await Promise.all([
+        supabase.rpc('get_brand_analysis_for_filters', { p_client_only: true }),
+        supabase.rpc('get_brand_analysis_for_filters', { p_client_only: false }),
       ]);
 
-      if (tbwaData.error || compData.error) {
+      if (clientData.error || compData.error) {
         throw new Error('Error fetching market share data');
       }
 
-      const tbwaRevenue = tbwaData.data?.summary?.total_revenue || 0;
+      const clientRevenue = clientData.data?.summary?.total_revenue || 0;
       const compRevenue = compData.data?.summary?.total_revenue || 0;
-      const totalRevenue = tbwaRevenue + compRevenue;
+      const totalRevenue = clientRevenue + compRevenue;
 
       return {
-        tbwa_revenue: tbwaRevenue,
+        client_revenue: clientRevenue,
         competitor_revenue: compRevenue,
         total_revenue: totalRevenue,
-        tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0,
+        client_share: totalRevenue > 0 ? (clientRevenue / totalRevenue) * 100 : 0,
       };
     } catch (error) {
-      console.error('Error getting market share:', error);
       return null;
     }
   }, []);
@@ -250,22 +246,22 @@ export const useAdvancedFilters = () => {
     try {
       const categoryData = await Promise.all(
         filterOptions.categories.map(async category => {
-          const [tbwaData, compData] = await Promise.all([
+          const [clientData, compData] = await Promise.all([
             getBrandAnalysis(category.value, true),
             getBrandAnalysis(category.value, false),
           ]);
 
-          const tbwaRevenue = tbwaData?.summary?.total_revenue || 0;
+          const clientRevenue = clientData?.summary?.total_revenue || 0;
           const compRevenue = compData?.summary?.total_revenue || 0;
-          const totalRevenue = tbwaRevenue + compRevenue;
+          const totalRevenue = clientRevenue + compRevenue;
 
           return {
             category: category.value,
-            tbwa_revenue: tbwaRevenue,
+            client_revenue: clientRevenue,
             competitor_revenue: compRevenue,
             total_revenue: totalRevenue,
-            tbwa_share: totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0,
-            tbwa_brands: tbwaData?.summary?.total_brands || 0,
+            client_share: totalRevenue > 0 ? (clientRevenue / totalRevenue) * 100 : 0,
+            client_brands: clientData?.summary?.total_brands || 0,
             competitor_brands: compData?.summary?.total_brands || 0,
           };
         })
@@ -273,7 +269,6 @@ export const useAdvancedFilters = () => {
 
       return categoryData.sort((a, b) => b.total_revenue - a.total_revenue);
     } catch (error) {
-      console.error('Error getting category performance:', error);
       return [];
     }
   }, [filterOptions, getBrandAnalysis]);
@@ -287,7 +282,7 @@ export const useAdvancedFilters = () => {
       categories: [],
       brands: [],
       locations: [],
-      tbwa_only: null,
+      client_only: null,
     });
   }, []);
 
@@ -326,7 +321,7 @@ export const useAdvancedFilters = () => {
     getAvailableBrands,
 
     // Helper functions
-    setTBWAOnly: (value: boolean | null) => updateFilter('tbwa_only', value),
+    setClientOnly: (value: boolean | null) => updateFilter('client_only', value),
     addCategory: (category: string) => {
       if (!filters.categories.includes(category)) {
         updateFilter('categories', [...filters.categories, category]);

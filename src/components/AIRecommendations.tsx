@@ -92,7 +92,6 @@ export function AIRecommendations({ dateRange, className }: AIRecommendationsPro
       const nlpData = processNLPInsights(transcriptions);
       setNlpInsights(nlpData);
     } catch (err) {
-      console.error('Error loading AI recommendations:', err);
       setError('Failed to load AI recommendations');
     } finally {
       setLoading(false);

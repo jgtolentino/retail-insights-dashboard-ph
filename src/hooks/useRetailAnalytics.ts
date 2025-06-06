@@ -15,7 +15,7 @@ export const useRetailAnalytics = () => {
             name,
             brands (
               name,
-              is_tbwa
+              is_client
             )
           )
         `
@@ -23,37 +23,32 @@ export const useRetailAnalytics = () => {
         .not('products.brands.name', 'is', null);
 
       if (error) {
-        console.error('Error fetching transaction items:', error);
         throw error;
       }
 
-      console.log('Raw data from Supabase:', data);
-      console.log('Number of items:', data?.length || 0);
-
       // If no data, return mock data to ensure chart displays
       if (!data || data.length === 0) {
-        console.log('No data from Supabase, returning mock data');
         return [
-          { name: 'Marlboro', sales: 18500, is_tbwa_client: false },
-          { name: 'Philip Morris', sales: 15300, is_tbwa_client: false },
-          { name: 'Fortune', sales: 12400, is_tbwa_client: false },
-          { name: 'Hope', sales: 11200, is_tbwa_client: false },
-          { name: 'More', sales: 9800, is_tbwa_client: false },
-          { name: 'Champion', sales: 8900, is_tbwa_client: false },
+          { name: 'Marlboro', sales: 18500, is_client_client: false },
+          { name: 'Philip Morris', sales: 15300, is_client_client: false },
+          { name: 'Fortune', sales: 12400, is_client_client: false },
+          { name: 'Hope', sales: 11200, is_client_client: false },
+          { name: 'More', sales: 9800, is_client_client: false },
+          { name: 'Champion', sales: 8900, is_client_client: false },
         ];
       }
 
       // Aggregate sales by brand
-      const brandSales: { [key: string]: { sales: number; is_tbwa_client: boolean } } = {};
+      const brandSales: { [key: string]: { sales: number; is_client_client: boolean } } = {};
 
       data.forEach(item => {
         const brandName = item.products?.brands?.name;
         const subtotal = (item.quantity || 0) * (item.price || 0);
-        const isTbwaClient = item.products?.brands?.is_tbwa || false;
+        const isTbwaClient = item.products?.brands?.is_client || false;
 
         if (brandName) {
           if (!brandSales[brandName]) {
-            brandSales[brandName] = { sales: 0, is_tbwa_client: isTbwaClient };
+            brandSales[brandName] = { sales: 0, is_client_client: isTbwaClient };
           }
           brandSales[brandName].sales += subtotal;
         }
@@ -63,23 +58,20 @@ export const useRetailAnalytics = () => {
         .map(([name, data]) => ({
           name,
           sales: data.sales,
-          is_tbwa_client: data.is_tbwa_client,
+          is_client_client: data.is_client_client,
         }))
         .sort((a, b) => b.sales - a.sales)
         .slice(0, 6);
 
-      console.log('Aggregated brands:', topBrands);
-
       // If still no brands after aggregation, return mock data
       if (topBrands.length === 0) {
-        console.log('No brands after aggregation, returning mock data');
         return [
-          { name: 'Marlboro', sales: 18500, is_tbwa_client: false },
-          { name: 'Philip Morris', sales: 15300, is_tbwa_client: false },
-          { name: 'Fortune', sales: 12400, is_tbwa_client: false },
-          { name: 'Hope', sales: 11200, is_tbwa_client: false },
-          { name: 'More', sales: 9800, is_tbwa_client: false },
-          { name: 'Champion', sales: 8900, is_tbwa_client: false },
+          { name: 'Marlboro', sales: 18500, is_client_client: false },
+          { name: 'Philip Morris', sales: 15300, is_client_client: false },
+          { name: 'Fortune', sales: 12400, is_client_client: false },
+          { name: 'Hope', sales: 11200, is_client_client: false },
+          { name: 'More', sales: 9800, is_client_client: false },
+          { name: 'Champion', sales: 8900, is_client_client: false },
         ];
       }
 

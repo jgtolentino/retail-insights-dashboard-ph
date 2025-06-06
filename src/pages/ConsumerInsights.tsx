@@ -828,7 +828,7 @@ export default function ConsumerInsights() {
                     <ul className="space-y-1 text-xs text-green-600">
                       <li>• 1 point per ₱10 spent</li>
                       <li>• 100 points = ₱50 discount</li>
-                      <li>• Bonus points on TBWA brands</li>
+                      <li>• Bonus points on Client brands</li>
                       <li>• Birthday month double points</li>
                     </ul>
                   </div>
