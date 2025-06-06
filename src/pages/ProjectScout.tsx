@@ -28,6 +28,7 @@ import { AIInsightsPanel } from '@/components/ai/AIInsightsPanel';
 import { DeviceHealthDashboard } from '@/components/iot/DeviceHealthDashboard';
 import { ProjectScoutTour } from '@/components/GuidedTour';
 import { TransactionTrendsChart } from '@/components/charts/TransactionTrendsChart';
+import { GeospatialHeatmap } from '@/components/charts/GeospatialHeatmap';
 
 export default function ProjectScout() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -325,6 +326,9 @@ export default function ProjectScout() {
           {/* Transaction Trends Chart */}
           <TransactionTrendsChart region="All Regions" period={7} className="w-full" />
 
+          {/* Geospatial Heatmap */}
+          <GeospatialHeatmap region="All Regions" period={7} className="w-full" />
+
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
@@ -338,6 +342,10 @@ export default function ProjectScout() {
                     <li className="flex items-center space-x-2">
                       <span className="h-2 w-2 rounded-full bg-green-500"></span>
                       <span>Hourly transaction trends (Live)</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                      <span>Geospatial store performance heatmap (Live)</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <span className="h-2 w-2 rounded-full bg-blue-500"></span>
@@ -394,12 +402,7 @@ export default function ProjectScout() {
               <CardDescription>Next phase analytics components in development</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
-                  <div className="mb-2 text-2xl">🗺️</div>
-                  <h4 className="font-medium">Geospatial Heatmap</h4>
-                  <p className="text-sm text-gray-500">Store performance mapping</p>
-                </div>
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
                   <div className="mb-2 text-2xl">📊</div>
                   <h4 className="font-medium">Brand Analysis</h4>

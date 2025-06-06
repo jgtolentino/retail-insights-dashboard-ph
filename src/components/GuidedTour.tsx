@@ -101,7 +101,7 @@ export function ProjectScoutTour() {
     {
       element: '[data-tour="analytics-content"]',
       intro:
-        'Here you can see live transaction trends! The chart shows hourly transaction patterns with counts and average amounts. This is real data from the API.',
+        'Here you can see live analytics! The Transaction Trends Chart shows hourly patterns, and below it is the Geospatial Heatmap displaying store performance across the Philippines with real IoT device data.',
     },
     {
       element: '[data-tour="architecture-tab"]',

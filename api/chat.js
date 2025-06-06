@@ -33,7 +33,10 @@ export default async function handler(req, res) {
       'help': "I'm ScoutBot, your dashboard assistant! I can help with navigation, explain features, provide cost information, discuss our IoT setup, or answer questions about the AI analytics. What would you like to know?",
       'chart': 'The Transaction Trends Chart in the Analytics tab shows hourly transaction patterns with two lines: blue for transaction count and yellow for average amount in PHP. It displays real data from our API with summary stats above the chart.',
       'trends': 'Visit the Analytics tab to see live transaction trends! The chart shows hourly patterns over the last 7 days, with peak hours typically around 12:00 PM. You can see both transaction volume and average spending amounts.',
-      'analytics': 'The Analytics tab now features a live Transaction Trends Chart showing hourly transaction patterns. This is real data from our API, displaying transaction counts and average amounts in Philippine pesos with interactive tooltips.'
+      'analytics': 'The Analytics tab now features live Transaction Trends Charts and a Geospatial Heatmap! The trends show hourly patterns while the heatmap displays store performance across the Philippines with real IoT device data, organized by Luzon, Visayas, and Mindanao regions.',
+      'heatmap': 'The Geospatial Heatmap shows all Philippine sari-sari stores on an interactive map organized by regions. Click on any store to see detailed performance metrics, device status, peak hours, and top products. You can filter by transactions or revenue.',
+      'map': 'Our store network spans Metro Manila, Cebu, Davao, Baguio, Iloilo, and Cagayan de Oro. Each store has an IoT device providing real-time transaction data, customer footfall, and performance insights.',
+      'stores': 'We monitor 15 active sari-sari stores across the Philippines. Each has unique names like "Tindahan ni Aling Rosa" and "Kuya Jun Store". You can see their exact locations, performance metrics, and device status in the Geospatial Heatmap.'
     };
 
     // Simple keyword matching for demo purposes
