@@ -240,7 +240,7 @@ Analyze the following Philippine retail sales data and provide actionable insigh
 Sales Overview:
 - Total Revenue: ₱${salesData.totalRevenue.toLocaleString()}
 - Total Transactions: ${salesData.totalTransactions.toLocaleString()}
-- Average Transaction Value: ₱${(salesData.totalRevenue / salesData.totalTransactions).toFixed(2)}
+- Average Transaction Value: ₱${(salesData.totalRevenue / salesData.totalTransactions) || 0).toFixed(2)}
 
 Top Brands:
 ${salesData.topBrands
@@ -356,7 +356,7 @@ Suggest optimizations for this Philippine retail operation:
 Performance Data:
 - Total Revenue: ₱${salesData.totalRevenue.toLocaleString()}
 - Total Transactions: ${salesData.totalTransactions.toLocaleString()}
-- Transaction Efficiency: ${(salesData.totalRevenue / salesData.totalTransactions).toFixed(2)}
+- Transaction Efficiency: ${(salesData.totalRevenue / salesData.totalTransactions) || 0).toFixed(2)}
 
 Top Performing Categories:
 ${salesData.topBrands
@@ -491,7 +491,7 @@ Consider: Filipino family dynamics, payday cycles, religious observances, region
       {
         id: 'fallback-1',
         title: 'Transaction Value Optimization',
-        description: `Current average transaction value is ₱${avgTransaction.toFixed(2)}. Consider bundling strategies to increase basket size.`,
+        description: `Current average transaction value is ₱${avgTransaction || 0).toFixed(2)}. Consider bundling strategies to increase basket size.`,
         impact: '+10-15% revenue potential',
         confidence: 75,
         category: 'revenue',

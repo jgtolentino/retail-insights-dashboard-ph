@@ -78,9 +78,9 @@ export function ParetoChart({
             {valueLabel}: {formatCurrency(payload[0].value)}
           </p>
           <p className="text-sm text-muted-foreground">
-            Percentage: {payload[0].payload.percentage.toFixed(1)}%
+            Percentage: {(payload[0].payload.percentage || 0).toFixed(1)}%
           </p>
-          <p className="text-sm text-orange-600">Cumulative: {payload[1].value.toFixed(1)}%</p>
+          <p className="text-sm text-orange-600">Cumulative: {(payload[1].value || 0).toFixed(1)}%</p>
         </div>
       );
     }
@@ -94,7 +94,7 @@ export function ParetoChart({
         {thresholdIndex !== -1 && (
           <p className="text-sm text-muted-foreground">
             {thresholdIndex + 1} of {data.length} items (
-            {(((thresholdIndex + 1) / data.length) * 100).toFixed(0)}%) contribute to {threshold}%
+            {(((thresholdIndex + 1) / data.length) * 100) || 0).toFixed(0)}%) contribute to {threshold}%
             of {valueLabel.toLowerCase()}
           </p>
         )}

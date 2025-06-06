@@ -70,7 +70,7 @@ export const simpleDashboardService = {
 
       console.log(`💰 Total Revenue: ₱${totalRevenue.toLocaleString()}`);
       console.log(`📊 Total Transactions: ${totalTransactions.toLocaleString()}`);
-      console.log(`📈 Average Transaction: ₱${avgTransaction.toFixed(2)}`);
+      console.log((`📈 Average Transaction: ₱${avgTransaction || 0) || 0).toFixed(2)}`);
 
       // Get actual brand sales from transaction_items, products, and brands tables
       console.log('📦 Fetching brand sales data...');
