@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SafeWrapper } from '@/components/SafeWrapper';
 // Removed old FilterProvider - now using Zustand dashboardStore
 import { Layout } from '@/components/Layout';
+import { SupabaseStatus } from '@/components/SupabaseStatus';
 import { FEATURE_FLAGS } from '@/config/features';
 
 // Import shared components
@@ -91,6 +92,9 @@ const App = () => {
             {/* Existing toasters */}
             <Toaster />
             <Sonner />
+
+            {/* Supabase connection status */}
+            <SupabaseStatus />
 
             <Layout>
               <main id="main-content" className="focus:outline-none">
