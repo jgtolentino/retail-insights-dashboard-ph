@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-06-06T04:40:04.081Z",
+  "summary": {
+    "passed": 7,
+    "warnings": 3,
+    "failed": 0,
+    "successRate": "70.0%"
+  },
+  "tests": [
+    {
+      "status": "PASS",
+      "message": "Database connection successful",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Data exists: 18000 transactions",
+      "details": ""
+    },
+    {
+      "status": "FAIL",
+      "message": "Unique customers equals total transactions (suspicious)",
+      "details": ""
+    },
+    {
+      "status": "FAIL",
+      "message": "Customer ratio unusual: 100.0%",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Metrics accuracy validated",
+      "details": ""
+    },
+    {
+      "status": "FAIL",
+      "message": "Customer profiles too unique (may indicate poor logic)",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Dashboard query fast: 75ms",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Environment variable VITE_SUPABASE_URL configured",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Environment variable VITE_SUPABASE_ANON_KEY configured",
+      "details": ""
+    },
+    {
+      "status": "PASS",
+      "message": "Database access permissions working",
+      "details": ""
+    }
+  ]
+}
