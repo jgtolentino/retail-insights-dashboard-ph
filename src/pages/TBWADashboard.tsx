@@ -23,76 +23,7 @@ import FilterBar from '@/components/FilterBar';
 import { useFilters } from '@/stores/dashboardStore';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeData';
-
-// Mock data for demonstration - replace with real Supabase data
-const mockBrandData = [
-  {
-    id: 'nike',
-    name: 'Nike',
-    revenue: 2500000,
-    transactions: 15678,
-    marketShare: 18.5,
-    growth: 12.3,
-    isTBWA: true,
-    category: 'Sportswear',
-    avgTransactionValue: 159.45,
-  },
-  {
-    id: 'apple',
-    name: 'Apple',
-    revenue: 4200000,
-    transactions: 8934,
-    marketShare: 31.2,
-    growth: 8.7,
-    isTBWA: true,
-    category: 'Technology',
-    avgTransactionValue: 470.12,
-  },
-  {
-    id: 'cocacola',
-    name: 'Coca-Cola',
-    revenue: 1800000,
-    transactions: 45231,
-    marketShare: 13.4,
-    growth: 5.2,
-    isTBWA: false,
-    category: 'Beverages',
-    avgTransactionValue: 39.78,
-  },
-  {
-    id: 'samsung',
-    name: 'Samsung',
-    revenue: 3100000,
-    transactions: 12456,
-    marketShare: 23.1,
-    growth: -2.1,
-    isTBWA: false,
-    category: 'Technology',
-    avgTransactionValue: 248.93,
-  },
-  {
-    id: 'adidas',
-    name: 'Adidas',
-    revenue: 1900000,
-    transactions: 18765,
-    marketShare: 14.1,
-    growth: 15.7,
-    isTBWA: true,
-    category: 'Sportswear',
-    avgTransactionValue: 101.24,
-  },
-  {
-    id: 'pepsi',
-    name: 'Pepsi',
-    revenue: 1200000,
-    transactions: 38904,
-    marketShare: 8.9,
-    growth: 3.4,
-    isTBWA: false,
-    category: 'Beverages',
-    avgTransactionValue: 30.84,
-  },
-];
+import { useRealBrandData, useRealTotalMetrics } from '@/hooks/useRealBrandData';
 
 export default function TBWADashboard() {
   const filters = useFilters();
@@ -102,33 +33,54 @@ export default function TBWADashboard() {
   // Real-time updates
   const { isConnected, showUpdateNotification, dismissNotification } = useRealtimeUpdates();
 
-  // Dashboard data with filters
-  const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardData({
-    timeRange: '30d',
-    filters: {
-      brands: filters.brands,
-      categories: filters.categories,
-      regions: filters.regions,
-      stores: filters.stores,
-    },
-    enabled: true,
-  });
+  // REAL DATA from Supabase (no more mock data!)
+  const { data: brandData = [], isLoading: isBrandDataLoading, error: brandError } = useRealBrandData();
+  const { data: totalMetrics, isLoading: isMetricsLoading, error: metricsError } = useRealTotalMetrics();
 
-  // Calculate aggregated metrics
-  const totalRevenue = mockBrandData.reduce((sum, brand) => sum + brand.revenue, 0);
-  const totalTransactions = mockBrandData.reduce((sum, brand) => sum + brand.transactions, 0);
-  const tbwaBrands = mockBrandData.filter(brand => brand.isTBWA);
+  // Calculate aggregated metrics from REAL data
+  const totalRevenue = totalMetrics?.totalRevenue || 0;
+  const totalTransactions = totalMetrics?.totalTransactions || 0;
+  const tbwaBrands = brandData.filter(brand => brand.isTBWA);
   const tbwaRevenue = tbwaBrands.reduce((sum, brand) => sum + brand.revenue, 0);
-  const tbwaMarketShare = (tbwaRevenue / totalRevenue) * 100;
+  const tbwaMarketShare = totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0;
+
+  // Show loading state if any data is loading
+  const isDataLoading = isBrandDataLoading || isMetricsLoading;
 
   const handleRefresh = async () => {
     setIsLoading(true);
-    // Simulate data refresh
+    // Trigger data refresh by invalidating queries
     setTimeout(() => {
       setIsLoading(false);
       setLastUpdated(new Date());
     }, 1000);
   };
+
+  // Handle errors - show real error instead of mock data
+  if (brandError || metricsError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="p-6 max-w-md">
+          <CardContent className="text-center">
+            <div className="text-red-500 mb-4">
+              <Globe className="h-12 w-12 mx-auto mb-2" />
+              <h2 className="text-lg font-semibold">Database Connection Error</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Unable to connect to the database. All data shown should be REAL from Supabase.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Error: {brandError?.message || metricsError?.message}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry Connection
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen space-y-6 bg-gray-50 p-6">
@@ -154,10 +106,10 @@ export default function TBWADashboard() {
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            disabled={isLoading}
+            disabled={isLoading || isDataLoading}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${(isLoading || isDataLoading) ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
@@ -235,13 +187,13 @@ export default function TBWADashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Brand Performance Grid */}
             <div className="lg:col-span-2">
-              <TBWABrandPerformanceGrid brands={mockBrandData} maxBrands={6} showTBWAFirst={true} />
+              <TBWABrandPerformanceGrid brands={brandData} maxBrands={6} showTBWAFirst={true} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="brands" className="space-y-4">
-          <TBWABrandPerformanceGrid brands={mockBrandData} maxBrands={12} showTBWAFirst={true} />
+          <TBWABrandPerformanceGrid brands={brandData} maxBrands={12} showTBWAFirst={true} />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-4">
@@ -300,7 +252,7 @@ export default function TBWADashboard() {
 
       {/* Footer */}
       <div className="py-4 text-center text-sm text-gray-500">
-        Last updated: {lastUpdated.toLocaleString()} | Powered by{' '}
+        Last updated: {lastUpdated.toLocaleString()} | REAL DATA from Supabase | Powered by{' '}
         <span className="font-semibold text-tbwa-blue">TBWA Analytics</span>
       </div>
     </div>
