@@ -22,21 +22,23 @@ import { FEATURE_FLAGS } from '@/config/features';
 import '@/styles/theme.css';
 import '@/styles/tbwa-theme.css';
 
-// Lazy loaded pages for better performance
-const Index = React.lazy(() => import('./pages/Index'));
+// Lazy loaded pages for better performance - New Power BI Storytelling Structure
+const Overview = React.lazy(() => import('./pages/Overview'));
+const DataHealth = React.lazy(() => import('./pages/DataHealth'));
+const GeospatialPerformance = React.lazy(() => import('./pages/GeospatialPerformance'));
+const ProductTrends = React.lazy(() => import('./pages/ProductTrends'));
+const ConsumerSegments = React.lazy(() => import('./pages/ConsumerSegments'));
+const BasketAnalysis = React.lazy(() => import('./pages/BasketAnalysis'));
+const AIInsights = React.lazy(() => import('./pages/AIInsights'));
+
+// Legacy pages (kept for compatibility)
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 const ProductMix = React.lazy(() => import('./pages/ProductMix'));
-const ConsumerInsights = React.lazy(() => import('./pages/ConsumerInsights'));
 const Brands = React.lazy(() => import('./pages/Brands'));
-const ProductInsights = React.lazy(() => import('./pages/ProductInsights'));
-const BasketBehavior = React.lazy(() => import('./pages/BasketBehavior'));
-const AIRecommendations = React.lazy(() => import('./pages/AIRecommendations'));
 const Trends = React.lazy(() => import('./pages/Trends'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
-const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
 const TBWADashboard = React.lazy(() => import('./pages/TBWADashboard'));
-const ProjectScout = React.lazy(() => import('./pages/ProjectScout'));
 
 // Enhanced Query Client with better defaults - Fixed deprecated cacheTime
 const queryClient = new QueryClient({
@@ -101,27 +103,38 @@ const App = () => {
               <main id="main-content" className="focus:outline-none">
                 <Suspense fallback={<div>Loading...</div>}>
                   <Routes>
-                    {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
+                    {/* New Power BI Storytelling Structure */}
+                    <Route path="/" element={<Overview />} />
+                    <Route path="/overview" element={<Overview />} />
+                    <Route path="/data-health" element={<DataHealth />} />
+                    <Route path="/geospatial-performance" element={<GeospatialPerformance />} />
+                    <Route path="/product-trends" element={<ProductTrends />} />
+                    <Route path="/consumer-segments" element={<ConsumerSegments />} />
+                    <Route path="/basket-analysis" element={<BasketAnalysis />} />
+                    <Route path="/ai-insights" element={<AIInsights />} />
+
+                    {/* Legacy routes for backward compatibility */}
                     {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
                     {FEATURE_FLAGS.PRODUCT_INSIGHTS && (
-                      <Route path="/product-insights" element={<ProductInsights />} />
+                      <Route path="/product-insights" element={<ProductTrends />} />
                     )}
                     {FEATURE_FLAGS.CONSUMER_INSIGHTS && (
-                      <Route path="/consumer-insights" element={<ConsumerInsights />} />
+                      <Route path="/consumer-insights" element={<ConsumerSegments />} />
                     )}
                     {FEATURE_FLAGS.BASKET_BEHAVIOR && (
-                      <Route path="/basket-behavior" element={<BasketBehavior />} />
+                      <Route path="/basket-behavior" element={<BasketAnalysis />} />
                     )}
                     {FEATURE_FLAGS.AI_RECOMMENDATIONS && (
-                      <Route path="/ai-recommendations" element={<AIRecommendations />} />
+                      <Route path="/ai-recommendations" element={<AIInsights />} />
                     )}
                     {FEATURE_FLAGS.SETTINGS_PAGE && (
                       <Route path="/settings" element={<Settings />} />
                     )}
 
-                    {/* New Filter System Preview */}
-                    <Route path="/dashboard-preview" element={<DashboardPreview />} />
-                    <Route path="/filter-preview" element={<DashboardPreview />} />
+                    {/* System Health and Regional Analysis */}
+                    <Route path="/project-scout" element={<DataHealth />} />
+                    <Route path="/dashboard-preview" element={<GeospatialPerformance />} />
+                    <Route path="/filter-preview" element={<GeospatialPerformance />} />
 
                     {/* Sprint 4: Advanced Analytics Dashboard */}
                     <Route
@@ -159,20 +172,12 @@ const App = () => {
                       }
                     />
 
-                    {/* Project Scout IoT + AI Dashboard */}
-                    <Route
-                      path="/project-scout"
-                      element={
-                        <SafeWrapper name="ProjectScout" maxRenders={50}>
-                          <ProjectScout />
-                        </SafeWrapper>
-                      }
-                    />
+                    {/* IoT Health Monitoring */}
                     <Route
                       path="/iot"
                       element={
-                        <SafeWrapper name="ProjectScout" maxRenders={50}>
-                          <ProjectScout />
+                        <SafeWrapper name="DataHealth" maxRenders={50}>
+                          <DataHealth />
                         </SafeWrapper>
                       }
                     />
