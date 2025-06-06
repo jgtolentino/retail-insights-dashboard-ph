@@ -27,6 +27,7 @@ import {
 import { AIInsightsPanel } from '@/components/ai/AIInsightsPanel';
 import { DeviceHealthDashboard } from '@/components/iot/DeviceHealthDashboard';
 import { ProjectScoutTour } from '@/components/GuidedTour';
+import { TransactionTrendsChart } from '@/components/charts/TransactionTrendsChart';
 
 export default function ProjectScout() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -320,20 +321,23 @@ export default function ProjectScout() {
         </TabsContent>
 
         {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Enhanced Analytics Coming Soon</CardTitle>
-              <CardDescription>Advanced retail analytics with IoT integration</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
+        <TabsContent value="analytics" className="space-y-6" data-tour="analytics-content">
+          {/* Transaction Trends Chart */}
+          <TransactionTrendsChart region="All Regions" period={7} className="w-full" />
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Real-Time Analytics</CardTitle>
+                <CardDescription>Live transaction monitoring and IoT integration</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  <h4 className="font-medium">New Analytics Features</h4>
+                  <h4 className="font-medium">Active Features</h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center space-x-2">
-                      <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-                      <span>Real-time transaction monitoring</span>
+                      <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                      <span>Hourly transaction trends (Live)</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <span className="h-2 w-2 rounded-full bg-blue-500"></span>
@@ -344,14 +348,22 @@ export default function ProjectScout() {
                       <span>Filipino shopping pattern analysis</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-                      <span>Substitution flow tracking</span>
+                      <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
+                      <span>Substitution flow tracking (Coming Soon)</span>
                     </li>
                   </ul>
                 </div>
+              </CardContent>
+            </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Quality & Integrity</CardTitle>
+                <CardDescription>Ensuring accurate analytics and insights</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  <h4 className="font-medium">Data Quality Improvements</h4>
+                  <h4 className="font-medium">Quality Assurance</h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center space-x-2">
                       <span className="h-2 w-2 rounded-full bg-green-500"></span>
@@ -370,6 +382,33 @@ export default function ProjectScout() {
                       <span>Automated data quality scoring</span>
                     </li>
                   </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Coming Soon Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Advanced Analytics Pipeline</CardTitle>
+              <CardDescription>Next phase analytics components in development</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+                  <div className="mb-2 text-2xl">🗺️</div>
+                  <h4 className="font-medium">Geospatial Heatmap</h4>
+                  <p className="text-sm text-gray-500">Store performance mapping</p>
+                </div>
+                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+                  <div className="mb-2 text-2xl">📊</div>
+                  <h4 className="font-medium">Brand Analysis</h4>
+                  <p className="text-sm text-gray-500">Top brands & SKU insights</p>
+                </div>
+                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+                  <div className="mb-2 text-2xl">👥</div>
+                  <h4 className="font-medium">Demographics</h4>
+                  <p className="text-sm text-gray-500">Consumer behavior patterns</p>
                 </div>
               </div>
             </CardContent>
