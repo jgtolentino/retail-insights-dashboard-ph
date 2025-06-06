@@ -25,6 +25,16 @@ async function checkReactErrors() {
     errors.push(error.message);
     console.log('❌ PAGE ERROR:', error.message);
   });
+
+  // Listen for network responses
+  page.on('response', response => {
+    const status = response.status();
+    if (status === 401 || status === 403 || status === 429) {
+      console.log(`❌ Resource Failed (${status}): ${response.url()}`);
+      // Optionally, add to errors array if this should be treated as a primary error
+      // errors.push(`Resource Failed (${status}): ${response.url()}`);
+    }
+  });
   
   try {
     console.log('📱 Loading production URL...');
