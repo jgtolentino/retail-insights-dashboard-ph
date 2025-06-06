@@ -13,15 +13,14 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     fetch: (url, options = {}) => {
-      // Add logging for debugging
       return fetch(url, {
         ...options,
-        // Add timeout to prevent hanging requests
         signal: AbortSignal.timeout(30000), // 30 second timeout
       })
         .then(response => {
           if (!response.ok) {
-            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
           return response;
         })
         .catch(error => {

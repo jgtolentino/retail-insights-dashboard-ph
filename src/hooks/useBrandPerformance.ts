@@ -39,11 +39,11 @@ export function useBrandPerformance() {
           .select(
             `
             id,
-            amount,
+            total_amount,
             created_at,
             transaction_items!inner (
               quantity,
-              amount,
+              total_amount,
               products!inner (
                 id,
                 name,
@@ -52,7 +52,7 @@ export function useBrandPerformance() {
                   id,
                   name,
                   category,
-                  is_client_client
+                  is_tbwa
                 )
               )
             )
@@ -69,11 +69,11 @@ export function useBrandPerformance() {
           .select(
             `
             id,
-            amount,
+            total_amount,
             created_at,
             transaction_items!inner (
               quantity,
-              amount,
+              total_amount,
               products!inner (
                 id,
                 name,
@@ -82,7 +82,7 @@ export function useBrandPerformance() {
                   id,
                   name,
                   category,
-                  is_client_client
+                  is_tbwa
                 )
               )
             )
@@ -115,14 +115,14 @@ export function useBrandPerformance() {
             const brand = item.products?.brands;
             if (brand) {
               const brandId = brand.id;
-              const itemRevenue = item.amount || 0;
+              const itemRevenue = item.total_amount || 0;
 
               if (!brandMetrics.has(brandId)) {
                 brandMetrics.set(brandId, {
                   id: brandId,
                   name: brand.name,
                   category: brand.category || 'Other',
-                  isClient: brand.is_client_client || false,
+                  isClient: brand.is_tbwa || false,
                   revenue: 0,
                   transactions: 0,
                   totalRevenue: 0,
@@ -145,7 +145,7 @@ export function useBrandPerformance() {
             const brand = item.products?.brands;
             if (brand) {
               const brandId = brand.id;
-              const itemRevenue = item.amount || 0;
+              const itemRevenue = item.total_amount || 0;
               const currentRevenue = prevBrandMetrics.get(brandId) || 0;
               prevBrandMetrics.set(brandId, currentRevenue + itemRevenue);
             }
