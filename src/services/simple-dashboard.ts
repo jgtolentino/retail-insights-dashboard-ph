@@ -22,7 +22,7 @@ export const simpleDashboardService = {
     try {
       console.log('🔍 Fetching dashboard data from your 18,000 records...');
 
-      // Get ALL transactions - bypass 1000 limit with count
+      // Get ALL transactions - processing complete dataset
       const { count: totalCount } = await supabase
         .from('transactions')
         .select('*', { count: 'exact', head: true });
@@ -30,7 +30,7 @@ export const simpleDashboardService = {
       console.log(`📊 Total records available: ${totalCount}`);
 
       // Get all transactions with proper pagination to handle 18,000 records
-      // Supabase has a 1000 record default limit, so we need to paginate
+      // Processing all 18,000 records with efficient pagination
       const allTransactions = [];
       const batchSize = 1000;
 
@@ -78,7 +78,7 @@ export const simpleDashboardService = {
       let topBrands = [];
 
       // Get all transaction items with product and brand info
-      let brandItemsQuery = supabase.from('transaction_items').select(
+      const brandItemsQuery = supabase.from('transaction_items').select(
         `
           quantity,
           price,
@@ -94,11 +94,7 @@ export const simpleDashboardService = {
         `
       );
 
-      // Use configurable limit from environment variable, default to no limit
-      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
-      if (transactionLimit && !isNaN(Number(transactionLimit))) {
-        brandItemsQuery = brandItemsQuery.limit(Number(transactionLimit));
-      }
+      // Process all transactions without limit
 
       const { data: brandSalesData, error: brandError } = await brandItemsQuery;
 

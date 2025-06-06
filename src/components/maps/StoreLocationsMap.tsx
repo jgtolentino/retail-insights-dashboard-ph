@@ -182,7 +182,7 @@ function StoreLocationsMapComponent({
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Avg Transaction:</span>
-                              <span>₱{store.avg_transaction_value.toFixed(2)}</span>
+                              <span>₱{(store.avg_transaction_value || 0).toFixed(2)}</span>
                             </div>
                           </>
                         )}
@@ -220,7 +220,7 @@ function StoreLocationsMapComponent({
                                       : 'text-gray-600'
                                 }`}
                               >
-                                {Math.abs(store.growth_rate).toFixed(1)}%
+                                {Math.abs(store.growth_rate || 0).toFixed(1)}%
                               </span>
                             </div>
                           )}

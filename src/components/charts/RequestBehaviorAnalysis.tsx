@@ -83,9 +83,9 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
     type: stat.request_type,
     count: stat.total_count,
     avgCheckoutTime: stat.avg_checkout_seconds,
-    acceptanceRate: (stat.suggestion_acceptance_rate * 100).toFixed(1),
+    acceptanceRate: ((stat.suggestion_acceptance_rate || 0) * 100).toFixed(1),
     clarifications: stat.avg_clarifications,
-    gestureRate: (stat.gesture_usage_rate * 100).toFixed(1),
+    gestureRate: ((stat.gesture_usage_rate || 0) * 100).toFixed(1),
   }));
 
   const checkoutDurationData = checkoutAnalysis.map(analysis => ({
@@ -200,7 +200,9 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ duration, percentage }) => `${duration} (${percentage.toFixed(1)}%)`}
+                  label={({ duration, percentage }) =>
+                    `${duration} (${(percentage || 0).toFixed(1)}%)`
+                  }
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"
@@ -233,7 +235,8 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
                 <span className="text-2xl font-bold">{stat.total_count.toLocaleString()}</span>
                 <Badge variant="outline" className="text-xs">
                   {(
-                    (stat.total_count / requestStats.reduce((sum, s) => sum + s.total_count, 0)) *
+                    (stat.total_count /
+                      (requestStats.reduce((sum, s) => sum + s.total_count, 0) || 1)) *
                     100
                   ).toFixed(1)}
                   %
@@ -243,24 +246,28 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Avg Checkout Time</span>
-                  <span className="font-medium">{stat.avg_checkout_seconds.toFixed(0)}s</span>
+                  <span className="font-medium">
+                    {(stat.avg_checkout_seconds || 0).toFixed(0)}s
+                  </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Acceptance Rate</span>
                   <span className="font-medium">
-                    {(stat.suggestion_acceptance_rate * 100).toFixed(1)}%
+                    {((stat.suggestion_acceptance_rate || 0) * 100).toFixed(1)}%
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Avg Clarifications</span>
-                  <span className="font-medium">{stat.avg_clarifications.toFixed(1)}</span>
+                  <span className="font-medium">{(stat.avg_clarifications || 0).toFixed(1)}</span>
                 </div>
 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Gesture Usage</span>
-                  <span className="font-medium">{(stat.gesture_usage_rate * 100).toFixed(1)}%</span>
+                  <span className="font-medium">
+                    {((stat.gesture_usage_rate || 0) * 100).toFixed(1)}%
+                  </span>
                 </div>
               </div>
 
@@ -317,13 +324,13 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-600">
                       <span>{insight.frequency} occurrences</span>
-                      <span>{insight.avgCheckoutTime.toFixed(0)}s avg time</span>
+                      <span>{(insight.avgCheckoutTime || 0).toFixed(0)}s avg time</span>
                       <span className="capitalize">{insight.requestType} requests</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium">
-                      {(insight.sentiment * 100).toFixed(0)}%
+                      {((insight.sentiment || 0) * 100).toFixed(0)}%
                     </div>
                     <div className="text-xs text-gray-500">sentiment</div>
                   </div>
@@ -368,7 +375,7 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
                     <span>Highest Acceptance Rate</span>
                     <span className="font-medium">
                       {(
-                        Math.max(...requestStats.map(s => s.suggestion_acceptance_rate)) * 100
+                        Math.max(...requestStats.map(s => s.suggestion_acceptance_rate || 0)) * 100
                       ).toFixed(1)}
                       %
                     </span>
@@ -383,9 +390,9 @@ export function RequestBehaviorAnalysis({ dateRange, className }: RequestBehavio
                 {checkoutAnalysis.find(c => c.duration_range === '5min+') && (
                   <div className="text-amber-600">
                     •{' '}
-                    {checkoutAnalysis
-                      .find(c => c.duration_range === '5min+')
-                      ?.percentage.toFixed(1)}
+                    {(
+                      checkoutAnalysis.find(c => c.duration_range === '5min+')?.percentage || 0
+                    ).toFixed(1)}
                     % of checkouts take over 5 minutes
                   </div>
                 )}

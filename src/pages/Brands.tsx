@@ -83,13 +83,7 @@ export default function Brands() {
         `
       );
 
-      // Use configurable limit from environment variable, default to no limit
-      const transactionLimit = import.meta.env.REACT_APP_TRANSACTION_LIMIT;
-      let finalQuery = query;
-
-      if (transactionLimit && !isNaN(Number(transactionLimit))) {
-        finalQuery = finalQuery.limit(Number(transactionLimit));
-      }
+      // Process all transactions without limit
 
       // Apply date filter
       const daysAgo = parseInt(dateRange);

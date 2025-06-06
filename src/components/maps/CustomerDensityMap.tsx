@@ -121,7 +121,7 @@ function CustomerDensityMapComponent({
                 <div>Revenue: ₱{location.revenue.toLocaleString()}</div>
                 <div>Customers: {location.unique_customers.toLocaleString()}</div>
                 <div className="mt-1 border-t pt-1">
-                  Avg Transaction: ₱{location.avg_transaction_value.toFixed(2)}
+                  Avg Transaction: ₱{(location.avg_transaction_value || 0).toFixed(2)}
                 </div>
               </div>
             </div>

@@ -234,9 +234,7 @@ export function useCustomerSegments() {
       const { data, error } = await supabase
         .from('mv_customer_segments')
         .select('*')
-        .order('total_spent', { ascending: false })
-        .limit(1000);
-
+        .order('total_spent', { ascending: false });
       if (error) throw error;
 
       // Aggregate by segment

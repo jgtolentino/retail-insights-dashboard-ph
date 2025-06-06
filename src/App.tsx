@@ -36,6 +36,7 @@ const Settings = React.lazy(() => import('./pages/Settings'));
 const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
 const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
 const TBWADashboard = React.lazy(() => import('./pages/TBWADashboard'));
+const ProjectScout = React.lazy(() => import('./pages/ProjectScout'));
 
 // Enhanced Query Client with better defaults - Fixed deprecated cacheTime
 const queryClient = new QueryClient({
@@ -154,6 +155,24 @@ const App = () => {
                       element={
                         <SafeWrapper name="TBWADashboard" maxRenders={50}>
                           <TBWADashboard />
+                        </SafeWrapper>
+                      }
+                    />
+
+                    {/* Project Scout IoT + AI Dashboard */}
+                    <Route
+                      path="/project-scout"
+                      element={
+                        <SafeWrapper name="ProjectScout" maxRenders={50}>
+                          <ProjectScout />
+                        </SafeWrapper>
+                      }
+                    />
+                    <Route
+                      path="/iot"
+                      element={
+                        <SafeWrapper name="ProjectScout" maxRenders={50}>
+                          <ProjectScout />
                         </SafeWrapper>
                       }
                     />
