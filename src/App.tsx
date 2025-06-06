@@ -1,12 +1,17 @@
 import React from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LayoutSwitcher } from "./components/layout/LayoutSwitcher";
 import "./index.css";
 
+// 🔑 SINGLETON so it's not recreated on hot-reload
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
-    <ErrorBoundary>
-      <LayoutSwitcher>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <LayoutSwitcher>
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
             🎯 Cruip Integration - Phase 1
@@ -48,7 +53,8 @@ export default function App() {
             </div>
           </div>
         </div>
-      </LayoutSwitcher>
-    </ErrorBoundary>
+        </LayoutSwitcher>
+      </ErrorBoundary>
+    </QueryClientProvider>
   );
 }
