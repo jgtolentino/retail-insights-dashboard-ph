@@ -23,14 +23,17 @@ export default async function handler(req, res) {
 
     // Mock responses for the Project Scout dashboard
     const mockResponses = {
-      'how do i': 'To navigate the dashboard, use the tabs at the top. Start with Overview to see system status, then explore IoT Devices for hardware monitoring, AI Insights for predictive analytics, and Architecture to understand our tech stack.',
+      'how do i': 'To navigate the dashboard, use the tabs at the top. Start with Overview to see system status, then explore IoT Devices for hardware monitoring, AI Insights for predictive analytics, and Analytics to see live transaction trends.',
       'what is': 'This is the Project Scout dashboard - an IoT-powered retail insights platform. It monitors sari-sari store performance using real-time device data and AI analytics, built on Supabase and Vercel for 83% cost savings vs Azure.',
       'cost': "We've achieved 83% cost savings ($3,156/year) by using Supabase + Vercel instead of Azure. The annual infrastructure cost is only $660 compared to Azure's $3,816.",
       'device': "IoT devices monitor store transactions in real-time. Currently, we're ready for device registration and targeting 90 stores for deployment. Each device provides transaction data, customer behavior insights, and health monitoring.",
       'ai': 'Our AI insights use Azure OpenAI to analyze Filipino consumer behavior, predict sales trends, and provide optimization recommendations. The AI processes transaction patterns and shopping behaviors specific to sari-sari stores.',
       'data': "We've solved critical data integrity issues including device collision detection, session matching validation, and transaction integrity checks. This ensures accurate analytics and prevents data corruption.",
       'tour': "You can take a guided tour by clicking the 'Take a Tour' button at the top of the page. It will walk you through all the key features step by step.",
-      'help': "I'm ScoutBot, your dashboard assistant! I can help with navigation, explain features, provide cost information, discuss our IoT setup, or answer questions about the AI analytics. What would you like to know?"
+      'help': "I'm ScoutBot, your dashboard assistant! I can help with navigation, explain features, provide cost information, discuss our IoT setup, or answer questions about the AI analytics. What would you like to know?",
+      'chart': 'The Transaction Trends Chart in the Analytics tab shows hourly transaction patterns with two lines: blue for transaction count and yellow for average amount in PHP. It displays real data from our API with summary stats above the chart.',
+      'trends': 'Visit the Analytics tab to see live transaction trends! The chart shows hourly patterns over the last 7 days, with peak hours typically around 12:00 PM. You can see both transaction volume and average spending amounts.',
+      'analytics': 'The Analytics tab now features a live Transaction Trends Chart showing hourly transaction patterns. This is real data from our API, displaying transaction counts and average amounts in Philippine pesos with interactive tooltips.'
     };
 
     // Simple keyword matching for demo purposes

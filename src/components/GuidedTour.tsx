@@ -99,6 +99,11 @@ export function ProjectScoutTour() {
         'Enhanced Analytics shows real-time transaction monitoring and device-correlated customer behavior patterns.',
     },
     {
+      element: '[data-tour="analytics-content"]',
+      intro:
+        'Here you can see live transaction trends! The chart shows hourly transaction patterns with counts and average amounts. This is real data from the API.',
+    },
+    {
       element: '[data-tour="architecture-tab"]',
       intro:
         'Finally, the Architecture tab explains our technical decisions and migration strategies.',
