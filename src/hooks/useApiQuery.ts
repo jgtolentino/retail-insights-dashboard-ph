@@ -111,6 +111,9 @@ export const transactionsApi = {
         itemQuery = itemQuery.in('category', filters.selectedCategories);
       }
 
+      // Add null checks with correct syntax
+      itemQuery = itemQuery.not('transaction_id', 'is', null).not('brand_id', 'is', null);
+
       const { data: filteredItems, error: itemsError } = await itemQuery;
 
       if (itemsError) {

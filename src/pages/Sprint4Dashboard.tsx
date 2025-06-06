@@ -84,10 +84,10 @@ export default function Sprint4Dashboard() {
       const csvData = [
         ['Metric', 'Value'],
         ['Total Transactions', summary.totalTransactions.toString()],
-        ['Total Revenue', `₱${(summary.totalRevenue || 0).toFixed(2)}`],
-        ['Average Checkout Time', `${(summary.avgCheckoutTime || 0).toFixed(1)}s`],
-        ['Substitution Rate', `${(summary.avgSubstitutionRate || 0).toFixed(1)}%`],
-        ['Digital Payment Rate', `${(summary.avgDigitalPaymentRate || 0).toFixed(1)}%`],
+        ['Total Revenue', `₱${(summary?.totalRevenue || 0).toFixed(2)}`],
+        ['Average Checkout Time', `${(summary?.avgCheckoutTime || 0).toFixed(1)}s`],
+        ['Substitution Rate', `${(summary?.avgSubstitutionRate || 0).toFixed(1)}%`],
+        ['Digital Payment Rate', `${(summary?.avgDigitalPaymentRate || 0).toFixed(1)}%`],
       ];
 
       const csvContent = csvData.map(row => row.join(',')).join('\n');
@@ -101,7 +101,7 @@ export default function Sprint4Dashboard() {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      } finally {
+    } finally {
       setIsLoading(false);
     }
   };

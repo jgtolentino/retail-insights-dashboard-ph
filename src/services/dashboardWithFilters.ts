@@ -194,19 +194,30 @@ export const dashboardServiceWithFilters = {
       }
 
       // Build query with filters
-      let query = supabase
+      const query = supabase
         .from('transactions')
         .select('id, created_at, total_amount')
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString())
         .order('created_at', { ascending: true });
 
-      // Apply store filter
+      // Apply store filter with pagination if needed
       if (filters?.stores && filters.stores.length > 0) {
-        query = query.in('store_id', filters.stores);
+        const BATCH_SIZE = 500;
+        const storeBatches = [];
+        for (let i = 0; i < filters.stores.length; i += BATCH_SIZE) {
+          storeBatches.push(filters.stores.slice(i, i + BATCH_SIZE));
+        }
+
+        const storeResults = await Promise.all(
+          storeBatches.map(batch => query.clone().in('store_id', batch))
+        );
+
+        const allData = storeResults.flatMap(result => result.data || []);
+        return allData;
       }
 
-      // Apply region filter
+      // Apply region filter with pagination
       if (filters?.regions && filters.regions.length > 0) {
         const { data: storesInRegions } = await supabase
           .from('stores')
@@ -215,7 +226,18 @@ export const dashboardServiceWithFilters = {
 
         if (storesInRegions) {
           const storeIds = storesInRegions.map(s => s.id);
-          query = query.in('store_id', storeIds);
+          const BATCH_SIZE = 500;
+          const storeBatches = [];
+          for (let i = 0; i < storeIds.length; i += BATCH_SIZE) {
+            storeBatches.push(storeIds.slice(i, i + BATCH_SIZE));
+          }
+
+          const storeResults = await Promise.all(
+            storeBatches.map(batch => query.clone().in('store_id', batch))
+          );
+
+          const allData = storeResults.flatMap(result => result.data || []);
+          return allData;
         }
       }
 
@@ -227,88 +249,9 @@ export const dashboardServiceWithFilters = {
         throw error;
       }
 
-      let transactions = transactionData;
-
-      // If we have brand or category filters, filter transactions based on items
-      if (
-        (filters?.brands && filters.brands.length > 0) ||
-        (filters?.categories && filters.categories.length > 0)
-      ) {
-        const transactionIds = transactions?.map(t => t.id) || [];
-
-        let itemsQuery = supabase
-          .from('transaction_items')
-          .select(
-            `
-            transaction_id,
-            products!inner (
-              brand_id,
-              brands!inner (
-                id,
-                category
-              )
-            )
-          `
-          )
-          .in('transaction_id', transactionIds);
-
-        if (filters?.brands && filters.brands.length > 0) {
-          itemsQuery = itemsQuery.in('products.brand_id', filters.brands);
-        }
-
-        if (filters?.categories && filters.categories.length > 0) {
-          itemsQuery = itemsQuery.in('products.brands.category', filters.categories);
-        }
-
-        const { data: filteredItems } = await itemsQuery;
-
-        if (filteredItems) {
-          const validTransactionIds = new Set(filteredItems.map(item => item.transaction_id));
-          transactions = transactions?.filter(t => validTransactionIds.has(t.id));
-        }
-      }
-
-      // Group data by time period
-      const timeSeriesMap = new Map<string, { transactions: number; revenue: number }>();
-
-      transactions?.forEach(transaction => {
-        const transactionDate = transaction.created_at;
-        if (!transactionDate) return;
-
-        const date = new Date(transactionDate);
-        let key: string;
-
-        if (groupBy === 'hour') {
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`;
-        } else if (groupBy === 'day') {
-          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        } else {
-          // week
-          const weekStart = new Date(date);
-          weekStart.setDate(date.getDate() - date.getDay());
-          key = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, '0')}-${String(weekStart.getDate()).padStart(2, '0')}`;
-        }
-
-        const existing = timeSeriesMap.get(key) || { transactions: 0, revenue: 0 };
-        existing.transactions += 1;
-        existing.revenue += transaction.total_amount || 0;
-        timeSeriesMap.set(key, existing);
-      });
-
-      // Convert to array
-      const timeSeriesData: TimeSeriesData[] = Array.from(timeSeriesMap.entries())
-        .map(([date, data]) => ({
-          date,
-          transactions: data.transactions,
-          revenue: Math.round(data.revenue * 100) / 100,
-        }))
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      logger.info(`Time series data fetched: ${timeSeriesData.length} data points`);
-      return timeSeriesData;
+      return transactionData || [];
     } catch (error) {
-      logger.error('Error fetching time series data:', error);
-      logDataFetchError('time_series_data_with_filters', error as Error, { timeRange, filters });
+      logger.error('Error in getTimeSeriesData:', error);
       throw error;
     }
   },

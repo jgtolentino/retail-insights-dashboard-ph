@@ -27,9 +27,11 @@ export function buildFilterQuery(filters: GlobalFilterState) {
 
   // Apply date range filter
   if (filters.dateRange?.start && filters.dateRange?.end) {
+    const startDate = new Date(filters.dateRange.start);
+    const endDate = new Date(filters.dateRange.end);
     query = query
-      .gte('created_at', filters.dateRange.start)
-      .lte('created_at', filters.dateRange.end);
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString());
   }
 
   // Apply store filter first (most direct)
@@ -162,8 +164,8 @@ export async function getFilterOptions() {
     .order('name');
 
   if (brandsError) {
-    } else {
-    }
+  } else {
+  }
 
   // Fetch categories
   const { data: categoriesRaw } = await supabase
