@@ -13,7 +13,7 @@ export const buildCompleteFilterQuery = ({
 }: Readonly<FilterState>): string => {
   const clauses: string[] = [];
   if (startDate && endDate)
-    clauses.push(`interaction_date BETWEEN '${startDate}' AND '${endDate}'`);
+    clauses.push(`interaction_date BETWEEN '${startDate}T00:00:00Z' AND '${endDate}T23:59:59Z'`);
   if (selectedBrands.length)
     clauses.push(`brand IN (${selectedBrands.map(b => `'${b}'`).join(',')})`);
   if (selectedRegions.length)

@@ -28,31 +28,65 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
         });
     },
   },
+  realtime: {
+    enabled: false
+  }
 });
 
 // Environment variables - these should be set in Vercel or your deployment platform
 const MCP_URL = import.meta.env.VITE_SUPABASE_MCP_URL;
 
+// Cache for MCP token
+let cachedMcpToken: string | null = null;
+let mcpTokenExpiry: number | null = null;
+
 // Function to fetch the short-lived MCP token from our serverless endpoint
 const fetchMcpToken = async () => {
-  const resp = await fetch('/api/getMcpToken', { method: 'POST' });
-  if (!resp.ok) {
-    const errorText = await resp.text();
-    throw new Error(`Failed to fetch MCP token: ${resp.status} - ${errorText}`);
+  // Check cache first
+  if (cachedMcpToken && mcpTokenExpiry && Date.now() < mcpTokenExpiry) {
+    console.log('ℹ️ Using cached MCP token.');
+    return cachedMcpToken;
   }
-  const { token } = await resp.json();
-  return token;
+
+  console.log('ℹ️ Fetching new MCP token...');
+  try {
+    const resp = await fetch('/api/getMcpToken', { method: 'POST' });
+    if (!resp.ok) {
+      const errorText = await resp.text();
+      console.error(`Failed to fetch MCP token: ${resp.status} - ${errorText}`);
+      // Don't throw here, allow fallback or retry if applicable by the caller
+      return null;
+    }
+    const tokenData = await resp.json();
+
+    if (tokenData.access_token && tokenData.expires_in) {
+      cachedMcpToken = tokenData.access_token;
+      // expires_in is in seconds, convert to milliseconds for Date.now() comparison
+      // Add a small buffer (e.g., 60 seconds) to ensure token is valid when used
+      const bufferSeconds = 60;
+      mcpTokenExpiry = Date.now() + (tokenData.expires_in - bufferSeconds) * 1000;
+      console.log('✅ New MCP token fetched and cached.');
+      return cachedMcpToken;
+    } else {
+      console.error('❌ MCP token response did not include access_token or expires_in:', tokenData);
+      return null;
+    }
+  } catch (error) {
+    console.error('🚨 Error fetching MCP token:', error);
+    return null; // Return null to indicate failure, allowing caller to handle
+  }
 };
 
 // Async function to get the Supabase client instance using the fetched token
 export async function getSupabaseClient() {
   // If MCP is configured, use it
   if (MCP_URL) {
-    try {
-      const token = await fetchMcpToken();
+    const token = await fetchMcpToken();
+    if (token) {
       // Create client with MCP URL and token
       return createClient<Database>(MCP_URL, token);
-    } catch (error) {
+    } else {
+      console.error('Error fetching MCP token, falling back to standard client.');
       // Fallback to standard client using environment variables
       const standardSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const standardSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;

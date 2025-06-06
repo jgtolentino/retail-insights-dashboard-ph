@@ -45,8 +45,8 @@ export const dashboardServiceWithFilters = {
       let transactionQuery = supabase
         .from('transactions')
         .select('id, total_amount, created_at, store_location')
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
+        .gte('created_at', `${startDate.toISOString().split('T')[0]}T00:00:00Z`)
+        .lte('created_at', `${endDate.toISOString().split('T')[0]}T23:59:59Z`);
 
       // Apply store filter
       if (filters?.stores && filters.stores.length > 0) {

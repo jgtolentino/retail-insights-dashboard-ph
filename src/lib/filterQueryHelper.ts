@@ -27,11 +27,9 @@ export function buildFilterQuery(filters: GlobalFilterState) {
 
   // Apply date range filter
   if (filters.dateRange?.start && filters.dateRange?.end) {
-    const startDate = new Date(filters.dateRange.start);
-    const endDate = new Date(filters.dateRange.end);
     query = query
-      .gte('created_at', startDate.toISOString())
-      .lte('created_at', endDate.toISOString());
+      .gte('created_at', `${filters.dateRange.start}T00:00:00Z`)
+      .lte('created_at', `${filters.dateRange.end}T23:59:59Z`);
   }
 
   // Apply store filter first (most direct)

@@ -84,11 +84,11 @@ export const transactionsApi = {
       )
     `);
 
-    // Apply filters
+    // Apply date range filter
     if (filters.dateRange?.start && filters.dateRange?.end) {
       query = query
-        .gte('created_at', filters.dateRange.start)
-        .lte('created_at', filters.dateRange.end);
+        .gte('created_at', `${filters.dateRange.start}T00:00:00Z`)
+        .lte('created_at', `${filters.dateRange.end}T23:59:59Z`);
     }
 
     if (filters.selectedStores?.length > 0) {
@@ -112,7 +112,9 @@ export const transactionsApi = {
       }
 
       // Add null checks with correct syntax
-      itemQuery = itemQuery.not('transaction_id', 'is', null).not('brand_id', 'is', null);
+      itemQuery = itemQuery
+        .not('transaction_id', 'is', null)
+        .not('brand_id', 'is', null);
 
       const { data: filteredItems, error: itemsError } = await itemQuery;
 
