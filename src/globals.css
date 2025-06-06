@@ -1,0 +1,238 @@
+@import './styles/global-design-system.css';
+
+/* Global application styles that build on the design system */
+
+/* Apply the corporate color scheme to the root */
+html {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Ensure consistent styling for the main app container */
+#root {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+/* Override default focus styles for better accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Ensure cards and panels use the design system */
+.card,
+[class*='card'] {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Navigation and header styling */
+nav,
+header {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+/* Form elements consistency */
+input,
+select,
+textarea {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: var(--space-2) var(--space-3);
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+/* Button consistency */
+button,
+[role='button'] {
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+/* Tables */
+table {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+/* Loading states */
+.loading,
+[data-loading='true'] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Error states */
+.error,
+[data-error='true'] {
+  border-color: var(--color-error);
+  background-color: var(--color-error-light);
+}
+
+/* Success states */
+.success,
+[data-success='true'] {
+  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+/* Typography improvements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+small,
+.text-small {
+  color: var(--text-tertiary);
+}
+
+/* Link styling */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+
+/* Utility classes for quick application */
+.text-primary {
+  color: var(--text-primary) !important;
+}
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+.text-tertiary {
+  color: var(--text-tertiary) !important;
+}
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.bg-primary {
+  background-color: var(--bg-primary) !important;
+}
+.bg-secondary {
+  background-color: var(--bg-secondary) !important;
+}
+.bg-tertiary {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.border-primary {
+  border-color: var(--border-primary) !important;
+}
+.border-secondary {
+  border-color: var(--border-secondary) !important;
+}
+
+/* Dashboard-specific enhancements */
+.dashboard-container {
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+  padding: var(--space-6);
+}
+
+.dashboard-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  transition: box-shadow var(--transition-normal);
+}
+
+.dashboard-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Chart and visualization containers */
+.chart-container {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+/* Status indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-indicator.online {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.status-indicator.offline {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+}
+
+.status-indicator.warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: var(--space-4);
+  }
+
+  .dashboard-card {
+    padding: var(--space-4);
+  }
+}

@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Use the actual Supabase project values directly
-const supabaseUrl = 'https://lcoxtanyckjzyxxcsjzz.supabase.co';
-const supabaseAnonKey =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxjb3h0YW55Y2tqenl4eGNzanp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNDUzMjcsImV4cCI6MjA2MzkyMTMyN30.W2JgvZdXubvWpKCNZ7TfjLiKANZO1Hlb164fBEKH2dA';
+// Use environment variables for Supabase credentials
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Export standard client for immediate compatibility
+// Export standard client for immediate compatibility (uses environment variables)
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
@@ -55,34 +54,38 @@ export async function getSupabaseClient() {
   if (MCP_URL) {
     try {
       const token = await fetchMcpToken();
+      // Create client with MCP URL and token
       return createClient<Database>(MCP_URL, token);
     } catch (error) {
       console.error('Error initializing Supabase client with MCP:', error);
-      // Fallback to standard client
-      return supabase;
+      // Fallback to standard client using environment variables
+      console.log('ℹ️ Falling back to standard Supabase client using environment variables.');
+      const standardSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const standardSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!standardSupabaseUrl || !standardSupabaseAnonKey) {
+        console.error('❌ Standard Supabase environment variables are not set. Cannot fallback.');
+        throw new Error('Supabase environment variables not set for fallback.');
+      }
+      return createClient<Database>(standardSupabaseUrl, standardSupabaseAnonKey);
     }
+  } else {
+    // If MCP is not configured, use standard client with environment variables
+    console.log(
+      'ℹ️ MCP is not configured. Using standard Supabase client using environment variables.'
+    );
+    const standardSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const standardSupabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!standardSupabaseUrl || !standardSupabaseAnonKey) {
+      console.error(
+        '❌ Standard Supabase environment variables are not set. Cannot create client.'
+      );
+      throw new Error('Supabase environment variables not set.');
+    }
+    return createClient<Database>(standardSupabaseUrl, standardSupabaseAnonKey);
   }
-
-  // Otherwise use standard client
-  return supabase;
 }
 
-// Note: You will need to update components and hooks that previously used a
-// directly created Supabase client instance to now use the async getSupabaseClient() function.
-// For example:
-// import { getSupabaseClient } from '@/integrations/supabase/client';
-// useEffect(() => {
-//   (async () => {
-//     try {
-//       const supabase = await getSupabaseClient();
-//       if (supabase) {
-//         // Use the supabase client for queries
-//         const { data, error } = await supabase.from('your_table').select('*');
-//         if (error) console.error('Supabase query error:', error);
-//         else console.log('Data:', data);
-//       }
-//     } catch (error) {
-//       console.error('Failed to get Supabase client:', error);
-//     }
-//   })();
-// }, []);
+// Note: Components and hooks should prefer using the async getSupabaseClient() function
+// for data fetching that requires RLS or benefits from the MCP setup.
+// The exported 'supabase' client can be used for immediate access if needed,
+// but relies on environment variables being set at load time.

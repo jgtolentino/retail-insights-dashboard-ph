@@ -23,79 +23,11 @@ import FilterBar from '@/components/FilterBar';
 import { useFilters } from '@/stores/dashboardStore';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeData';
-
-// Mock data for demonstration - replace with real Supabase data
-const mockBrandData = [
-  {
-    id: 'nike',
-    name: 'Nike',
-    revenue: 2500000,
-    transactions: 15678,
-    marketShare: 18.5,
-    growth: 12.3,
-    isTBWA: true,
-    category: 'Sportswear',
-    avgTransactionValue: 159.45,
-  },
-  {
-    id: 'apple',
-    name: 'Apple',
-    revenue: 4200000,
-    transactions: 8934,
-    marketShare: 31.2,
-    growth: 8.7,
-    isTBWA: true,
-    category: 'Technology',
-    avgTransactionValue: 470.12,
-  },
-  {
-    id: 'cocacola',
-    name: 'Coca-Cola',
-    revenue: 1800000,
-    transactions: 45231,
-    marketShare: 13.4,
-    growth: 5.2,
-    isTBWA: false,
-    category: 'Beverages',
-    avgTransactionValue: 39.78,
-  },
-  {
-    id: 'samsung',
-    name: 'Samsung',
-    revenue: 3100000,
-    transactions: 12456,
-    marketShare: 23.1,
-    growth: -2.1,
-    isTBWA: false,
-    category: 'Technology',
-    avgTransactionValue: 248.93,
-  },
-  {
-    id: 'adidas',
-    name: 'Adidas',
-    revenue: 1900000,
-    transactions: 18765,
-    marketShare: 14.1,
-    growth: 15.7,
-    isTBWA: true,
-    category: 'Sportswear',
-    avgTransactionValue: 101.24,
-  },
-  {
-    id: 'pepsi',
-    name: 'Pepsi',
-    revenue: 1200000,
-    transactions: 38904,
-    marketShare: 8.9,
-    growth: 3.4,
-    isTBWA: false,
-    category: 'Beverages',
-    avgTransactionValue: 30.84,
-  },
-];
+import { useBrandPerformance } from '@/hooks/useBrandPerformance';
 
 export default function TBWADashboard() {
   const filters = useFilters();
+  const { brandData, isLoading: brandLoading, error: brandError } = useBrandPerformance();
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
@@ -114,12 +46,22 @@ export default function TBWADashboard() {
     enabled: true,
   });
 
-  // Calculate aggregated metrics
-  const totalRevenue = mockBrandData.reduce((sum, brand) => sum + brand.revenue, 0);
-  const totalTransactions = mockBrandData.reduce((sum, brand) => sum + brand.transactions, 0);
-  const tbwaBrands = mockBrandData.filter(brand => brand.isTBWA);
+  // Calculate aggregated metrics from real data
+  const totalRevenue = brandData.reduce((sum, brand) => sum + brand.revenue, 0);
+  const totalTransactions = brandData.reduce((sum, brand) => sum + brand.transactions, 0);
+  const tbwaBrands = brandData.filter(brand => brand.isTBWA);
   const tbwaRevenue = tbwaBrands.reduce((sum, brand) => sum + brand.revenue, 0);
-  const tbwaMarketShare = (tbwaRevenue / totalRevenue) * 100;
+  const tbwaMarketShare = totalRevenue > 0 ? (tbwaRevenue / totalRevenue) * 100 : 0;
+
+  // Calculate average growth rates
+  const avgGrowthRate =
+    brandData.length > 0
+      ? brandData.reduce((sum, brand) => sum + brand.growth, 0) / brandData.length
+      : 0;
+  const avgTbwaGrowthRate =
+    tbwaBrands.length > 0
+      ? tbwaBrands.reduce((sum, brand) => sum + brand.growth, 0) / tbwaBrands.length
+      : 0;
 
   const handleRefresh = async () => {
     setIsLoading(true);
@@ -186,7 +128,7 @@ export default function TBWADashboard() {
         <TBWAMetricCard
           title="Total Revenue"
           value={`₱${(totalRevenue / 1000000).toFixed(1)}M`}
-          change={8.7}
+          change={Math.round(avgGrowthRate * 10) / 10}
           icon={<TrendingUp className="h-5 w-5" />}
           color="#0078d4"
           subtitle="All Brands Combined"
@@ -195,7 +137,7 @@ export default function TBWADashboard() {
         <TBWAMetricCard
           title="TBWA Revenue"
           value={`₱${(tbwaRevenue / 1000000).toFixed(1)}M`}
-          change={12.3}
+          change={Math.round(avgTbwaGrowthRate * 10) / 10}
           icon={<Target className="h-5 w-5" />}
           color="#F89E1B"
           isTBWABrand={true}
@@ -205,7 +147,7 @@ export default function TBWADashboard() {
         <TBWAMetricCard
           title="Market Share"
           value={`${tbwaMarketShare.toFixed(1)}%`}
-          change={5.2}
+          change={Math.round(avgTbwaGrowthRate * 10) / 10}
           icon={<BarChart3 className="h-5 w-5" />}
           color="#28a745"
           isTBWABrand={true}
@@ -235,13 +177,13 @@ export default function TBWADashboard() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Brand Performance Grid */}
             <div className="lg:col-span-2">
-              <TBWABrandPerformanceGrid brands={mockBrandData} maxBrands={6} showTBWAFirst={true} />
+              <TBWABrandPerformanceGrid brands={brandData} maxBrands={6} showTBWAFirst={true} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="brands" className="space-y-4">
-          <TBWABrandPerformanceGrid brands={mockBrandData} maxBrands={12} showTBWAFirst={true} />
+          <TBWABrandPerformanceGrid brands={brandData} maxBrands={12} showTBWAFirst={true} />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-4">
