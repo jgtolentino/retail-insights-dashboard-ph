@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useDashboardStore, useFilters, useFilterActions } from '@/stores/dashboardStore';
-// Debug // Debug import removed: useEmergencyRenderLimit
+import { useEmergencyRenderLimit } from '@/hooks/debugging/useEmergencyRenderLimit';
 import { useBrands } from '@/hooks/useBrands';
 import Select, { MultiValue, Options } from 'react-select';
 import { supabase } from '@/integrations/supabase/client';

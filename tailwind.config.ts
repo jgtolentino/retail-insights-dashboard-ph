@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+			},
 			colors: {
 				// TBWA Brand Colors
 				'tbwa-blue': '#0078d4',
@@ -25,6 +28,36 @@ export default {
 				'tbwa-gray': '#2E2F33',
 				'tbwa-light-gray': '#F5F5F5',
 				'tbwa-dark-blue': '#002b49',
+				
+				// Enhanced gray palette from Cruip
+				gray: {
+					50: '#f9fafb',
+					100: '#f3f4f6',
+					200: '#e5e7eb',
+					300: '#bfc4cd',
+					400: '#9ca3af',
+					500: '#6b7280',
+					600: '#4b5563',
+					700: '#374151',
+					800: '#1f2937',
+					900: '#111827',
+					950: '#030712',
+				},
+				
+				// Cruip violet palette
+				violet: {
+					50: '#f1eeff',
+					100: '#e6e1ff',
+					200: '#d2cbff',
+					300: '#b7acff',
+					400: '#9c8cff',
+					500: '#8470ff',
+					600: '#755ff8',
+					700: '#5d47de',
+					800: '#4634b1',
+					900: '#2f227c',
+					950: '#1c1357',
+				},
 				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -74,6 +107,12 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				xs: '0 1px 1px 0 rgb(0 0 0 / 0.05), 0 1px 2px 0 rgb(0 0 0 / 0.02)',
+			},
+			maxWidth: {
+				'9xl': '100rem',
 			},
 			keyframes: {
 				'accordion-down': {

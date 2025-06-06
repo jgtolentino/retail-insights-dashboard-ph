@@ -1,10 +1,13 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
+import { useEmergencyRenderLimit } from '@/hooks/debugging/useEmergencyRenderLimit';
 
 interface SafeWrapperProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  name?: string;
+  maxRenders?: number;
 }
 
 interface State {
@@ -23,9 +26,16 @@ export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    }
+    console.error('SafeWrapper caught error:', error, errorInfo);
+  }
 
   render() {
+    // Use the hook in a functional component wrapper
+    const SafeWrapperContent = () => {
+      useEmergencyRenderLimit(this.props.name || 'SafeWrapper');
+      return this.props.children;
+    };
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
@@ -54,6 +64,6 @@ export class SafeWrapper extends React.Component<SafeWrapperProps, State> {
       );
     }
 
-    return this.props.children;
+    return <SafeWrapperContent />;
   }
 }

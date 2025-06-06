@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
@@ -27,7 +26,7 @@ export const CustomerDemographicsMini = () => {
       return Object.entries(genderCounts).map(([gender, count]) => ({
         gender,
         customer_count: count,
-        percentage: total > 0 ? ((count / total) * 100).toFixed(1) : '0'
+        percentage: total > 0 ? ((count / total) * 100).toFixed(1) || '0' : '0'
       }));
     }
   });
@@ -62,7 +61,7 @@ export const CustomerDemographicsMini = () => {
       return Object.entries(ageCounts).map(([age_group, count]) => ({
         age_group,
         customer_count: count,
-        percentage: total > 0 ? ((count / total) * 100).toFixed(1) : '0'
+        percentage: total > 0 ? ((count / total) * 100).toFixed(1) || '0' : '0'
       }));
     }
   });

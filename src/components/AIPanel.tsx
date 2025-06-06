@@ -185,7 +185,7 @@ export function AIPanel({ dashboardData, className = '' }: AIPanelProps) {
                           <p className="text-xs text-gray-700">{insight.content}</p>
 
                           <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>Confidence: {(insight.confidence * 100).toFixed(0)}%</span>
+                            <span>Confidence: {((insight.confidence || 0) * 100).toFixed(0)}%</span>
                             <span>{new Date(insight.timestamp).toLocaleTimeString()}</span>
                           </div>
 

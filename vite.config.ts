@@ -106,6 +106,9 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     'import.meta.env.VITE_BUILD_TIME': JSON.stringify(new Date().toISOString()),
+    global: 'globalThis',
+    'process.env': {},
+    'process': '{}',
   },
   build: {
     rollupOptions: {

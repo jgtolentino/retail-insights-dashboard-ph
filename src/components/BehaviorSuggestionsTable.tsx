@@ -237,7 +237,7 @@ export function BehaviorSuggestionsTable({
                     (data.reduce((sum, d) => sum + d.suggestionsAccepted, 0) /
                       data.reduce((sum, d) => sum + d.suggestionsOffered, 0)) *
                     100
-                  ).toFixed(1)
+                  ).toFixed(1) || '0'
                 : 0}
               %
             </p>
@@ -283,12 +283,12 @@ export function BehaviorSuggestionsTable({
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <span className="font-medium">
-                          {item.suggestionAcceptanceRate.toFixed(1)}%
+                          {(item.suggestionAcceptanceRate || 0).toFixed(1)}%
                         </span>
                         <Progress value={item.suggestionAcceptanceRate} className="h-2 w-16" />
                       </div>
                     </TableCell>
-                    <TableCell>{getAcceptanceRateBadge(item.suggestionAcceptanceRate)}</TableCell>
+                    <TableCell>{getAcceptanceRateBadge(item.suggestionAcceptanceRate || 0)}</TableCell>
                   </TableRow>
                 ))
               ) : (
