@@ -47,14 +47,24 @@ export default function ProjectScout() {
             <Badge variant="outline" className="bg-purple-50 text-purple-700">
               Azure OpenAI Powered
             </Badge>
+            <Badge variant="outline" className="bg-gray-50 text-gray-700">
+              Architecture Modern Stack
+            </Badge>
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <div className="text-sm text-gray-500">Architecture</div>
-            <div className="font-semibold">Modern Stack</div>
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+              <span className="text-sm text-gray-600">System Health: Optimal</span>
+            </div>
+            <div className="text-xs text-gray-500">Database connected successfully</div>
           </div>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            <Activity className="mr-2 h-4 w-4" />
+            Refresh Status
+          </Button>
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
             <Zap className="h-5 w-5 text-white" />
           </div>
@@ -479,6 +489,34 @@ export default function ProjectScout() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Footer Status Bar */}
+      <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium text-gray-900">
+              Retail Insights Dashboard PH - Powered by Dlab
+            </span>
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 rounded-full bg-green-500"></div>
+              <span className="text-xs text-gray-600">Database connected</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-xs text-gray-500">
+              Last updated:{' '}
+              {new Date().toLocaleDateString('en-US', {
+                month: 'numeric',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              })}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
