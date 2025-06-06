@@ -40,17 +40,21 @@ function scanFile(filePath: string): { file: string; violations: Array<{ line: n
   const violations: Array<{ line: number; pattern: string; message: string }> = [];
 
   UNSAFE_PATTERNS.forEach(({ pattern, message }) => {
-    const matches = content.matchAll(pattern);
+    const matches = Array.from(content.matchAll(pattern));
     
     for (const match of matches) {
-      const lineNum = content.substring(0, match.index).split('\n').length;
-      const lineContent = lines[lineNum - 1];
-      
-      violations.push({
-        line: lineNum,
-        pattern: lineContent.trim(),
-        message
-      });
+      if (match.index !== undefined) {
+        const lineNum = content.substring(0, match.index).split('\n').length;
+        const lineContent = lines[lineNum - 1];
+        
+        if (lineContent) {
+          violations.push({
+            line: lineNum,
+            pattern: lineContent.trim(),
+            message
+          });
+        }
+      }
     }
   });
 
