@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
 import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
-import shallow from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SalesByBrandData {

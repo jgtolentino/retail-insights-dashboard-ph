@@ -14,6 +14,11 @@ interface AppConfig {
     apiKey: string;
     deploymentName: string;
   };
+  databricks?: {
+    host: string;
+    token: string;
+    genieSpaceId: string;
+  };
   database: {
     password: string;
   };
@@ -65,6 +70,9 @@ class ConfigManager {
         'azure-openai-endpoint',
         'azure-openai-key',
         'azure-openai-deployment',
+        'databricks-host',
+        'databricks-token',
+        'databricks-genie-space-id',
         'database-password',
         'iot-device-key',
         'iot-connection-string',
@@ -85,6 +93,11 @@ class ConfigManager {
           apiKey: secrets['azure-openai-key'],
           deploymentName: secrets['azure-openai-deployment'] || 'gpt-4',
         },
+        databricks: secrets['databricks-host'] ? {
+          host: secrets['databricks-host'],
+          token: secrets['databricks-token'],
+          genieSpaceId: secrets['databricks-genie-space-id'],
+        } : undefined,
         database: {
           password: secrets['database-password'],
         },
@@ -127,6 +140,11 @@ class ConfigManager {
         apiKey: process.env.AZURE_OPENAI_API_KEY || '',
         deploymentName: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
       },
+      databricks: process.env.DATABRICKS_HOST ? {
+        host: process.env.DATABRICKS_HOST,
+        token: process.env.DATABRICKS_TOKEN || '',
+        genieSpaceId: process.env.DATABRICKS_GENIE_SPACE_ID || '',
+      } : undefined,
       database: {
         password: process.env.DATABASE_PASSWORD || '',
       },

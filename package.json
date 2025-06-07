@@ -75,6 +75,7 @@
     "@ai-sdk/groq": "^1.2.9",
     "@azure/identity": "^4.10.0",
     "@azure/keyvault-secrets": "^4.9.0",
+    "@azure/openai": "^2.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@octokit/rest": "^22.0.0",
     "@radix-ui/react-accordion": "^1.2.0",

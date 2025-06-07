@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useFilterStore } from '../stores/filterStore'; // Changed 'store' to 'stores'
 import { buildCompleteFilterQuery } from '../utils/buildCompleteFilterQuery';
-import shallow from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 import { logger } from '@/utils/logger';
 
 export interface CustomerDensityData {

@@ -93,6 +93,9 @@ class AzureKeyVaultClient {
     'AZURE_OPENAI_ENDPOINT': 'azure-openai-endpoint',
     'AZURE_OPENAI_API_KEY': 'azure-openai-key',
     'AZURE_OPENAI_DEPLOYMENT_NAME': 'azure-openai-deployment',
+    'DATABRICKS_HOST': 'databricks-host',
+    'DATABRICKS_TOKEN': 'databricks-token',
+    'DATABRICKS_GENIE_SPACE_ID': 'databricks-genie-space-id',
     'EDGE_DEVICE_AUTH_TOKEN': 'edge-device-auth-token',
   };
 
