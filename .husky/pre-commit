@@ -3,7 +3,7 @@
 
 # Run type checking
 echo "🔍 Running type check..."
-npm run type-check || exit 1
+npm run typecheck || exit 1
 
 # Run linting
 echo "🧹 Running linter..."
