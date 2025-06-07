@@ -225,7 +225,7 @@ export default function Index() {
       isInitialized.current = true;
       fetchStores();
     }
-  }, [fetchStores]);
+  }, []); // Empty dependency array - only run once
 
   // Fetch data when dependencies change
   useEffect(() => {
