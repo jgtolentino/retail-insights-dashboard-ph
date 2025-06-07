@@ -1,229 +1,143 @@
 #!/bin/bash
 
 # Azure Key Vault Setup Script for Retail Insights Dashboard
-# This script creates and configures Azure Key Vault with all required credentials
+# This script sets up Azure Key Vault with all required secrets for production deployment
 
-set -e  # Exit on any error
+set -e
 
-echo "🔐 Azure Key Vault Setup for Retail Insights Dashboard"
-echo "=================================================="
+echo "🔐 Setting up Azure Key Vault for Retail Insights Dashboard..."
 
 # Configuration
 RESOURCE_GROUP="retail-insights-rg"
-LOCATION="East US"
 KEYVAULT_NAME="retail-insights-kv-$(date +%s)"
-SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+LOCATION="East US"
 
-echo "📋 Configuration:"
-echo "   Resource Group: $RESOURCE_GROUP"
-echo "   Location: $LOCATION"
-echo "   Key Vault Name: $KEYVAULT_NAME"
-echo "   Subscription: $SUBSCRIPTION_ID"
-echo ""
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-# Check if Azure CLI is logged in
-if ! az account show &> /dev/null; then
-    echo "❌ Please login to Azure CLI first:"
-    echo "   az login"
+print_step() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+# Check if Azure CLI is installed
+if ! command -v az &> /dev/null; then
+    print_error "Azure CLI not found. Please install it first."
     exit 1
 fi
 
-echo "✅ Azure CLI authenticated"
+# Check if user is logged in
+if ! az account show &> /dev/null; then
+    print_warning "Please log in to Azure:"
+    az login
+fi
 
-# Create resource group if it doesn't exist
-echo "📦 Creating resource group..."
-az group create --name $RESOURCE_GROUP --location "$LOCATION" --output table
+print_step "Creating Azure Resource Group: $RESOURCE_GROUP"
+az group create --name $RESOURCE_GROUP --location "$LOCATION" --output none
 
-# Create Key Vault
-echo "🔐 Creating Key Vault..."
+print_step "Creating Azure Key Vault: $KEYVAULT_NAME"
 az keyvault create \
   --name $KEYVAULT_NAME \
   --resource-group $RESOURCE_GROUP \
   --location "$LOCATION" \
   --enabled-for-template-deployment true \
-  --enabled-for-disk-encryption true \
-  --enabled-for-deployment true \
   --sku standard \
-  --output table
+  --output none
 
-echo "✅ Key Vault created: $KEYVAULT_NAME"
-
-# Get current user object ID for access policy
+# Get current user's object ID for access policy
 USER_OBJECT_ID=$(az ad signed-in-user show --query objectId -o tsv)
 
-echo "🔑 Setting access policy for current user..."
+print_step "Setting access policy for current user"
 az keyvault set-policy \
   --name $KEYVAULT_NAME \
   --object-id $USER_OBJECT_ID \
-  --secret-permissions get list set delete backup restore recover purge \
-  --output table
+  --secret-permissions get list set delete \
+  --output none
 
-# Store current credentials from .env file (if exists)
-if [ -f ".env" ]; then
-    echo "📁 Reading existing credentials from .env file..."
+echo ""
+echo "🔑 Now you need to set the secrets. Please provide the following values:"
+echo ""
+
+# Function to prompt for secret and store it
+store_secret() {
+    local secret_name=$1
+    local display_name=$2
+    local is_required=${3:-true}
     
-    # Source the .env file
-    set -a
-    source .env
-    set +a
+    echo -n "Enter $display_name: "
+    read -s secret_value
+    echo ""
     
-    echo "🔐 Storing credentials in Key Vault..."
-    
-    # Supabase credentials
-    if [ ! -z "$VITE_SUPABASE_URL" ]; then
-        az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-url" --value "$VITE_SUPABASE_URL" > /dev/null
-        echo "   ✅ Stored: supabase-url"
+    if [[ -z "$secret_value" ]] && [[ "$is_required" == "true" ]]; then
+        print_error "$display_name is required!"
+        return 1
     fi
     
-    if [ ! -z "$VITE_SUPABASE_ANON_KEY" ]; then
-        az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-anon-key" --value "$VITE_SUPABASE_ANON_KEY" > /dev/null
-        echo "   ✅ Stored: supabase-anon-key"
+    if [[ -n "$secret_value" ]]; then
+        az keyvault secret set \
+          --vault-name $KEYVAULT_NAME \
+          --name $secret_name \
+          --value "$secret_value" \
+          --output none
+        print_step "Stored: $display_name"
+    else
+        print_warning "Skipped: $display_name (optional)"
     fi
-    
-    if [ ! -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-        az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-service-key" --value "$SUPABASE_SERVICE_ROLE_KEY" > /dev/null
-        echo "   ✅ Stored: supabase-service-key"
-    fi
-    
-    # Database credentials
-    if [ ! -z "$DATABASE_PASSWORD" ]; then
-        az keyvault secret set --vault-name $KEYVAULT_NAME --name "database-password" --value "$DATABASE_PASSWORD" > /dev/null
-        echo "   ✅ Stored: database-password"
-    fi
-    
-    # Placeholder for future credentials
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-endpoint" --value "https://your-openai.openai.azure.com/" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-key" --value "your-azure-openai-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-deployment" --value "gpt-4" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "iot-device-key" --value "placeholder-iot-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "iot-connection-string" --value "placeholder-connection-string" > /dev/null
-    
-    echo "   ✅ Stored placeholder credentials for Azure OpenAI and IoT"
-    
-else
-    echo "⚠️  No .env file found. Creating placeholder secrets..."
-    
-    # Create placeholder secrets
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-url" --value "https://your-project.supabase.co" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-anon-key" --value "your-anon-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "supabase-service-key" --value "your-service-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-endpoint" --value "https://your-openai.openai.azure.com/" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-key" --value "your-azure-openai-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "azure-openai-deployment" --value "gpt-4" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "database-password" --value "your-database-password" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "iot-device-key" --value "placeholder-iot-key" > /dev/null
-    az keyvault secret set --vault-name $KEYVAULT_NAME --name "iot-connection-string" --value "placeholder-connection-string" > /dev/null
-    
-    echo "   ✅ Created placeholder secrets (update with real values)"
-fi
-
-# Create a test secret for connectivity testing
-az keyvault secret set --vault-name $KEYVAULT_NAME --name "connection-test" --value "OK" > /dev/null
-echo "   ✅ Created test secret for connectivity verification"
-
-# Enable diagnostic settings (optional)
-echo "📊 Setting up monitoring and diagnostics..."
-
-# Create Log Analytics workspace for monitoring
-WORKSPACE_NAME="retail-insights-workspace"
-az monitor log-analytics workspace create \
-  --resource-group $RESOURCE_GROUP \
-  --workspace-name $WORKSPACE_NAME \
-  --location "$LOCATION" \
-  --output table 2>/dev/null || echo "   ⚠️  Workspace already exists or requires different permissions"
-
-# Get workspace resource ID
-WORKSPACE_ID=$(az monitor log-analytics workspace show \
-  --resource-group $RESOURCE_GROUP \
-  --workspace-name $WORKSPACE_NAME \
-  --query id -o tsv 2>/dev/null || echo "")
-
-if [ ! -z "$WORKSPACE_ID" ]; then
-    # Enable diagnostic settings
-    az monitor diagnostic-settings create \
-      --name "keyvault-diagnostics" \
-      --resource "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.KeyVault/vaults/$KEYVAULT_NAME" \
-      --logs '[{"category":"AuditEvent","enabled":true,"retentionPolicy":{"enabled":true,"days":30}}]' \
-      --workspace "$WORKSPACE_ID" \
-      --output table 2>/dev/null || echo "   ⚠️  Diagnostic settings require different permissions"
-fi
-
-# Output configuration for application
-echo ""
-echo "🎉 Azure Key Vault setup completed successfully!"
-echo ""
-echo "📋 Configuration Summary:"
-echo "   Key Vault URL: https://$KEYVAULT_NAME.vault.azure.net/"
-echo "   Resource Group: $RESOURCE_GROUP"
-echo "   Location: $LOCATION"
-echo ""
-echo "🔧 Environment Variables for your application:"
-echo "   AZURE_KEYVAULT_URL=https://$KEYVAULT_NAME.vault.azure.net/"
-echo "   AZURE_KEYVAULT_NAME=$KEYVAULT_NAME"
-echo ""
-echo "📝 Next Steps:"
-echo "   1. Update your .env file with the Key Vault URL:"
-echo "      echo 'AZURE_KEYVAULT_URL=https://$KEYVAULT_NAME.vault.azure.net/' >> .env"
-echo ""
-echo "   2. Install Azure SDK dependencies:"
-echo "      npm install @azure/keyvault-secrets @azure/identity"
-echo ""
-echo "   3. Update placeholder secrets with real values:"
-echo "      az keyvault secret set --vault-name $KEYVAULT_NAME --name 'azure-openai-endpoint' --value 'YOUR_REAL_ENDPOINT'"
-echo "      az keyvault secret set --vault-name $KEYVAULT_NAME --name 'azure-openai-key' --value 'YOUR_REAL_KEY'"
-echo ""
-echo "   4. Test the connection:"
-echo "      node -e \"import('./src/lib/azure-keyvault.js').then(m => m.testKeyVaultConnection())\""
-echo ""
-echo "   5. For production deployment, create a service principal:"
-echo "      az ad sp create-for-rbac --name 'retail-insights-app' --role contributor"
-echo ""
-echo "🔐 Security Notes:"
-echo "   • Your current user has full access to this Key Vault"
-echo "   • For production, use service principals with minimal permissions"
-echo "   • Consider enabling network restrictions for production use"
-echo "   • Monitor access logs through Azure Monitor"
-echo ""
-echo "💰 Cost Information:"
-echo "   • Key Vault: \$0.03 per 10,000 operations (25,000 free/month)"
-echo "   • Log Analytics: Pay-per-GB ingested"
-echo "   • Estimated monthly cost: < \$5 for typical usage"
-
-# Create a simple test script
-cat > test-keyvault.js << 'EOF'
-// Simple Key Vault connectivity test
-const { SecretClient } = require('@azure/keyvault-secrets');
-const { DefaultAzureCredential } = require('@azure/identity');
-
-async function testKeyVault() {
-  try {
-    const vaultUrl = process.env.AZURE_KEYVAULT_URL;
-    if (!vaultUrl) {
-      console.log('❌ AZURE_KEYVAULT_URL not set');
-      return;
-    }
-
-    console.log(`🔐 Testing connection to: ${vaultUrl}`);
-    
-    const credential = new DefaultAzureCredential();
-    const client = new SecretClient(vaultUrl, credential);
-    
-    const secret = await client.getSecret('connection-test');
-    
-    if (secret.value === 'OK') {
-      console.log('✅ Key Vault connection successful!');
-    } else {
-      console.log('❌ Unexpected test secret value');
-    }
-  } catch (error) {
-    console.log('❌ Key Vault connection failed:', error.message);
-  }
 }
 
-testKeyVault();
-EOF
+# Required secrets
+echo "📋 Required Secrets:"
+store_secret "supabase-url" "Supabase URL (e.g., https://xxx.supabase.co)" true
+store_secret "supabase-anon-key" "Supabase Anonymous Key" true
+store_secret "supabase-service-key" "Supabase Service Role Key" true
+store_secret "groq-api-key" "Groq API Key (for StockBot AI)" true
 
 echo ""
-echo "📄 Created test-keyvault.js for connection testing"
+echo "📋 Optional Secrets (press Enter to skip):"
+store_secret "azure-openai-endpoint" "Azure OpenAI Endpoint" false
+store_secret "azure-openai-key" "Azure OpenAI API Key" false
+store_secret "azure-openai-deployment" "Azure OpenAI Deployment Name (default: gpt-4)" false
+store_secret "database-password" "Database Password" false
+store_secret "iot-device-key" "IoT Device Key" false
+store_secret "iot-connection-string" "IoT Connection String" false
+store_secret "vercel-token" "Vercel Deployment Token" false
+
 echo ""
-echo "🎯 Ready to integrate Azure Key Vault with your retail insights dashboard!"
+print_step "Azure Key Vault setup completed!"
+
+echo ""
+echo "📋 Configuration Summary:"
+echo "Resource Group: $RESOURCE_GROUP"
+echo "Key Vault Name: $KEYVAULT_NAME"
+echo "Key Vault URL: https://$KEYVAULT_NAME.vault.azure.net/"
+echo ""
+
+echo "🚀 Next Steps:"
+echo "1. Set these environment variables in Vercel:"
+echo "   AZURE_KEYVAULT_URL=https://$KEYVAULT_NAME.vault.azure.net/"
+echo "   NODE_ENV=production"
+echo ""
+echo "2. For local development, create .env file with:"
+echo "   AZURE_KEYVAULT_URL=https://$KEYVAULT_NAME.vault.azure.net/"
+echo ""
+echo "3. Ensure your deployment has Azure authentication configured"
+echo "   (Managed Identity or Service Principal)"
+echo ""
+
+print_warning "Important: Store these details securely!"
+echo "Key Vault Name: $KEYVAULT_NAME"
+echo "Resource Group: $RESOURCE_GROUP"
+echo "Location: $LOCATION"
+
+echo ""
+print_step "Setup complete! 🎉"

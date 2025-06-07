@@ -89,6 +89,7 @@ class AzureKeyVaultClient {
     'VITE_SUPABASE_URL': 'supabase-url',
     'VITE_SUPABASE_ANON_KEY': 'supabase-anon-key',
     'SUPABASE_SERVICE_ROLE_KEY': 'supabase-service-role-key',
+    'GROQ_API_KEY': 'groq-api-key',
     'AZURE_OPENAI_ENDPOINT': 'azure-openai-endpoint',
     'AZURE_OPENAI_API_KEY': 'azure-openai-key',
     'AZURE_OPENAI_DEPLOYMENT_NAME': 'azure-openai-deployment',

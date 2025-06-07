@@ -92,12 +92,12 @@ export async function verifyDataConnections(): Promise<HealthCheckResult> {
 
 export function logHealthCheckResult(result: HealthCheckResult) {
   if (result.dataStats) {
-    }
+    console.log('Data stats:', result.dataStats);
+  }
 
   if (result.errors && result.errors.length > 0) {
-    result.errors.forEach(error => );
-  } else {
-    }
+    result.errors.forEach(error => console.warn('Health check error:', error));
+  }
 
   return result;
 }

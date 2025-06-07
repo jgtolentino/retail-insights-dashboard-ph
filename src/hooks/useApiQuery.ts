@@ -8,7 +8,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { handleApiError } from '@/stores/errorStore';
 import { useFilterStore } from '@/stores/filterStore';
-import { shallow } from 'zustand/shallow';
+import { shallow } from 'zustand/traditional';
 
 // Query key factory for consistent caching
 export const queryKeys = {

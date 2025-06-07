@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 
@@ -51,7 +51,7 @@ const initialFilters: DashboardFilters = {
   priceRanges: [],
 };
 
-export const useDashboardStore = create<DashboardState>()(
+export const useDashboardStore = createWithEqualityFn<DashboardState>()(
   devtools(
     immer((set, get) => ({
       // Initial state

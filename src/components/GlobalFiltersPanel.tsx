@@ -19,8 +19,10 @@ export function GlobalFiltersPanel() {
   const filters = useFilters();
   const { updateFilters, resetFilters } = useFilterActions();
 
-  // Track what causes re-renders
-  trackReason('store-subscription');
+  // Track what causes re-renders (development only)
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('Filter panel render - store subscription');
+  }
 
   // Fetch dynamic brand data from Supabase
   const { data: allBrands = [], isLoading: brandsLoading } = useBrands();
@@ -44,29 +46,39 @@ export function GlobalFiltersPanel() {
 
   // ✅ NEW PATTERN: Direct store updates (no useEffect, no callback deps!)
   const handleCategoriesChange = (vals: MultiValue<{ label: string; value: string }>) => {
-    trackReason('categories-change');
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('Filter change - categories');
+    }
     updateFilters({ categories: vals.map(v => v.value) });
   };
 
   const handleBrandsChange = (vals: MultiValue<{ label: string; value: string }>) => {
-    trackReason('brands-change');
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('Filter change - brands');
+    }
     updateFilters({ brands: vals.map(v => v.value) });
   };
 
   const handleRegionsChange = (vals: MultiValue<{ label: string; value: string }>) => {
-    trackReason('regions-change');
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('Filter change - regions');
+    }
     updateFilters({ regions: vals.map(v => v.value) });
   };
 
   const handleStoresChange = (vals: MultiValue<{ label: string; value: string }>) => {
-    trackReason('stores-change');
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('Filter change - stores');
+    }
     updateFilters({ stores: vals.map(v => v.value) });
   };
 
   // ✅ DATA FETCHING: Only runs once, no dependencies on reactive state
   useEffect(() => {
     const fetchAllData = async () => {
-      trackReason('data-fetch');
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('GlobalFiltersPanel - data-fetch');
+      }
 
       try {
         // Fetch categories
@@ -112,8 +124,9 @@ export function GlobalFiltersPanel() {
   return (
     <div className="flex flex-wrap items-start gap-6 rounded bg-white p-4 shadow">
       <div className="w-56">
-        <label className="mb-1 block text-sm font-medium text-gray-700">Categories</label>
+        <label htmlFor="category-filter" className="mb-1 block text-sm font-medium text-gray-700">Categories</label>
         <Select
+          id="category-filter"
           isMulti
           options={categoryOptions}
           value={selectedCategoryValues}
@@ -124,8 +137,9 @@ export function GlobalFiltersPanel() {
       </div>
 
       <div className="w-56">
-        <label className="mb-1 block text-sm font-medium text-gray-700">Brands</label>
+        <label htmlFor="brand-filter" className="mb-1 block text-sm font-medium text-gray-700">Brands</label>
         <Select
+          id="brand-filter"
           isMulti
           isLoading={brandsLoading}
           options={brandOptions}
@@ -140,8 +154,9 @@ export function GlobalFiltersPanel() {
       </div>
 
       <div className="w-56">
-        <label className="mb-1 block text-sm font-medium text-gray-700">Regions</label>
+        <label htmlFor="region-filter" className="mb-1 block text-sm font-medium text-gray-700">Regions</label>
         <Select
+          id="region-filter"
           isMulti
           options={regionOptions}
           value={selectedRegionValues}
@@ -151,8 +166,9 @@ export function GlobalFiltersPanel() {
       </div>
 
       <div className="w-56">
-        <label className="mb-1 block text-sm font-medium text-gray-700">Stores</label>
+        <label htmlFor="store-filter" className="mb-1 block text-sm font-medium text-gray-700">Stores</label>
         <Select
+          id="store-filter"
           isMulti
           options={storeOptions}
           value={selectedStoreValues}

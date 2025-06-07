@@ -6,6 +6,9 @@ interface AppConfig {
     anonKey: string;
     serviceKey: string;
   };
+  groq: {
+    apiKey: string;
+  };
   azureOpenAI: {
     endpoint: string;
     apiKey: string;
@@ -58,6 +61,7 @@ class ConfigManager {
         'supabase-url',
         'supabase-anon-key',
         'supabase-service-key',
+        'groq-api-key',
         'azure-openai-endpoint',
         'azure-openai-key',
         'azure-openai-deployment',
@@ -72,6 +76,9 @@ class ConfigManager {
           url: secrets['supabase-url'],
           anonKey: secrets['supabase-anon-key'],
           serviceKey: secrets['supabase-service-key'],
+        },
+        groq: {
+          apiKey: secrets['groq-api-key'],
         },
         azureOpenAI: {
           endpoint: secrets['azure-openai-endpoint'],
@@ -111,6 +118,9 @@ class ConfigManager {
         url: process.env.VITE_SUPABASE_URL!,
         anonKey: process.env.VITE_SUPABASE_ANON_KEY!,
         serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      },
+      groq: {
+        apiKey: process.env.GROQ_API_KEY || '',
       },
       azureOpenAI: {
         endpoint: process.env.AZURE_OPENAI_ENDPOINT || '',

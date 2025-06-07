@@ -2,6 +2,7 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LayoutSwitcher } from "./components/layout/LayoutSwitcher";
+import { StockBotPanel } from "./components/StockBotPanel";
 import "./index.css";
 
 // 🔑 SINGLETON so it's not recreated on hot-reload
@@ -29,6 +30,18 @@ export default function App() {
             </ul>
           </div>
           
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-semibold text-purple-800 mb-3">
+              🤖 Groq StockBot Integration
+            </h3>
+            <ul className="text-purple-700 space-y-1">
+              <li>✅ Groq AI (Llama 3.1 70B) integrated</li>
+              <li>✅ Production-hardened retail tools</li>
+              <li>✅ Philippine retail analytics ready</li>
+              <li>✅ Chat panel available (bottom-right)</li>
+            </ul>
+          </div>
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-blue-800 mb-3">
               📊 Component Migration Status
@@ -40,6 +53,7 @@ export default function App() {
                   <li>✅ Sidebar layout</li>
                   <li>✅ Header navigation</li>
                   <li>✅ Layout toggle</li>
+                  <li>✅ Groq StockBot</li>
                 </ul>
               </div>
               <div>
@@ -54,6 +68,9 @@ export default function App() {
           </div>
         </div>
         </LayoutSwitcher>
+        
+        {/* Groq StockBot Panel - Fixed positioned */}
+        <StockBotPanel />
       </ErrorBoundary>
     </QueryClientProvider>
   );

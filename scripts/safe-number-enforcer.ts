@@ -23,7 +23,7 @@ const UNSAFE_PATTERNS: UnsafePattern[] = [
     fix: 'Use parseFloat(value || 0).toFixed()'
   },
   {
-    pattern: /\[[\w\[\]'"]+\]\.(?!length|push|pop|map|filter|toString)/g,
+    pattern: /\[[\w[\]'"]+\]\.(?!length|push|pop|map|filter|toString)/g,
     message: 'Unsafe array/object access without bounds checking',
     fix: 'Use optional chaining: obj?.[key]'
   }

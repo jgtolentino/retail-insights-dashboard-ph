@@ -55,7 +55,7 @@ class SupabaseExecutor {
   private async createFunctionAlternative(sql: string, functionName?: string): Promise<any> {
     // For now, we'll log the SQL and return success
     // In production, you might store functions in a table and execute them
-    + '...');
+    console.log(`Function SQL: ${sql.substring(0, 100)}...`);
 
     return {
       success: true,

@@ -85,7 +85,7 @@ describe('Chart-Filter Integration', () => {
     expect(initialChart).toBeInTheDocument();
 
     // Change brand filter
-    const brandSelect = screen.getByLabelText(/Brands/);
+    const brandSelect = document.getElementById('brand-filter');
     expect(brandSelect).toBeInTheDocument();
 
     // Simulate selecting a brand (would trigger filter store update)

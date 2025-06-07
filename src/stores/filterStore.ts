@@ -2,7 +2,7 @@
 // This file exists only to prevent build failures while migrating to dashboardStore.ts
 // All new code should use @/stores/dashboardStore
 
-import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 
 export interface GlobalFilterState {
   dateRange: {
@@ -49,7 +49,7 @@ const defaultState: GlobalFilterState = {
   selectedIncomeRanges: [],
 };
 
-export const useFilterStore = create<FilterStore>((set, get) => ({
+export const useFilterStore = createWithEqualityFn<FilterStore>()((set, get) => ({
   ...defaultState,
 
   setDateRange: range => set({ dateRange: range }),

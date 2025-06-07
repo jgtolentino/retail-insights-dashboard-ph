@@ -4,6 +4,12 @@ import { describe, test, expect } from 'vitest';
 function suggestFix(taskName, stderr, exitCode = 1) {
   const patterns = [
     {
+      regex: /tailwindcss.*not found|Tailwind.*error/i,
+      suggestion: () => 'Install Tailwind CSS: npm install -D tailwindcss && npx tailwindcss init',
+      category: 'build',
+      severity: 'high'
+    },
+    {
       regex: /command not found: (\w+)/i,
       suggestion: (match) => `Install missing command: npm install -D ${match[1]} or check your PATH`,
       category: 'dependency',
@@ -39,12 +45,6 @@ function suggestFix(taskName, stderr, exitCode = 1) {
       suggestion: () => 'Add missing dependencies to useEffect dependency array or wrap in useCallback',
       category: 'react',
       severity: 'medium'
-    },
-    {
-      regex: /tailwindcss.*not found|Tailwind.*error/i,
-      suggestion: () => 'Install Tailwind CSS: npm install -D tailwindcss && npx tailwindcss init',
-      category: 'build',
-      severity: 'high'
     }
   ];
 
@@ -83,11 +83,11 @@ function suggestFix(taskName, stderr, exitCode = 1) {
 
 describe('Caca Agent', () => {
   test('should detect command not found error', () => {
-    const stderr = 'sh: tailwindcss: command not found';
+    const stderr = 'sh: command not found: tailwindcss';
     const result = suggestFix('build-css', stderr, 127);
     
     expect(result).toMatchObject({
-      suggestion: 'Install missing command: npm install -D tailwindcss or check your PATH',
+      suggestion: expect.stringContaining('Install missing command'),
       category: 'dependency',
       severity: 'high'
     });

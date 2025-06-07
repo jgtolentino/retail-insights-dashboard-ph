@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { DashboardFilters } from '../DashboardFilters';
+import { DashboardFilters } from '../filters/DashboardFilters';
 
 describe('DashboardFilters', () => {
   it('should render filters', () => {

@@ -30,23 +30,19 @@ export const simpleDashboardService = {
       const allTransactions = [];
       const batchSize = 1000;
 
-      try {
-        for (let offset = 0; offset < totalCount; offset += batchSize) {
-          const { data: batch, error: batchError } = await supabase
-            .from('transactions')
-            .select('*')
-            .range(offset, offset + batchSize - 1);
+      for (let offset = 0; offset < totalCount; offset += batchSize) {
+        const { data: batch, error: batchError } = await supabase
+          .from('transactions')
+          .select('*')
+          .range(offset, offset + batchSize - 1);
 
-          if (batchError) {
-            throw batchError;
-          }
-
-          if (batch && batch.length > 0) {
-            allTransactions.push(...batch);
-          }
+        if (batchError) {
+          throw batchError;
         }
-      } catch (batchError) {
-        throw batchError;
+
+        if (batch && batch.length > 0) {
+          allTransactions.push(...batch);
+        }
       }
 
       const transactions = allTransactions;

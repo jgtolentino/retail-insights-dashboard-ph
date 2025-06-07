@@ -43,7 +43,7 @@ export const isPromise = <T>(value: unknown): value is Promise<T> => {
 };
 
 // Type guard for function
-export const isFunction = (value: unknown): value is Function => {
+export const isFunction = (value: unknown): value is (...args: unknown[]) => unknown => {
   return typeof value === 'function';
 };
 

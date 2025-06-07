@@ -111,24 +111,41 @@ export default defineConfig(({ mode }) => ({
     'process': '{}',
   },
   build: {
+    target: 'es2015',
+    sourcemap: mode === 'development',
+    minify: mode === 'production' ? 'terser' : false,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Create a chunk for react and react-dom
+            // Create specific vendor chunks for better caching
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-vendor';
             }
-            // You can add more conditions here to split other libraries
-            // For example, to split supabase:
-            // if (id.includes('@supabase/supabase-js')) {
-            //   return 'supabase-vendor';
-            // }
-            // To create a single vendor chunk for all node_modules:
-            // return 'vendor';
+            if (id.includes('@supabase/supabase-js')) {
+              return 'supabase-vendor';
+            }
+            if (id.includes('@ai-sdk/groq') || id.includes('groq-sdk') || id.includes('ai')) {
+              return 'ai-vendor';
+            }
+            if (id.includes('recharts')) {
+              return 'charts-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            // Fallback for other node_modules
+            return 'vendor';
           }
         },
       },
     },
+    terserOptions: mode === 'production' ? {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    } : undefined,
+    chunkSizeWarningLimit: 1000,
   },
 }));
