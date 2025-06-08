@@ -1,26 +1,63 @@
 {
-  "name": "AI-Agency Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/python-node:1-3.11-bullseye",
+  "name": "Retail Insights AI Platform",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20-bullseye",
   "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    }
   },
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
-        "GitHub.copilot",
-        "ms-azuretools.vscode-docker"
-      ]
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode-remote.remote-containers",
+        "github.copilot",
+        "ms-azuretools.azure-dev",
+        "ms-vscode.vscode-json",
+        "ms-vscode.vscode-yaml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "files.associations": {
+          "*.yaml": "yaml",
+          "Taskfile.yml": "yaml"
+        }
+      }
     }
   },
-  "postCreateCommand": "task doctor",
-  "remoteUser": "vscode",
-  "mounts": ["source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"],
-  "env": {
-    "PYTHONPATH": "${containerWorkspaceFolder}"
-  }
+  "postCreateCommand": "npm install && pip install -r requirements.txt || echo 'requirements.txt not found'",
+  "containerEnv": {
+    "PYDEVD_DISABLE_FILE_VALIDATION": "1",
+    "NODE_ENV": "development"
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.azure,target=/home/vscode/.azure,type=bind,consistency=cached"
+  ],
+  "forwardPorts": [8080, 3000, 8000],
+  "portsAttributes": {
+    "8080": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "React App",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "API Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteUser": "vscode"
 }
