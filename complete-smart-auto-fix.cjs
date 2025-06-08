@@ -5,8 +5,12 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 
 class SmartAutoFixer {
-  constructor() {
+  constructor(options = {}) {
     this.fixesApplied = [];
+    this.dryRun = options.dryRun || process.argv.includes('--dry-run');
+    if (this.dryRun) {
+      console.log('🔍 Running in DRY-RUN mode - no changes will be made\n');
+    }
   }
 
   async analyzeRepo() {
@@ -170,6 +174,14 @@ class SmartAutoFixer {
   async removeEnvFiles(envFiles) {
     console.log('\n🚨 EMERGENCY: Removing exposed env files...');
     
+    if (this.dryRun) {
+      console.log('🔍 [DRY-RUN] Would remove these files from git:', envFiles);
+      console.log('🔍 [DRY-RUN] Would update .gitignore');
+      console.log('🔍 [DRY-RUN] Would commit security fix');
+      this.fixesApplied.push('🔍 [DRY-RUN] Would remove env files from git');
+      return;
+    }
+    
     // Backup first
     for (const file of envFiles) {
       if (fs.existsSync(file)) {
@@ -206,6 +218,12 @@ class SmartAutoFixer {
   async removePulserBranding(pulserFiles) {
     console.log('\n🏷️  Removing Pulser branding...');
     
+    if (this.dryRun) {
+      console.log('🔍 [DRY-RUN] Would move these Pulser files to archive:', pulserFiles);
+      this.fixesApplied.push('🔍 [DRY-RUN] Would move Pulser branding to archive');
+      return;
+    }
+    
     try {
       // Create archive directory
       const archiveDir = '../pulser-archive';
@@ -231,6 +249,12 @@ class SmartAutoFixer {
 
   async organizeMigrations(sqlFiles) {
     console.log('\n📄 Organizing SQL migrations...');
+    
+    if (this.dryRun) {
+      console.log('🔍 [DRY-RUN] Would organize these SQL files:', sqlFiles.filter(f => !f.includes('migrations')));
+      this.fixesApplied.push('🔍 [DRY-RUN] Would organize SQL migrations');
+      return;
+    }
     
     try {
       const migrationDir = 'supabase/migrations';
@@ -279,6 +303,12 @@ class SmartAutoFixer {
 
   async improveAccessibility() {
     console.log('\n♿ Adding accessibility improvements...');
+    
+    if (this.dryRun) {
+      console.log('🔍 [DRY-RUN] Would create accessibility test files');
+      this.fixesApplied.push('🔍 [DRY-RUN] Would add accessibility tests');
+      return;
+    }
     
     const a11yTest = `
 import { test, expect } from '@playwright/test';

@@ -4,8 +4,10 @@
 
 ![Project Scout](https://img.shields.io/badge/Project-Scout-blue?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-green?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-4.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.2.0-orange?style=for-the-badge)
 ![Edge](https://img.shields.io/badge/Edge%20Computing-Enabled-purple?style=for-the-badge)
+![Node](https://img.shields.io/badge/Node-20+-brightgreen?style=for-the-badge)
+![Vite](https://img.shields.io/badge/Vite-5173-purple?style=for-the-badge)
 
 **A comprehensive AI-powered retail analytics platform for consumer insights, competitive analysis, and market intelligence across Philippine retail markets.**
 
@@ -173,7 +175,7 @@ graph TB
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+ (required for ES modules)
 - npm or yarn
 - Supabase account
 - (Optional) Raspberry Pi 5 for edge deployment
@@ -211,7 +213,7 @@ npm run seed
 ### 4. **Development**
 
 ```bash
-# Start development server
+# Start development server (runs on port 5173)
 npm run dev
 
 # Build for production
@@ -220,6 +222,28 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+#### Development Configuration
+
+- **Vite Dev Server**: Runs on port 5173 by default
+- **Node.js 20+**: Required for ES modules support
+- **Polyfills**: Project includes polyfills for browser compatibility
+
+#### Code Quality & Auto-Fix
+
+```bash
+# Run smart auto-fix to clean up codebase
+npm run auto-fix
+
+# This will:
+# - Remove exposed env files from git tracking
+# - Organize SQL migrations
+# - Archive branding-specific files
+# - Add accessibility tests
+# - Generate a detailed report
+```
+
+⚠️ **Important**: After running auto-fix, check the `SMART-FIX-REPORT.md` for any critical actions required.
 
 ---
 
@@ -453,6 +477,25 @@ npm run test:integration
 
 # Edge device tests
 node test_edge_integration.cjs
+
+# Accessibility tests
+npm run test:e2e
+```
+
+### **Git Hooks & CI**
+
+This project uses Husky and lint-staged for code quality enforcement:
+
+```bash
+# Pre-commit hooks automatically run:
+- ESLint fixing
+- Prettier formatting
+- Unit tests
+
+# Pre-push hooks verify:
+- All tests pass
+- No console errors
+- Build succeeds
 ```
 
 ### **Performance Monitoring**
@@ -570,6 +613,7 @@ _Transforming retail insights through AI-powered analytics_
 ## Common Pitfalls and Best Practices
 
 ### 1. Data Handling
+
 - Never use mock data in production code
 - Always validate data before using it
 - Use proper type guards for null/undefined checks
@@ -577,6 +621,7 @@ _Transforming retail insights through AI-powered analytics_
 - Handle empty arrays and null values gracefully
 
 ### 2. Error Handling
+
 - Always use `logger.error()` in catch blocks
 - Never leave catch blocks empty
 - Provide meaningful error messages
@@ -584,6 +629,7 @@ _Transforming retail insights through AI-powered analytics_
 - Log errors with proper context
 
 ### 3. Type Safety
+
 - Avoid using `any` type
 - Use proper TypeScript types
 - Add proper return types to functions
@@ -591,6 +637,7 @@ _Transforming retail insights through AI-powered analytics_
 - Avoid non-null assertions (`!`)
 
 ### 4. Performance
+
 - Batch large data requests
 - Use proper pagination
 - Avoid unnecessary re-renders
@@ -598,6 +645,7 @@ _Transforming retail insights through AI-powered analytics_
 - Handle large lists efficiently
 
 ### 5. Accessibility
+
 - Always include proper ARIA attributes
 - Use semantic HTML elements
 - Provide proper alt text for images
@@ -605,6 +653,7 @@ _Transforming retail insights through AI-powered analytics_
 - Test with screen readers
 
 ### 6. Code Quality
+
 - Follow consistent naming conventions
 - Use proper code formatting
 - Write meaningful comments
@@ -612,6 +661,7 @@ _Transforming retail insights through AI-powered analytics_
 - Use proper error boundaries
 
 ### 7. Testing
+
 - Write unit tests for critical paths
 - Test error scenarios
 - Test edge cases
@@ -619,13 +669,23 @@ _Transforming retail insights through AI-powered analytics_
 - Mock external dependencies
 
 ### 8. Security
+
 - Never expose sensitive data
 - Use proper authentication
 - Validate user input
 - Use proper CORS settings
 - Follow security best practices
 
+#### Environment Security
+
+- **NEVER** commit `.env` files
+- Use `.env.example` for templates
+- Rotate credentials if exposed
+- Run `npm run auto-fix` to check for exposed secrets
+- Use BFG Repo Cleaner if secrets were committed
+
 ### 9. State Management
+
 - Use proper state management
 - Avoid prop drilling
 - Use proper context
@@ -633,6 +693,7 @@ _Transforming retail insights through AI-powered analytics_
 - Handle error states
 
 ### 10. API Integration
+
 - Use proper error handling
 - Use proper data validation
 - Use proper type definitions
@@ -642,12 +703,14 @@ _Transforming retail insights through AI-powered analytics_
 ## Development Workflow
 
 1. **Before Starting**
+
    - Read the requirements carefully
    - Plan the implementation
    - Consider edge cases
    - Consider performance implications
 
 2. **During Development**
+
    - Follow the style guide
    - Write tests
    - Handle errors properly
@@ -655,6 +718,7 @@ _Transforming retail insights through AI-powered analytics_
    - Document your code
 
 3. **Before Committing**
+
    - Run tests
    - Run linter
    - Check for common issues

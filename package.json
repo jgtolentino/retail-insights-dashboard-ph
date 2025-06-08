@@ -1,7 +1,7 @@
 {
   "name": "vite_react_shadcn_ts",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -65,6 +65,7 @@
     "qa:update-matrix": "ts-node scripts/qa/update_matrix.ts",
     "ai:diagnostics": "node scripts/ai-diagnostics.js",
     "ai:autofix": "node scripts/ai-autofix.js",
+    "auto-fix": "node complete-smart-auto-fix.cjs",
     "load-test": "ts-node scripts/load-test.ts",
     "benchmark": "ts-node scripts/benchmark-dashboard.ts",
     "keyvault:setup": "./setup-azure-keyvault.sh",

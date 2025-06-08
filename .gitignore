@@ -40,3 +40,8 @@ coverage/
 .env.example
 .env.production
 .env.production.template
+
+.env.edge.backup
+.env.example.backup
+.env.production.backup
+.env.production.template.backup
