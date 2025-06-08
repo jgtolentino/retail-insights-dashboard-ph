@@ -76,30 +76,34 @@ The platform uses **complexity-based model routing** to optimize cost and perfor
 
 ## 🗄️ Data Architecture
 
-### Database Schema (Supabase PostgreSQL)
+### Database Schema (Azure PostgreSQL)
 
 ```sql
--- Core retail data tables
-transactions (id, total_amount, customer_age, gender, store_location, created_at)
-brands (id, name, is_tbwa, category)
-products (id, name, brand_id, price, category)
-customers (id, age, gender, location)
-stores (id, name, location, region)
+-- Core retail data tables with tenant isolation
+transactions (id, total_amount, customer_age, gender, store_location, created_at, tenant_id)
+brands (id, name, is_tbwa, category, tenant_id)
+products (id, name, brand_id, price, category, tenant_id)
+customers (id, age, gender, location, tenant_id)
+stores (id, name, location, region, tenant_id)
 
--- Secure SQL execution function
+-- Row Level Security (RLS) policies for multi-tenant access
+CREATE POLICY tenant_isolation ON transactions USING (tenant_id = current_setting('app.current_tenant_id'));
+
+-- Secure SQL execution functions
 execute_sql(sql_query text) RETURNS TABLE(result json)
 execute_sql_simple(sql_query text) RETURNS JSONB
 ```
 
-### Data Flow
+### Multi-Tenant Data Flow
 
 1. **User Query** → Natural language in chat interface
-2. **Complexity Analysis** → Pattern matching + heuristics
-3. **Model Selection** → Route to appropriate GPT model
-4. **SQL Generation** → Convert to executable SQL
-5. **Data Execution** → Run against Supabase via RPC
-6. **Result Processing** → Format + visualize data
-7. **Response** → Natural language explanation + charts
+2. **Tenant Context** → Extract tenant_id from request headers/auth
+3. **Complexity Analysis** → Pattern matching + heuristics
+4. **Model Selection** → Route to appropriate GPT model
+5. **SQL Generation** → Convert to executable SQL
+6. **Data Execution** → Run against Azure PostgreSQL with RLS
+7. **Result Processing** → Format + visualize tenant-scoped data
+8. **Response** → Natural language explanation + charts
 
 ## 🚀 Deployment Architecture
 
@@ -120,9 +124,10 @@ execute_sql_simple(sql_query text) RETURNS JSONB
 ### Production Stack
 
 - **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Supabase PostgreSQL + Edge Functions
+- **Backend**: Azure PostgreSQL + Vercel Serverless Functions
 - **AI Layer**: Azure OpenAI with intelligent routing
-- **Hosting**: Vercel (frontend) + Supabase (backend)
+- **Hosting**: Vercel (full-stack deployment)
+- **Multi-tenancy**: Row Level Security (RLS) policies
 - **Monitoring**: Pulser pipelines + cost tracking
 
 ## 🔄 Pulser Pipeline Integration
@@ -133,9 +138,10 @@ execute_sql_simple(sql_query text) RETURNS JSONB
 schedule: '0 */6 * * *' # Every 6 hours
 
 steps:
-  - health_check: 'Test Azure OpenAI + Supabase connectivity'
+  - health_check: 'Test Azure OpenAI + Azure PostgreSQL connectivity'
   - test_routing: 'Verify intelligent model selection'
   - sql_generation: 'Test natural language → SQL conversion'
+  - tenant_isolation: 'Verify RLS policies work correctly'
   - cost_optimization: 'Generate cost savings report'
   - dashboard_integration: 'Verify UI functionality'
 ```
@@ -181,10 +187,13 @@ AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 AZURE_OPENAI_API_KEY=your_api_key
 AZURE_OPENAI_API_VERSION=2024-02-15-preview
 
-# Supabase (Required)
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Azure PostgreSQL (Required)
+AZURE_POSTGRES_HOST=your-server.postgres.database.azure.com
+AZURE_POSTGRES_PORT=5432
+AZURE_POSTGRES_DATABASE=retail_insights
+AZURE_POSTGRES_USERNAME=your_username@your-server
+AZURE_POSTGRES_PASSWORD=your_password
+AZURE_POSTGRES_SSL=true
 
 # Optional: Advanced features
 IOT_DEVICE_API_KEY=your_device_api_key
@@ -193,9 +202,11 @@ SLACK_WEBHOOK_URL=your_slack_webhook
 
 ### Security Features
 
-- **RLS (Row Level Security)** on all Supabase tables
+- **RLS (Row Level Security)** on all Azure PostgreSQL tables
+- **Multi-tenant isolation** via tenant_id policies
 - **SQL injection protection** via parameterized queries
 - **API key rotation** support
+- **Secure connection** with SSL/TLS encryption
 - **Audit logging** for all AI model calls
 
 ## 📊 Performance Optimization

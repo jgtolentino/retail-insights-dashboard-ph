@@ -14,7 +14,7 @@ import {
   DollarSign,
   Target,
 } from 'lucide-react';
-import { databricksGenie, GenieQuery, GenieResponse } from '@/services/databricksGenie';
+import { GenieQuery, GenieResponse } from '@/services/databricksGenie';
 import {
   ResponsiveContainer,
   BarChart,
@@ -38,7 +38,16 @@ export default function DatabricksGeniePanel({ className }: DatabricksGeniePanel
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<GenieQuery[]>([]);
-  const [suggestions] = useState(databricksGenie.getSuggestedQueries());
+  const [suggestions] = useState([
+    'What are the top 5 selling brands this month?',
+    'Show me sales trends for the last 6 months',
+    'Which age group spends the most?',
+    'Compare TBWA brands vs competitors',
+    "What's the average transaction value by region?",
+    'Show customer demographics breakdown',
+    'Which stores have the highest revenue?',
+    'What products are trending this week?',
+  ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -65,7 +74,24 @@ export default function DatabricksGeniePanel({ className }: DatabricksGeniePanel
     setIsLoading(true);
 
     try {
-      const response = await databricksGenie.askGenie(questionText);
+      // Call Vercel API endpoint with Azure PostgreSQL
+      const apiResponse = await fetch('/api/genie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-tenant-id': 'scout', // Default to scout tenant, should be dynamic in production
+        },
+        body: JSON.stringify({
+          query: questionText,
+          tenant_id: 'scout', // This should come from user context
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API error: ${apiResponse.status}`);
+      }
+
+      const { data: response } = await apiResponse.json();
 
       setConversation(prev =>
         prev.map(q => (q.id === newQuery.id ? { ...q, response, status: 'completed' as const } : q))

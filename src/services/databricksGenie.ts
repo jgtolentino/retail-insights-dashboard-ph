@@ -5,7 +5,7 @@
  */
 
 import { AzureOpenAI } from 'openai';
-import { supabase } from '@/integrations/supabase/client';
+import { getAzurePostgresClient, TenantContext } from './azurePostgresClient';
 import { intelligentRouter, TaskComplexity } from './intelligentModelRouter';
 
 const azureOpenAI = new AzureOpenAI({
@@ -43,6 +43,7 @@ export interface GenieResponse {
   complexity?: TaskComplexity;
   modelUsed?: string;
   estimatedCost?: number;
+  tenantId?: string;
 }
 
 export interface GenieContext {
@@ -78,7 +79,7 @@ class DatabricksAIGenie {
   /**
    * Process natural language query and return structured response with real data
    */
-  async askGenie(query: string): Promise<GenieResponse> {
+  async askGenie(query: string, tenantContext?: TenantContext): Promise<GenieResponse> {
     const startTime = Date.now();
 
     try {
@@ -89,29 +90,38 @@ class DatabricksAIGenie {
         return this.generateTextualResponse(query);
       }
 
-      // Step 2: Execute SQL against Supabase
+      // Step 2: Execute SQL against Azure PostgreSQL
       let data, error;
 
       try {
-        // Try the simple version first
-        const result = await supabase.rpc('execute_sql_simple', { sql_query: sql });
-        data = result.data;
-        error = result.error;
+        const postgresClient = getAzurePostgresClient();
 
-        // If simple version fails, try the original
-        if (error) {
-          const fallbackResult = await supabase.rpc('execute_sql', { sql_query: sql });
-          data = fallbackResult.data;
-          error = fallbackResult.error;
+        // Try execute_sql_simple function first
+        try {
+          const result = await postgresClient.rpc(
+            'execute_sql_simple',
+            { sql_query: sql },
+            {
+              tenant: tenantContext,
+            }
+          );
+          data = result.data;
+          error = result.error;
+        } catch (funcError) {
+          // Fallback to direct SQL execution if RPC function doesn't exist
+          console.warn('execute_sql_simple function not available, executing SQL directly');
+          const rows = await postgresClient.executeSql(sql, [], { tenant: tenantContext });
+          data = rows;
+          error = null;
         }
-      } catch (rpcError) {
-        console.warn('RPC function not available, falling back to textual response:', rpcError);
-        return this.generateTextualResponseWithSQL(query, sql);
+      } catch (dbError) {
+        console.warn('Database execution failed, falling back to textual response:', dbError);
+        return this.generateTextualResponseWithSQL(query, sql, tenantContext?.tenantId);
       }
 
       if (error || !data) {
         console.warn('SQL execution failed, falling back to textual response:', error);
-        return this.generateTextualResponseWithSQL(query, sql);
+        return this.generateTextualResponseWithSQL(query, sql, tenantContext?.tenantId);
       }
 
       // Step 3: Generate explanation of results
@@ -136,6 +146,7 @@ class DatabricksAIGenie {
         rowCount: data.length,
         complexity,
         modelUsed: complexity.suggestedModel,
+        tenantId: tenantContext?.tenantId,
       };
     } catch (error) {
       console.error('Databricks AI Genie Error:', error);
@@ -182,7 +193,11 @@ class DatabricksAIGenie {
   /**
    * Generate response with SQL but no data (when execution fails)
    */
-  private async generateTextualResponseWithSQL(query: string, sql: string): Promise<GenieResponse> {
+  private async generateTextualResponseWithSQL(
+    query: string,
+    sql: string,
+    tenantId?: string
+  ): Promise<GenieResponse> {
     const prompt = `The user asked: "${query}"
 I generated this SQL: ${sql}
 
@@ -202,6 +217,7 @@ However, the SQL couldn't be executed. Please provide a helpful response explain
         sql,
         suggestedQueries: this.getContextualSuggestions(query),
         confidence: 0.6,
+        tenantId,
       };
     } catch (error) {
       return {
@@ -209,6 +225,7 @@ However, the SQL couldn't be executed. Please provide a helpful response explain
         sql,
         suggestedQueries: this.getDefaultSuggestions(),
         confidence: 0.4,
+        tenantId,
       };
     }
   }

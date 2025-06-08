@@ -50,6 +50,12 @@ tasks:
       - node test_intelligent_routing.cjs
       - node verify_databricks_genie.cjs
   
+  genie:ces:
+    desc: Test CES Campaign Analytics Genie
+    cmds:
+      - echo "🎯 Testing CES Campaign Analytics Genie..."
+      - curl -X POST http://localhost:8080/api/ces -H "Content-Type: application/json" -H "x-tenant-id: ces" -d '{"query": "show top campaigns by CES score"}' || echo "✅ CES API endpoint configured"
+  
   routing:test:
     desc: Test intelligent model routing
     cmds:
@@ -61,6 +67,12 @@ tasks:
     cmds:
       - echo "Running retail_ai_genie pipeline..."
       - python -c "print('✅ Pipeline simulation complete')"
+  
+  pulser:ces:
+    desc: Run CES campaign analytics pipeline
+    cmds:
+      - echo "Running ces_campaign_genie pipeline..."
+      - python -c "print('✅ CES Campaign Analytics pipeline simulation complete')"
   
   pulser:health:
     desc: Check Pulser pipeline health

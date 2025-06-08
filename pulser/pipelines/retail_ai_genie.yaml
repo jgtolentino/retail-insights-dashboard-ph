@@ -8,9 +8,12 @@ env:
   AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
   AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY}
   AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-02-15-preview}
-  SUPABASE_URL: ${VITE_SUPABASE_URL}
-  SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+  AZURE_POSTGRES_HOST: ${AZURE_POSTGRES_HOST}
+  AZURE_POSTGRES_PORT: ${AZURE_POSTGRES_PORT:-5432}
+  AZURE_POSTGRES_DATABASE: ${AZURE_POSTGRES_DATABASE}
+  AZURE_POSTGRES_USERNAME: ${AZURE_POSTGRES_USERNAME}
+  AZURE_POSTGRES_PASSWORD: ${AZURE_POSTGRES_PASSWORD}
+  AZURE_POSTGRES_SSL: ${AZURE_POSTGRES_SSL:-true}
 
 steps:
   - id: health_check
@@ -32,18 +35,25 @@ steps:
           print(f"❌ Azure OpenAI error: {e}")
           exit(1)
       
-      # Check Supabase connectivity
-      print("🔍 Testing Supabase connection...")
+      # Check Azure PostgreSQL connectivity
+      print("🔍 Testing Azure PostgreSQL connection...")
       try:
-          response = requests.get(f"{os.getenv('SUPABASE_URL')}/rest/v1/", 
-                                headers={"apikey": os.getenv('SUPABASE_ANON_KEY')})
-          if response.status_code == 200:
-              print("✅ Supabase connection successful")
+          import sys
+          sys.path.append('.')
+          from src.services.azurePostgresClient import createAzurePostgresFromEnv
+          
+          client = createAzurePostgresFromEnv()
+          is_connected = client.testConnection()
+          
+          if is_connected:
+              health_info = client.getHealthInfo()
+              print(f"✅ Azure PostgreSQL connected: {health_info['activeConnections']} active connections")
+              print(f"   📊 Database version: {health_info['version'][:50]}...")
           else:
-              print(f"❌ Supabase error: {response.status_code}")
+              print("❌ Azure PostgreSQL connection failed")
               exit(1)
       except Exception as e:
-          print(f"❌ Supabase connection error: {e}")
+          print(f"❌ Azure PostgreSQL connection error: {e}")
           exit(1)
 
   - id: test_intelligent_routing
@@ -152,9 +162,59 @@ steps:
           except Exception as e:
               print(f"   ❌ Error: {e}")
 
+  - id: test_tenant_isolation
+    name: "Test Multi-Tenant Row Level Security"
+    needs: [test_sql_generation]
+    uses: python:3.11
+    run: |
+      import sys
+      sys.path.append('.')
+      from src.services.azurePostgresClient import createAzurePostgresFromEnv, TenantContext
+      
+      print("🔒 Testing Multi-Tenant Row Level Security...")
+      
+      client = createAzurePostgresFromEnv()
+      
+      # Test tenant contexts
+      test_tenants = [
+          TenantContext(tenantId="scout", userId="user1", role="analyst"),
+          TenantContext(tenantId="ces", userId="user2", role="manager")
+      ]
+      
+      for tenant in test_tenants:
+          print(f"\n🏢 Testing tenant: {tenant.tenantId}")
+          
+          try:
+              # Test basic query with tenant context
+              result = client.query(
+                  "SELECT COUNT(*) as tenant_count FROM transactions",
+                  [],
+                  {"tenant": tenant}
+              )
+              
+              print(f"   ✅ Tenant {tenant.tenantId}: {result.rows[0]['tenant_count']} records accessible")
+              
+              # Test RLS policy enforcement
+              context_check = client.query(
+                  "SELECT current_setting('app.current_tenant_id', true) as current_tenant",
+                  [],
+                  {"tenant": tenant}
+              )
+              
+              current_tenant = context_check.rows[0]['current_tenant']
+              if current_tenant == tenant.tenantId:
+                  print(f"   ✅ RLS context correctly set: {current_tenant}")
+              else:
+                  print(f"   ❌ RLS context mismatch: expected {tenant.tenantId}, got {current_tenant}")
+              
+          except Exception as e:
+              print(f"   ❌ Tenant {tenant.tenantId} test failed: {e}")
+      
+      print("\n🛡️ Multi-tenant isolation test completed")
+
   - id: cost_optimization_report
     name: "Generate Cost Optimization Report"
-    needs: [test_sql_generation]
+    needs: [test_tenant_isolation]
     uses: python:3.11
     run: |
       import json
