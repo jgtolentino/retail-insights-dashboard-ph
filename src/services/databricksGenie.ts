@@ -86,7 +86,24 @@ class DatabricksAIGenie {
       }
 
       // Step 2: Execute SQL against Supabase
-      const { data, error } = await supabase.rpc('execute_sql', { sql_query: sql });
+      let data, error;
+
+      try {
+        // Try the simple version first
+        const result = await supabase.rpc('execute_sql_simple', { sql_query: sql });
+        data = result.data;
+        error = result.error;
+
+        // If simple version fails, try the original
+        if (error) {
+          const fallbackResult = await supabase.rpc('execute_sql', { sql_query: sql });
+          data = fallbackResult.data;
+          error = fallbackResult.error;
+        }
+      } catch (rpcError) {
+        console.warn('RPC function not available, falling back to textual response:', rpcError);
+        return this.generateTextualResponseWithSQL(query, sql);
+      }
 
       if (error || !data) {
         console.warn('SQL execution failed, falling back to textual response:', error);
