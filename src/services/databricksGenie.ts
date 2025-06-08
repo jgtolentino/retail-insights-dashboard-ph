@@ -6,6 +6,7 @@
 
 import { AzureOpenAI } from 'openai';
 import { supabase } from '@/integrations/supabase/client';
+import { intelligentRouter, TaskComplexity } from './intelligentModelRouter';
 
 const azureOpenAI = new AzureOpenAI({
   endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || process.env.AZURE_OPENAI_ENDPOINT,
@@ -34,11 +35,14 @@ export interface GenieResponse {
   answer: string;
   suggestedQueries: string[];
   chartType?: 'bar' | 'line' | 'pie' | 'table';
-  data?: any[];
+  data?: Record<string, unknown>[];
   sql?: string;
   confidence: number;
   executionTime?: number;
   rowCount?: number;
+  complexity?: TaskComplexity;
+  modelUsed?: string;
+  estimatedCost?: number;
 }
 
 export interface GenieContext {
@@ -118,6 +122,9 @@ class DatabricksAIGenie {
 
       const executionTime = Date.now() - startTime;
 
+      // Analyze query complexity for response metadata
+      const complexity = intelligentRouter.analyzeComplexity(query);
+
       return {
         answer: explanation,
         suggestedQueries: this.getContextualSuggestions(query),
@@ -127,6 +134,8 @@ class DatabricksAIGenie {
         confidence: 0.9,
         executionTime,
         rowCount: data.length,
+        complexity,
+        modelUsed: complexity.suggestedModel,
       };
     } catch (error) {
       console.error('Databricks AI Genie Error:', error);
@@ -148,22 +157,17 @@ class DatabricksAIGenie {
       const systemPrompt = this.buildSystemPrompt();
       const userPrompt = this.buildUserPrompt(query);
 
-      const completion = await azureOpenAI.chat.completions.create({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        model: deploymentName,
-        temperature: 0.1,
-        max_tokens: 1000,
-      });
+      // Use intelligent routing to select appropriate model
+      const result = await intelligentRouter.routeQuery(query, systemPrompt, userPrompt);
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from Azure OpenAI');
-      }
+      const parsedResponse = this.parseGenieResponse(result.response, query);
 
-      return this.parseGenieResponse(response, query);
+      return {
+        ...parsedResponse,
+        complexity: result.complexity,
+        modelUsed: result.complexity.suggestedModel,
+        estimatedCost: result.estimatedCost,
+      };
     } catch (error) {
       console.error('Textual response generation error:', error);
       return {
@@ -366,7 +370,7 @@ Please analyze this question about Philippine retail data and provide a comprehe
   /**
    * Suggest best chart type based on data structure
    */
-  private suggestChartType(data: any[]): 'bar' | 'line' | 'pie' | 'table' {
+  private suggestChartType(data: Record<string, unknown>[]): 'bar' | 'line' | 'pie' | 'table' {
     if (!data || data.length === 0) return 'table';
 
     const firstRow = data[0];
@@ -406,26 +410,28 @@ Please analyze this question about Philippine retail data and provide a comprehe
   }
 
   /**
-   * Generate SQL from natural language (enhanced)
+   * Generate SQL from natural language (enhanced with intelligent routing)
    */
   async generateSQL(query: string): Promise<string> {
-    const prompt = `Convert this natural language query to SQL for a Philippine retail database:
+    const systemPrompt = `You are an expert SQL generator for Philippine retail analytics. Convert natural language to PostgreSQL/Supabase SQL.
 
-QUERY: ${query}
+AVAILABLE TABLES: ${Object.keys(this.context.columns).join(', ')}
+COLUMNS: ${Object.entries(this.context.columns)
+      .map(([table, cols]) => `${table}: ${cols.join(', ')}`)
+      .join('\n')}
 
-TABLES: ${Object.keys(this.context.columns).join(', ')}
+Rules:
+- Return ONLY the SQL statement, no explanations
+- Use proper PostgreSQL syntax
+- Handle Philippine retail context appropriately
+- Consider data relationships and proper JOINs`;
 
-Return only the SQL statement, no explanation.`;
+    const userPrompt = `Convert to SQL: ${query}`;
 
     try {
-      const completion = await azureOpenAI.chat.completions.create({
-        messages: [{ role: 'user', content: prompt }],
-        model: deploymentName,
-        temperature: 0,
-        max_tokens: 300,
-      });
-
-      return completion.choices[0]?.message?.content?.trim() || '';
+      // Use intelligent routing for SQL generation
+      const result = await intelligentRouter.routeQuery(query, systemPrompt, userPrompt);
+      return result.response.trim();
     } catch (error) {
       console.error('SQL generation error:', error);
       return '';
@@ -433,28 +439,25 @@ Return only the SQL statement, no explanation.`;
   }
 
   /**
-   * Explain query results in natural language
+   * Explain query results in natural language (with intelligent routing)
    */
-  async explainResults(data: any[], originalQuery: string): Promise<string> {
+  async explainResults(data: Record<string, unknown>[], originalQuery: string): Promise<string> {
     const dataPreview = JSON.stringify(data.slice(0, 5), null, 2);
 
-    const prompt = `Explain these query results in simple terms:
+    const systemPrompt = `You are a retail analytics expert. Explain query results in clear, conversational language for business users.`;
+
+    const userPrompt = `Explain these query results:
 
 ORIGINAL QUESTION: ${originalQuery}
 RESULTS (first 5 rows): ${dataPreview}
 TOTAL ROWS: ${data.length}
 
-Provide a clear, conversational explanation of what the data shows.`;
+Provide a clear, conversational explanation focusing on business insights.`;
 
     try {
-      const completion = await azureOpenAI.chat.completions.create({
-        messages: [{ role: 'user', content: prompt }],
-        model: deploymentName,
-        temperature: 0.3,
-        max_tokens: 300,
-      });
-
-      return completion.choices[0]?.message?.content || 'Here are your results.';
+      // Use intelligent routing for result explanation
+      const result = await intelligentRouter.routeQuery(originalQuery, systemPrompt, userPrompt);
+      return result.response || 'Here are your results.';
     } catch (error) {
       console.error('Explanation error:', error);
       return 'Here are your query results.';

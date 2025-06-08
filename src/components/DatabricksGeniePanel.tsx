@@ -3,7 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Sparkles, BarChart3, Database, Clock } from 'lucide-react';
+import {
+  Loader2,
+  Send,
+  Sparkles,
+  BarChart3,
+  Database,
+  Clock,
+  Cpu,
+  DollarSign,
+  Target,
+} from 'lucide-react';
 import { databricksGenie, GenieQuery, GenieResponse } from '@/services/databricksGenie';
 import {
   ResponsiveContainer,
@@ -119,7 +129,7 @@ export default function DatabricksGeniePanel({ className }: DatabricksGeniePanel
           </ResponsiveContainer>
         );
 
-      case 'pie':
+      case 'pie': {
         const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
         return (
           <ResponsiveContainer width="100%" height={300}>
@@ -142,6 +152,7 @@ export default function DatabricksGeniePanel({ className }: DatabricksGeniePanel
             </PieChart>
           </ResponsiveContainer>
         );
+      }
 
       case 'table':
       default:
@@ -227,25 +238,50 @@ export default function DatabricksGeniePanel({ className }: DatabricksGeniePanel
                     <p className="mb-3 text-gray-800">{query.response.answer}</p>
 
                     {/* Metadata */}
-                    {(query.response.executionTime || query.response.rowCount) && (
-                      <div className="mb-3 flex items-center gap-4 text-xs text-gray-500">
-                        {query.response.executionTime && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {query.response.executionTime}ms
-                          </span>
-                        )}
-                        {query.response.rowCount && (
-                          <span className="flex items-center gap-1">
-                            <BarChart3 className="h-3 w-3" />
-                            {query.response.rowCount} rows
-                          </span>
-                        )}
-                        <Badge variant="outline" className="text-xs">
-                          {Math.round(query.response.confidence * 100)}% confidence
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                      {query.response.executionTime && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {query.response.executionTime}ms
+                        </span>
+                      )}
+                      {query.response.rowCount && (
+                        <span className="flex items-center gap-1">
+                          <BarChart3 className="h-3 w-3" />
+                          {query.response.rowCount} rows
+                        </span>
+                      )}
+                      {query.response.complexity && (
+                        <Badge
+                          variant={
+                            query.response.complexity.level === 'simple'
+                              ? 'secondary'
+                              : query.response.complexity.level === 'medium'
+                                ? 'default'
+                                : 'destructive'
+                          }
+                          className="flex items-center gap-1 text-xs"
+                        >
+                          <Target className="h-3 w-3" />
+                          {query.response.complexity.level}
                         </Badge>
-                      </div>
-                    )}
+                      )}
+                      {query.response.modelUsed && (
+                        <span className="flex items-center gap-1">
+                          <Cpu className="h-3 w-3" />
+                          {query.response.modelUsed}
+                        </span>
+                      )}
+                      {query.response.estimatedCost && (
+                        <span className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />$
+                          {query.response.estimatedCost.toFixed(4)}
+                        </span>
+                      )}
+                      <Badge variant="outline" className="text-xs">
+                        {Math.round(query.response.confidence * 100)}% confidence
+                      </Badge>
+                    </div>
 
                     {/* Chart Visualization */}
                     {query.response.data && query.response.data.length > 0 && (
