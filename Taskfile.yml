@@ -1,0 +1,32 @@
+version: '3'
+
+env:
+  PYTHONPATH: "{{.ROOT_DIR}}"
+
+tasks:
+  doctor:  # full smoke test
+    cmds:
+      - python scripts/doctor.py   # python version of your bash doctor
+  dev:     # start both pilots in dev-mode
+    cmds:
+      - task: ces:dev
+      - task: scout:dev
+  ces:dev:
+    dir: pilots/ces/frontend_vite
+    cmds: ["pnpm install", "pnpm dev"]
+  scout:dev:
+    dir: pilots/scout/frontend_next
+    cmds: ["pnpm install", "pnpm dev"]
+  drive:scan:   # manual Drive health push
+    cmds:
+      - python -m shared.drive_monitor.publisher
+  db:migrate:
+    cmds: ["alembic upgrade head"]
+  build:
+    desc: Build all components
+    cmds:
+      - npm run build
+  watch:
+    desc: Watch for changes and rebuild
+    cmds:
+      - npm run dev
