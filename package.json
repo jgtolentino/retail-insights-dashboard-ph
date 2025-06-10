@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:local": "./dev-local.sh",
-    "build": "vite build",
-    "build:prod": "VITE_APP_ENV=production vite build --mode production",
-    "build:dev": "vite build --mode development",
+    "build": "npm run typecheck && vite build",
+    "build:prod": "VITE_APP_ENV=production npm run typecheck && vite build --mode production",
+    "build:dev": "npm run typecheck && vite build --mode development",
     "preview:prod": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -24,9 +24,10 @@
     "qa:screenshot": "node scripts/screenshot-validator.js",
     "rollback": "./scripts/auto-rollback.sh",
     "setup": "node scripts/setup-env.js",
-    "test": "vitest --passWithNoTests || true",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
     "test:agents": "vitest tests/agents/",
     "test:integration": "vitest run tests/integration --passWithNoTests",
     "test:e2e": "playwright test",
@@ -156,8 +157,10 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.5.5",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.5.2",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "@vitest/coverage-v8": "^3.1.4",
     "autoprefixer": "^10.4.20",
@@ -169,10 +172,11 @@
     "husky": "^9.1.7",
     "js-yaml": "^4.1.0",
     "jsdom": "^26.1.0",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "lint-staged": "^16.1.0",
     "lovable-tagger": "^1.1.7",
     "nodemon": "^3.1.10",
-    "@types/pg": "^8.11.10",
     "playwright": "^1.52.0",
     "postcss": "^8.4.47",
     "prettier": "^3.5.3",
@@ -186,7 +190,8 @@
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
     "wait-on": "^7.2.0",
-    "webpack-bundle-analyzer": "^4.10.2"
+    "webpack-bundle-analyzer": "^4.10.2",
+    "xlsx": "^0.18.5"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [
@@ -196,5 +201,10 @@
     "**/*.{json,css,md}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "xlsx": "0.18.5"
+    }
   }
 }
