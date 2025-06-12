@@ -30,6 +30,7 @@ const Sprint4Dashboard = React.lazy(() => import('./pages/Sprint4Dashboard'));
 const DashboardPreview = React.lazy(() => import('./pages/DashboardPreview'));
 const ClientDashboard = React.lazy(() => import('./pages/TBWADashboard'));
 const ProjectScout = React.lazy(() => import('./pages/ProjectScout'));
+const DatabricksGenie = React.lazy(() => import('./pages/DatabricksGenie'));
 
 // Enhanced Query Client with better defaults
 const queryClient = new QueryClient({
@@ -72,7 +73,7 @@ function useRenderCounter(componentName: string) {
 const App = () => {
   useEmergencyRenderLimit('App');
   useRenderCounter('App');
-  
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -87,9 +88,13 @@ const App = () => {
 
             <LayoutSwitcher>
               <main id="main-content" className="focus:outline-none">
-                <Suspense fallback={<div className="flex items-center justify-center h-screen">
-                  <div className="text-lg font-medium">Loading dashboard...</div>
-                </div>}>
+                <Suspense
+                  fallback={
+                    <div className="flex h-screen items-center justify-center">
+                      <div className="text-lg font-medium">Loading dashboard...</div>
+                    </div>
+                  }
+                >
                   <Routes>
                     {FEATURE_FLAGS.DASHBOARD_OVERVIEW && <Route path="/" element={<Index />} />}
                     {FEATURE_FLAGS.TRENDS_PAGE && <Route path="/trends" element={<Trends />} />}
@@ -155,6 +160,16 @@ const App = () => {
                       element={
                         <SafeWrapper name="ProjectScout" maxRenders={50}>
                           <ProjectScout />
+                        </SafeWrapper>
+                      }
+                    />
+
+                    {/* Databricks AI Genie */}
+                    <Route
+                      path="/databricks-genie"
+                      element={
+                        <SafeWrapper name="DatabricksGenie" maxRenders={50}>
+                          <DatabricksGenie />
                         </SafeWrapper>
                       }
                     />

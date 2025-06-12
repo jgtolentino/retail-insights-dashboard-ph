@@ -35,3 +35,13 @@ coverage/
 *gcp_codex_creds.json
 *credentials*.json
 *creds*.json
+
+.env.edge
+.env.example
+.env.production
+.env.production.template
+
+.env.edge.backup
+.env.example.backup
+.env.production.backup
+.env.production.template.backup

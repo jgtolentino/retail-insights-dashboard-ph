@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linter
+        run: npm run lint
+      
+      - name: Run type check
+        run: npm run typecheck
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Run auto-fix (dry-run)
+        run: |
+          # Create a dry-run version of auto-fix for CI
+          node complete-smart-auto-fix.cjs --dry-run || true
+        continue-on-error: true
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for exposed secrets
+        run: |
+          # Check if any .env files are tracked
+          if git ls-files | grep -E '\.env($|\..*$)' | grep -v '\.example'; then
+            echo "❌ ERROR: Found tracked .env files!"
+            git ls-files | grep -E '\.env($|\..*$)' | grep -v '\.example'
+            exit 1
+          fi
+          echo "✅ No exposed .env files found"
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: quality
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
