@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:local": "./dev-local.sh",
-    "build": "npm run typecheck && vite build",
-    "build:prod": "VITE_APP_ENV=production npm run typecheck && vite build --mode production",
+    "build": "tsc && vite build",
+    "build:prod": "tsc && vite build --config vite.config.simple.ts",
     "build:dev": "npm run typecheck && vite build --mode development",
     "preview:prod": "vite preview",
     "lint": "eslint .",
