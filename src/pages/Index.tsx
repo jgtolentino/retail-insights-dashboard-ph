@@ -225,7 +225,7 @@ export default function Index() {
       isInitialized.current = true;
       fetchStores();
     }
-  }, [fetchStores]);
+  }, []); // Empty dependency array - only run once
 
   // Fetch data when dependencies change
   useEffect(() => {
@@ -294,8 +294,23 @@ export default function Index() {
   return (
     <DashboardErrorBoundary>
       <div className="space-y-6">
-        {/* Data Check - Development only */}
-        {/* Production: Debug component removed */}
+        {/* Version Banner - Full Dashboard Active */}
+        <div className="rounded-lg border border-green-200 bg-gradient-to-r from-green-50 to-blue-50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white">
+                ✓
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-green-800">Full Dashboard Active</h3>
+                <p className="text-xs text-green-600">Complete retail analytics with Databricks AI Genie integration</p>
+              </div>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              Production Ready
+            </Badge>
+          </div>
+        </div>
 
         {/* Header with Transaction Counter */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

@@ -1,0 +1,60 @@
+name: "drive_to_rag"
+description: "Monitor Google Drive and update RAG knowledge base"
+schedule: "0 */6 * * *"  # Every 6 hours
+
+env:
+  GOOGLE_DRIVE_REMOTE: "gdrive"
+  GOOGLE_DRIVE_FOLDER_ID: "${GOOGLE_DRIVE_FOLDER_ID}"
+  SUPABASE_URL: "${SUPABASE_URL}"
+  SUPABASE_SERVICE_ROLE_KEY: "${SUPABASE_SERVICE_ROLE_KEY}"
+
+steps:
+  - name: "drive_health_check"
+    task: "shared.tasks.drive.monitor"
+    params:
+      remote: "${GOOGLE_DRIVE_REMOTE}"
+      folder_id: "${GOOGLE_DRIVE_FOLDER_ID}"
+    outputs:
+      - file_count
+      - total_bytes
+
+  - name: "sync_files"
+    task: "shared.tasks.drive.sync"
+    depends_on: ["drive_health_check"]
+    params:
+      remote: "${GOOGLE_DRIVE_REMOTE}"
+      folder_id: "${GOOGLE_DRIVE_FOLDER_ID}"
+      local_path: "/tmp/drive_sync"
+    
+  - name: "process_documents"
+    task: "shared.tasks.rag.ingest"
+    depends_on: ["sync_files"]
+    params:
+      source_path: "/tmp/drive_sync"
+      chunk_size: 1000
+      overlap: 200
+
+  - name: "update_embeddings"
+    task: "shared.tasks.rag.embed"
+    depends_on: ["process_documents"]
+    params:
+      model: "text-embedding-ada-002"
+      batch_size: 100
+
+notifications:
+  on_failure:
+    - type: "supabase_insert"
+      table: "pipeline_alerts"
+      data:
+        pipeline: "drive_to_rag"
+        status: "failed"
+        timestamp: "{{ now() }}"
+        
+  on_success:
+    - type: "supabase_insert"
+      table: "pipeline_status"
+      data:
+        pipeline: "drive_to_rag"
+        status: "completed"
+        files_processed: "{{ steps.drive_health_check.outputs.file_count }}"
+        timestamp: "{{ now() }}"
