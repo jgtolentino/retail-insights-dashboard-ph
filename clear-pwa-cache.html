@@ -1,0 +1,39 @@
+<\!DOCTYPE html>
+<html>
+<head>
+    <title>Clear PWA Cache</title>
+</head>
+<body>
+    <h1>Clearing Service Worker and Cache...</h1>
+    <div id="status"></div>
+    <script>
+        const status = document.getElementById('status');
+        
+        // Unregister all service workers
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister();
+                status.innerHTML += '<p>Service worker unregistered</p>';
+            }
+        });
+        
+        // Clear all caches
+        caches.keys().then(function(names) {
+            for (let name of names) {
+                caches.delete(name);
+                status.innerHTML += '<p>Cache deleted: ' + name + '</p>';
+            }
+        });
+        
+        // Clear localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        status.innerHTML += '<p>Local and session storage cleared</p>';
+        
+        setTimeout(() => {
+            status.innerHTML += '<p><strong>Done\! Please close this tab and reload your app.</strong></p>';
+        }, 1000);
+    </script>
+</body>
+</html>
+EOF < /dev/null

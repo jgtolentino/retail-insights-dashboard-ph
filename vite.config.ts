@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
 // Mock API plugin for development
 const mockApiPlugin = () => ({
@@ -97,7 +96,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && mockApiPlugin(),
-    mode === 'development' && componentTagger(),
+    // Removed componentTagger for production build
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -119,20 +118,21 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             // Create specific vendor chunks for better caching
+            if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-vendor')) {
+              return 'charts-vendor';
+            }
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-vendor';
             }
             if (id.includes('@supabase/supabase-js')) {
               return 'supabase-vendor';
             }
-            if (id.includes('@ai-sdk/groq') || id.includes('groq-sdk') || id.includes('ai')) {
-              return 'ai-vendor';
-            }
-            if (id.includes('recharts')) {
-              return 'charts-vendor';
-            }
             if (id.includes('@radix-ui')) {
               return 'ui-vendor';
+            }
+            // Group all AI-related dependencies together
+            if (id.includes('@ai-sdk') || id.includes('groq') || id.includes('openai') || id.includes('ai')) {
+              return 'ai-vendor';
             }
             // Fallback for other node_modules
             return 'vendor';
